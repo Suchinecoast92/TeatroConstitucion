@@ -1,0 +1,448 @@
+/* Mejoras adicionales para el menú del punto de venta */
+
+/* Animación suave para las estadísticas */
+.stat-value {
+  transition: all 0.3s ease;
+}
+
+.stat-value.updated {
+  animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+    color: var(--primary-color);
+  }
+}
+
+/* Mejora en el botón de pagar */
+#btnPagar {
+  position: relative;
+  overflow: hidden;
+}
+
+#btnPagar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+#btnPagar:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Mejora visual del selector de descuentos */
+.descuento-selector {
+  transition: all 0.3s ease;
+}
+
+.descuento-selector:hover {
+  box-shadow: 0 4px 6px -1px rgba(251, 191, 36, 0.3);
+}
+
+/* Efecto hover mejorado en las categorías */
+.seccion-categorias-separada .list-group-item {
+  transition: all 0.2s ease;
+}
+
+.seccion-categorias-separada .list-group-item:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  transform: translateX(4px);
+  border-left: 3px solid #f59e0b;
+}
+
+/* Indicador visual cuando el carrito está vacío */
+.carrito-vacio {
+  animation: fadeIn 0.5s ease;
+}
+
+/* Mejora en las acciones rápidas */
+.acciones-rapidas .btn {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.acciones-rapidas .btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.acciones-rapidas .btn:hover::after {
+  width: 80%;
+}
+
+/* Mejora en el badge del evento */
+.evento-badge {
+  animation: slideInRight 0.5s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Tooltip personalizado para información adicional */
+.tooltip-custom {
+  position: relative;
+  cursor: help;
+}
+
+.tooltip-custom::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background: rgba(15, 23, 42, 0.95);
+  color: white;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.tooltip-custom:hover::after {
+  opacity: 1;
+}
+
+/* Mejora en el input-group */
+.input-group-text {
+  transition: all 0.2s ease;
+}
+
+.input-group:focus-within .input-group-text {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Scroll suave en el panel */
+.controls-panel {
+  scroll-behavior: smooth;
+}
+
+/* Indicador de carga mejorado */
+#loadingIndicator {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Mejora en las transiciones de las secciones colapsables */
+.seccion-content {
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+}
+
+.seccion-content.collapsed {
+  opacity: 0;
+}
+
+.seccion-content:not(.collapsed) {
+  opacity: 1;
+}
+
+
+/* Estilos para botones de Ver Vendidos y Categorías */
+.acciones-rapidas .btn-info {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: white;
+  font-weight: 600;
+}
+
+.acciones-rapidas .btn-info:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+}
+
+.acciones-rapidas .btn-warning {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: white;
+  font-weight: 600;
+}
+
+.acciones-rapidas .btn-warning:hover {
+  background: #d97706;
+  border-color: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
+}
+
+/* Estilos para modales */
+.modal-header.bg-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+  color: #92400e;
+  border-bottom: 2px solid #f59e0b;
+}
+
+.modal-header.bg-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border-bottom: 2px solid #0ea5e9;
+}
+
+/* Lista de asientos vendidos */
+#listaAsientosVendidos .badge {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
+
+/* Mejoras para el contenedor de items del carrito */
+.carrito-items-container {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Animación suave al agregar items */
+.carrito-item {
+  animation: slideInCart 0.3s ease;
+}
+
+/* Sombra sutil en el footer del carrito */
+.carrito-footer {
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Mejora visual cuando hay muchos items */
+.carrito-items-container:has(.carrito-item) {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  background: #f8fafc;
+}
+
+
+/* Animación minimalista para el selector de descuentos */
+.descuento-selector-separado {
+  transition: all 0.2s ease;
+}
+
+/* Efecto sutil cuando se selecciona un descuento */
+.descuento-selector-separado.activo .form-select {
+  border-color: var(--success-color);
+  background: #f0fdf4;
+}
+
+.descuento-selector-separado.activo small {
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Botón de pago principal destacado */
+#btnPagar {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+#btnPagar:not(:disabled) {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+#btnPagar:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.5) !important;
+}
+
+#btnPagar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 6px 12px -2px rgba(16, 185, 129, 0.5);
+  }
+}
+
+/* Efecto de onda al hacer clic */
+#btnPagar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+#btnPagar:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+
+/* Estilos para el escáner QR con efecto espejo */
+#qr-reader {
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 300px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#qr-reader video {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  object-fit: cover;
+}
+
+/* Ocultar elementos internos de la librería que pueden interferir */
+#qr-reader__scan_region {
+  background: transparent !important;
+  min-height: 280px !important;
+}
+
+#qr-reader__scan_region img {
+  display: none !important;
+}
+
+#qr-reader__dashboard {
+  padding: 10px !important;
+}
+
+#qr-reader__dashboard_section_csr {
+  display: none !important;
+}
+
+/* Contenedor de sección de cámara */
+#seccionCamara {
+  min-height: 350px;
+}
+
+/* Botón de efecto espejo */
+#btnEspejo {
+  transition: all 0.2s ease;
+}
+
+#btnEspejo:hover {
+  transform: scale(1.05);
+}
+
+/* Estilos para los botones de método (Cámara/Manual) */
+.metodo-btn.active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* Animación para el cambio de espejo */
+@keyframes flipHorizontal {
+  0% {
+    transform: scaleX(1);
+  }
+
+  50% {
+    transform: scaleX(0);
+  }
+
+  100% {
+    transform: scaleX(-1);
+  }
+}
+
+/* ==========================================
+   ESTILOS ADICIONALES PARA EL VIDEO QR
+   Para asegurar que el video sea visible
+   ========================================== */
+
+/* Forzar visibilidad del video */
+#qr-reader video,
+#qr-reader__scan_region video {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 250px !important;
+  max-height: 400px !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+}
+
+/* Asegurar que el contenedor tenga altura */
+#qr-reader__scan_region {
+  display: block !important;
+  width: 100% !important;
+  min-height: 280px !important;
+  overflow: visible !important;
+}
+
+/* Ocultar elementos de UI innecesarios de la librería */
+#qr-reader__dashboard_section_swaplink,
+#qr-reader__status_span,
+#qr-reader__camera_permission_button {
+  display: block !important;
+}
+
+/* Dashboard visible */
+#qr-reader__dashboard {
+  display: block !important;
+  padding: 10px !important;
+  background: #f8fafc !important;
+  border-radius: 0 0 12px 12px !important;
+}

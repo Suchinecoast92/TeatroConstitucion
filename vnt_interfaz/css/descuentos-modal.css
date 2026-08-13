@@ -1,0 +1,211 @@
+/* Estilos para el modal de selección de descuentos */
+
+.lista-boletos-descuento {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+.lista-boletos-descuento::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lista-boletos-descuento::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.lista-boletos-descuento::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+.lista-boletos-descuento::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.boleto-descuento-item {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.boleto-descuento-item:hover:not(.disabled) {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transform: translateX(2px);
+}
+
+.boleto-descuento-item.disabled {
+    opacity: 0.5;
+    background: #f8fafc;
+}
+
+.boleto-descuento-item .form-check {
+    margin: 0;
+}
+
+.boleto-descuento-item .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0;
+    cursor: pointer;
+}
+
+.boleto-descuento-item .form-check-input:disabled {
+    cursor: not-allowed;
+}
+
+.boleto-descuento-item .form-check-label {
+    width: 100%;
+    cursor: pointer;
+    padding-left: 8px;
+}
+
+.boleto-descuento-item.disabled .form-check-label {
+    cursor: not-allowed;
+}
+
+.boleto-descuento-item strong {
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.boleto-descuento-item small {
+    font-size: 0.8rem;
+}
+
+.boleto-descuento-item .badge {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+}
+
+/* Animación de entrada */
+@keyframes slideInModal {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.boleto-descuento-item {
+    animation: slideInModal 0.2s ease;
+}
+
+/* Estilos para el resumen */
+#modalSeleccionDescuento .bg-light {
+    border: 1px solid #e2e8f0;
+}
+
+#modalSeleccionDescuento .modal-header.bg-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border-bottom: 1px solid #fbbf24;
+}
+
+#modalSeleccionDescuento .modal-header.bg-warning .modal-title {
+    color: #92400e;
+}
+
+#modalSeleccionDescuento .btn-warning {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+#modalSeleccionDescuento .btn-warning:hover {
+    background: #d97706;
+    border-color: #d97706;
+}
+
+/* Estilos para el modal de tipo de boleto */
+.lista-boletos-tipo {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.lista-boletos-tipo::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-boletos-tipo::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.lista-boletos-tipo::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.lista-boletos-tipo::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.boleto-tipo-item {
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.boleto-tipo-item:hover {
+    background: #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tipo-boleto-select {
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border: 2px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.tipo-boleto-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.tipo-boleto-select option {
+    padding: 8px;
+}
+
+/* Botones de aplicar a todos */
+.btn-group .btn {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+
+.btn-group .btn i {
+    margin-right: 4px;
+}
+
+/* Responsive para el modal de tipo de boleto */
+@media (max-width: 768px) {
+    .boleto-tipo-item .row {
+        flex-direction: column;
+    }
+    
+    .boleto-tipo-item .col-md-4,
+    .boleto-tipo-item .col-md-8 {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}

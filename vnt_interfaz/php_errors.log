@@ -1,0 +1,19 @@
+[17-Dec-2025 16:13:07 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'f.nombre' in 'field list' in C:\xampp\htdocs\teatro\vnt_interfaz\imprimir_boleto.php:23
+Stack trace:
+#0 C:\xampp\htdocs\teatro\vnt_interfaz\imprimir_boleto.php(23): mysqli->prepare('\r\n    SELECT \r\n...')
+#1 {main}
+  thrown in C:\xampp\htdocs\teatro\vnt_interfaz\imprimir_boleto.php on line 23
+[21-Jan-2026 23:31:55 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\TEATRO\teatro\vnt_interfaz/vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\TEATRO\teatro\vnt_interfaz\imprimir_boleto.php on line 8
+[21-Jan-2026 23:31:57 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\TEATRO\teatro\vnt_interfaz/vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\TEATRO\teatro\vnt_interfaz\imprimir_boleto.php:8
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\TEATRO\teatro\vnt_interfaz\imprimir_boleto.php on line 8
+[27-Jan-2026 01:16:22 Europe/Berlin] PHP Fatal error:  Uncaught Exception: FPDF error: Not a PNG file: C:\xampp\htdocs\teatro\vnt_interfaz/../assets/img/panda_empty.png in C:\xampp\htdocs\teatro\vnt_interfaz\vendor\setasign\fpdf\fpdf.php:267
+Stack trace:
+#0 C:\xampp\htdocs\teatro\vnt_interfaz\vendor\setasign\fpdf\fpdf.php(1286): FPDF->Error('Not a PNG file:...')
+#1 C:\xampp\htdocs\teatro\vnt_interfaz\vendor\setasign\fpdf\fpdf.php(1277): FPDF->_parsepngstream(Resource id #13, 'C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\teatro\vnt_interfaz\vendor\setasign\fpdf\fpdf.php(890): FPDF->_parsepng('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\teatro\vnt_interfaz\logoticket.php(16): FPDF->Image('C:\\xampp\\htdocs...', 27.5, 10.00125, 25)
+#4 C:\xampp\htdocs\teatro\vnt_interfaz\imprimir_boleto.php(63): include('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\teatro\vnt_interfaz\vendor\setasign\fpdf\fpdf.php on line 267

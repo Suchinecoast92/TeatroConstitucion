@@ -1,0 +1,110 @@
+/* Estilos para selección múltiple de asientos */
+
+/* Animación de selección */
+@keyframes pulseSelect {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.seat.selected {
+  animation: pulseSelect 0.6s ease-out;
+}
+
+/* Efecto hover mejorado para row labels */
+.row-label {
+  position: relative;
+}
+
+.row-label::after {
+  content: '👆';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  font-size: 1.2rem;
+  transition: opacity 0.2s ease;
+}
+
+.row-label:hover::after {
+  opacity: 0.5;
+}
+
+/* Indicador visual de modo selección */
+.seat {
+  position: relative;
+}
+
+.seat.selectable::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--success-color);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.seat:hover.selectable::before {
+  opacity: 1;
+}
+
+/* Efecto de selección en rango */
+.seat.in-range {
+  border-color: var(--warning-color) !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+
+/* Tooltip para instrucciones */
+.selection-tooltip {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.selection-tooltip i {
+  color: var(--success-color);
+  margin-right: 8px;
+}
+
+/* Contador flotante removido */
+
+/* Responsive */
+@media (max-width: 768px) {
+  .selection-tooltip {
+    font-size: 0.8rem;
+    padding: 10px 16px;
+    bottom: 10px;
+  }
+}

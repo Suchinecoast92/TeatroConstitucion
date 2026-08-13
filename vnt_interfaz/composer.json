@@ -1,0 +1,10 @@
+{
+    "name": "trt25/venta-boletos",
+    "description": "Sistema de venta de boletos",
+    "type": "project",
+    "require": {
+        "endroid/qr-code": "^4.4",
+        "setasign/fpdf": "^1.8",
+        "mike42/escpos-php": "^4.0"
+    }
+}

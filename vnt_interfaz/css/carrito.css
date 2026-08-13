@@ -1,0 +1,309 @@
+/* Estilos minimalistas para el carrito de compras */
+
+.seat.selected {
+  border: 2px solid #32d74b !important;
+  box-shadow: 0 0 0 3px rgba(50, 215, 75, 0.3);
+  transform: translateY(-2px) scale(1.05);
+  background-color: #32d74b !important;
+  color: #000000 !important;
+}
+
+/* Asientos vendidos - tachados */
+.seat.vendido {
+  background: #1c1c1e !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  position: relative;
+  pointer-events: none;
+  color: #666 !important;
+}
+
+.seat.vendido::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #ef4444;
+  transform: rotate(-45deg);
+  z-index: 1;
+}
+
+.seat.vendido::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #ef4444;
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+/* Tooltip para asientos vendidos */
+.seat.vendido {
+  pointer-events: auto !important;
+  /* Permitir hover para tooltip */
+  cursor: not-allowed !important;
+}
+
+.seat.vendido:hover::before,
+.seat.vendido:hover::after {
+  opacity: 0;
+  /* Ocultar X al hacer hover */
+}
+
+.seat.vendido .tooltip-vendido,
+.seat.vendido:hover .tooltip-vendido {
+  display: none;
+}
+
+.seat.vendido:hover {
+  transform: none !important;
+  box-shadow: 0 0 0 2px #ef4444 !important;
+}
+
+/* Tooltip usando title nativo - agregar via JS */
+.seat.vendido[title]:hover {
+  position: relative;
+}
+
+/* ===== Asiento APARTADO temporalmente por otro vendedor / cliente online ===== */
+.seat.reservado-otro {
+  background: repeating-linear-gradient(45deg,
+      #f59e0b,
+      #f59e0b 6px,
+      #d97706 6px,
+      #d97706 12px) !important;
+  color: #1a1a1a !important;
+  cursor: not-allowed !important;
+  opacity: 0.85;
+  position: relative;
+  animation: reservaPulse 2s ease-in-out infinite;
+  pointer-events: auto;
+}
+
+.seat.reservado-otro::before {
+  content: '⏱';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.85em;
+  font-weight: bold;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes reservaPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+  50%      { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+}
+
+/* Asientos NO VENTA - bloqueados permanentemente */
+.seat.no-venta {
+  background: repeating-linear-gradient(45deg,
+      #9ca3af,
+      #9ca3af 4px,
+      #6b7280 4px,
+      #6b7280 8px) !important;
+  cursor: not-allowed !important;
+  opacity: 0.5;
+  pointer-events: auto !important;
+  /* Permitir hover para tooltip */
+  color: transparent !important;
+  position: relative;
+}
+
+.seat.no-venta:hover {
+  box-shadow: 0 0 0 2px #6b7280 !important;
+}
+
+.seat.no-venta::after {
+  content: '🚫';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+}
+
+.carrito-item {
+  background: #2b2b2b;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  animation: slideInCart 0.3s ease;
+  color: #ffffff;
+}
+
+@keyframes slideInCart {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.carrito-item:hover {
+  border-color: #0066ff;
+  box-shadow: 0 2px 4px rgba(0, 102, 255, 0.2);
+}
+
+.carrito-item .asiento-info {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+/* Ensure all text in cart items is visible */
+.carrito-item .asiento-info strong {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.carrito-item .asiento-info small {
+  font-size: 0.75rem;
+  color: #a0a0a0 !important;
+}
+
+.carrito-item .asiento-nombre {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.carrito-item .asiento-categoria {
+  font-size: 0.7rem;
+  color: #a0a0a0;
+}
+
+.carrito-item .asiento-precio {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #32d74b;
+}
+
+.carrito-item .btn-remove {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.carrito-item .btn-remove:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+}
+
+.carrito-item .btn-remove:active {
+  transform: scale(0.95);
+}
+
+.total-section {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.total-section h4 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+#btnPagar {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-top: 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  background: #32d74b;
+  color: #000000;
+  box-shadow: 0 4px 6px -1px rgba(50, 215, 75, 0.3);
+}
+
+#btnPagar:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(50, 215, 75, 0.4);
+}
+
+#btnPagar:disabled {
+  background: #3a3a3c;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.carrito-vacio {
+  text-align: center;
+  color: #86868b;
+  padding: 32px 20px;
+  font-size: 0.95rem;
+  background: #2b2b2b;
+  border-radius: 10px;
+  border: 2px dashed #3a3a3c;
+}
+
+.carrito-vacio::before {
+  content: '🛒';
+  display: block;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+/* Animación de descuento aplicado */
+.descuento-aplicado {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fbbf24;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideInCart 0.3s ease;
+}
+
+.descuento-aplicado i {
+  color: #f59e0b;
+  font-size: 1.1rem;
+}

@@ -1,0 +1,731 @@
+/* ============================================
+   TEATRO - SISTEMA DE GESTIÓN
+   Estilo Global - Tema Oscuro Elegante
+   ============================================ */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================
+   VARIABLES CSS - TEMA OSCURO
+   ============================================ */
+:root {
+    /* Colores Base Oscuros */
+    --bg-primary: #131313;
+    --bg-secondary: #1c1c1e;
+    --bg-tertiary: #2b2b2b;
+    --bg-card: #1c1c1e;
+    --bg-hover: #3a3a3c;
+
+    /* Textos */
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1a6;
+    --text-muted: #86868b;
+    --text-disabled: #636366;
+
+    /* Colores de Acento */
+    --accent-blue: #1561f0;
+    --accent-blue-hover: #0d4fc4;
+    --accent-purple: #a855f7;
+    --accent-pink: #ec4899;
+
+    /* Estados */
+    --success: #32d74b;
+    --success-bg: rgba(50, 215, 75, 0.15);
+    --warning: #ff9f0a;
+    --warning-bg: rgba(255, 159, 10, 0.15);
+    --danger: #ff453a;
+    --danger-bg: rgba(255, 69, 58, 0.15);
+    --info: #64d2ff;
+
+    /* Bordes */
+    --border-color: #3a3a3c;
+    --border-light: #48484a;
+
+    /* Gradientes */
+    --gradient-primary: linear-gradient(135deg, #1561f0 0%, #a855f7 100%);
+    --gradient-secondary: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    --gradient-success: linear-gradient(135deg, #32d74b 0%, #30b048 100%);
+    --gradient-danger: linear-gradient(135deg, #ff453a 0%, #d93025 100%);
+    --gradient-dark: linear-gradient(180deg, #1c1c1e 0%, #131313 100%);
+
+    /* Tipografía */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+
+    /* Sombras */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 30px rgba(21, 97, 240, 0.3);
+
+    /* Bordes redondeados */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* Transiciones */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+    --transition-slow: 0.4s ease;
+}
+
+/* ============================================
+   RESET Y BASE
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.teatro-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* ============================================
+   CARDS - Estilo Glassmorphism Oscuro
+   ============================================ */
+.teatro-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    transition: var(--transition-normal);
+}
+
+.teatro-card:hover {
+    border-color: var(--border-light);
+    background: var(--bg-tertiary);
+}
+
+.teatro-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.teatro-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.teatro-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: white;
+    background: var(--gradient-primary);
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.teatro-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 24px;
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    text-decoration: none;
+}
+
+.teatro-btn:hover {
+    transform: translateY(-2px);
+}
+
+.teatro-btn-primary {
+    background: var(--accent-blue);
+    color: white;
+}
+
+.teatro-btn-primary:hover {
+    background: var(--accent-blue-hover);
+    box-shadow: var(--shadow-glow);
+}
+
+.teatro-btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.teatro-btn-secondary:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-light);
+}
+
+.teatro-btn-success {
+    background: var(--success);
+    color: #000;
+}
+
+.teatro-btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.teatro-btn-ghost {
+    background: transparent;
+    color: var(--accent-blue);
+}
+
+.teatro-btn-ghost:hover {
+    background: rgba(21, 97, 240, 0.1);
+}
+
+/* ============================================
+   FORMULARIOS
+   ============================================ */
+.teatro-form-group {
+    margin-bottom: 20px;
+}
+
+.teatro-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.teatro-input,
+.teatro-select,
+.teatro-textarea {
+    width: 100%;
+    padding: 14px 18px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transition: var(--transition-normal);
+}
+
+.teatro-input:focus,
+.teatro-select:focus,
+.teatro-textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(21, 97, 240, 0.2);
+}
+
+.teatro-input::placeholder {
+    color: var(--text-muted);
+}
+
+.teatro-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* ============================================
+   TABLAS
+   ============================================ */
+.teatro-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.teatro-table th,
+.teatro-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.teatro-table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--bg-secondary);
+}
+
+.teatro-table td {
+    color: var(--text-primary);
+}
+
+.teatro-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+.teatro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+}
+
+.teatro-badge-primary {
+    background: rgba(21, 97, 240, 0.15);
+    color: var(--accent-blue);
+}
+
+.teatro-badge-secondary {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--accent-purple);
+}
+
+.teatro-badge-success {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.teatro-badge-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.teatro-badge-danger {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.teatro-alert {
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    border: 1px solid;
+}
+
+.teatro-alert-success {
+    background: var(--success-bg);
+    color: var(--success);
+    border-color: rgba(50, 215, 75, 0.3);
+}
+
+.teatro-alert-error {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: rgba(255, 69, 58, 0.3);
+}
+
+.teatro-alert-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+    border-color: rgba(255, 159, 10, 0.3);
+}
+
+.teatro-alert-info {
+    background: rgba(21, 97, 240, 0.15);
+    color: var(--accent-blue);
+    border-color: rgba(21, 97, 240, 0.3);
+}
+
+/* ============================================
+   MODALES
+   ============================================ */
+.teatro-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.teatro-modal-overlay.active {
+    display: flex;
+}
+
+.teatro-modal {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 440px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-xl);
+    animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.teatro-modal-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.teatro-modal-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.teatro-modal-header h3 i {
+    color: var(--accent-blue);
+}
+
+.teatro-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.teatro-modal-close:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.teatro-modal-body {
+    padding: 24px;
+}
+
+.teatro-modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Modal Seguridad */
+.teatro-security-icon {
+    font-size: 3.5rem;
+    color: var(--accent-blue);
+    text-align: center;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.teatro-security-text {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.teatro-password-input {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transition: var(--transition-normal);
+}
+
+.teatro-password-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(21, 97, 240, 0.2);
+}
+
+/* ============================================
+   TOGGLE SWITCH
+   ============================================ */
+.teatro-toggle {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.teatro-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.teatro-toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--danger);
+    border-radius: var(--radius-full);
+    transition: var(--transition-normal);
+}
+
+.teatro-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: var(--transition-normal);
+}
+
+.teatro-toggle input:checked+.teatro-toggle-slider {
+    background: var(--success);
+}
+
+.teatro-toggle input:checked+.teatro-toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* ============================================
+   MENÚ CARDS
+   ============================================ */
+.teatro-menu-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    text-decoration: none;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.teatro-menu-card:hover {
+    border-color: var(--accent-blue);
+    background: var(--bg-tertiary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-glow);
+}
+
+.teatro-menu-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    background: var(--gradient-primary);
+}
+
+.teatro-menu-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.teatro-menu-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.teatro-header {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.teatro-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.teatro-header h1 i {
+    color: var(--accent-blue);
+}
+
+.teatro-header p {
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* ============================================
+   PAGE BLOCKER
+   ============================================ */
+.teatro-page-blocked {
+    filter: blur(10px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ============================================
+   UTILIDADES
+   ============================================ */
+.text-center {
+    text-align: center;
+}
+
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-accent {
+    color: var(--accent-blue);
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+.bg-card {
+    background: var(--bg-card);
+}
+
+.bg-secondary {
+    background: var(--bg-secondary);
+}
+
+.bg-tertiary {
+    background: var(--bg-tertiary);
+}
+
+.border-subtle {
+    border: 1px solid var(--border-color);
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
+.mb-1 {
+    margin-bottom: 8px;
+}
+
+.mb-2 {
+    margin-bottom: 16px;
+}
+
+.mb-3 {
+    margin-bottom: 24px;
+}
+
+.mb-4 {
+    margin-bottom: 32px;
+}
+
+.mt-1 {
+    margin-top: 8px;
+}
+
+.mt-2 {
+    margin-top: 16px;
+}
+
+.mt-3 {
+    margin-top: 24px;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-1 {
+    gap: 8px;
+}
+
+.gap-2 {
+    gap: 16px;
+}
+
+.gap-3 {
+    gap: 24px;
+}

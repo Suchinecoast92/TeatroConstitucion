@@ -1,0 +1,216 @@
+/* Sistema de notificaciones minimalista */
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    pointer-events: none;
+    max-width: 400px;
+}
+
+.toast-notification {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 320px;
+    max-width: 400px;
+    pointer-events: auto;
+    animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Barra de progreso minimalista */
+.toast-notification::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.4;
+    animation: progress var(--progress-duration, 4000ms) linear;
+}
+
+.toast-notification.toast-success {
+    border-left: 3px solid #10b981;
+}
+
+.toast-notification.toast-success::after {
+    color: #10b981;
+}
+
+.toast-notification.toast-error {
+    border-left: 3px solid #ef4444;
+}
+
+.toast-notification.toast-error::after {
+    color: #ef4444;
+}
+
+.toast-notification.toast-warning {
+    border-left: 3px solid #f59e0b;
+}
+
+.toast-notification.toast-warning::after {
+    color: #f59e0b;
+}
+
+.toast-notification.toast-info {
+    border-left: 3px solid #3b82f6;
+}
+
+.toast-notification.toast-info::after {
+    color: #3b82f6;
+}
+
+.toast-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.toast-success .toast-icon {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.toast-error .toast-icon {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.toast-warning .toast-icon {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.toast-info .toast-icon {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+.toast-message {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #64748b;
+    transform: scale(1.1);
+}
+
+.toast-close:active {
+    transform: scale(0.9);
+}
+
+/* Animaciones suaves */
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+@keyframes iconPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes progress {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
+.toast-notification.toast-hiding {
+    animation: slideOut 0.25s ease-out forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .toast-container {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+    }
+    
+    .toast-notification {
+        min-width: auto;
+        max-width: none;
+    }
+}
