@@ -109,8 +109,15 @@ async function cargarAsientosVendidos() {
 
         if (data.success) {
             const prev = new Set(asientosVendidos);
-            asientosVendidos = new Set(data.asientos);
+            asientosVendidos = new Set(data.asientos || data.vendidos || []);
             marcarAsientosVendidos();
+
+            // Holds ajenos desde la misma respuesta unificada (además del poll de reservas)
+            if (Array.isArray(data.reservados)) {
+                if (window.TeatroReservas && typeof window.TeatroReservas.aplicarHolds === 'function') {
+                    window.TeatroReservas.aplicarHolds(data.reservados);
+                }
+            }
 
             // Quitar del carrito asientos que acaban de venderse (otro canal)
             if (typeof carrito !== 'undefined' && Array.isArray(carrito)) {

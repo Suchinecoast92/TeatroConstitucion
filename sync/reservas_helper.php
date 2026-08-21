@@ -125,21 +125,7 @@ if (!function_exists('reservarAsientos')) {
             $existing = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-            // Taquilla (local) tiene prioridad: puede quitar apartados online
-            if ($origen === 'local' && $existing && $existing['session_id'] !== $sessionId
-                && ($existing['origen'] ?? '') === 'online') {
-                $up = $conn->prepare("
-                    UPDATE reservas_temporales
-                    SET session_id = ?, origen = 'local', cliente_info = ?, expira_en = ?
-                    WHERE id_reserva = ?
-                ");
-                $up->bind_param('sssi', $sessionId, $clienteInfo, $expira, $existing['id_reserva']);
-                $up->execute();
-                $up->close();
-                $reservados[] = $codigo;
-                continue;
-            }
-
+            // Hold ajeno (local u online) bloquea: nadie "roba" la butaca.
             if ($existing) {
                 if ($existing['session_id'] === $sessionId) {
                     // Renovar TTL de la propia reserva (extender hasta `expira`)
@@ -149,9 +135,11 @@ if (!function_exists('reservarAsientos')) {
                     $up->close();
                     $reservados[] = $codigo;
                 } else {
-                    // Online no puede quitar apartado de taquilla u otro vendedor
-                    if ($origen === 'online' && ($existing['origen'] ?? '') === 'local') {
+                    $origenExistente = $existing['origen'] ?? '';
+                    if ($origenExistente === 'local') {
                         $conflictos[$codigo] = 'taquilla';
+                    } elseif ($origenExistente === 'online') {
+                        $conflictos[$codigo] = 'online';
                     } else {
                         $conflictos[$codigo] = 'reservado';
                     }
@@ -228,8 +216,11 @@ if (!function_exists('reservarAsientos')) {
                     $chk->execute();
                     $rowChk = $chk->get_result()->fetch_assoc();
                     $chk->close();
-                    if ($origen === 'online' && ($rowChk['origen'] ?? '') === 'local') {
+                    $origenChk = $rowChk['origen'] ?? '';
+                    if ($origenChk === 'local') {
                         $conflictos[$codigo] = 'taquilla';
+                    } elseif ($origenChk === 'online') {
+                        $conflictos[$codigo] = 'online';
                     } else {
                         $conflictos[$codigo] = 'reservado';
                     }
@@ -460,28 +451,14 @@ if (!function_exists('verificarVentaAtomica')) {
             throw new Exception("Asiento(s) ya vendido(s): " . implode(', ', $vendidosLocal));
         }
 
-        // 2) Verificar reservas activas de OTRAS sesiones
+        // 2) Verificar reservas activas de OTRAS sesiones (local u online bloquean por igual)
         $connRes = getReservasConnection();
         if ($connRes) {
             limpiarReservasExpiradas($connRes);
             $idFunc = $idFuncion ?: 0;
 
-            // Taquilla tiene prioridad: al vender, quitar apartados online de estos asientos
-            if ($origen === 'local') {
-                foreach ($codigosAsientos as $codigo) {
-                    $del = $connRes->prepare("
-                        DELETE FROM reservas_temporales
-                        WHERE codigo_asiento = ? AND id_evento = ? AND id_funcion = ?
-                          AND origen = 'online' AND expira_en > NOW()
-                    ");
-                    $del->bind_param('sii', $codigo, $idEvento, $idFunc);
-                    $del->execute();
-                    $del->close();
-                }
-            }
-
             $sql = "
-                SELECT codigo_asiento, session_id
+                SELECT codigo_asiento, session_id, origen
                 FROM reservas_temporales
                 WHERE id_evento = ? AND id_funcion = ?
                   AND codigo_asiento IN ($placeholders)
@@ -495,12 +472,118 @@ if (!function_exists('verificarVentaAtomica')) {
             $stmt->execute();
             $res = $stmt->get_result();
             $reservadosOtros = [];
-            while ($row = $res->fetch_assoc()) $reservadosOtros[] = $row['codigo_asiento'];
+            while ($row = $res->fetch_assoc()) {
+                $reservadosOtros[] = $row['codigo_asiento'];
+            }
             $stmt->close();
             if ($reservadosOtros) {
                 throw new Exception("Asiento(s) reservado(s) por otro usuario: " . implode(', ', $reservadosOtros));
             }
         }
+    }
+}
+
+/**
+ * Disponibilidad unificada de una función: vendidos + holds ajenos.
+ *
+ * @return array{
+ *   success: bool,
+ *   vendidos: string[],
+ *   reservados: string[],
+ *   reservados_detalle: array<int,array{codigo:string,origen:string}>,
+ *   ocupados: string[]
+ * }
+ */
+if (!function_exists('obtenerDisponibilidadFuncion')) {
+    function obtenerDisponibilidadFuncion(
+        int $idEvento,
+        ?int $idFuncion = null,
+        ?string $excluirSession = null,
+        ?mysqli $connBoletos = null
+    ): array {
+        $conn = $connBoletos ?: getReservasConnection();
+        if (!$conn) {
+            return [
+                'success' => false,
+                'vendidos' => [],
+                'reservados' => [],
+                'reservados_detalle' => [],
+                'ocupados' => [],
+            ];
+        }
+
+        limpiarReservasExpiradas($conn);
+
+        $vendidos = [];
+        if ($idFuncion) {
+            $stmt = $conn->prepare("
+                SELECT a.codigo_asiento
+                FROM boletos b
+                INNER JOIN asientos a ON b.id_asiento = a.id_asiento
+                WHERE b.id_evento = ? AND b.id_funcion = ? AND b.estatus = 1
+            ");
+            $stmt->bind_param('ii', $idEvento, $idFuncion);
+        } else {
+            $stmt = $conn->prepare("
+                SELECT a.codigo_asiento
+                FROM boletos b
+                INNER JOIN asientos a ON b.id_asiento = a.id_asiento
+                WHERE b.id_evento = ? AND b.estatus = 1
+            ");
+            $stmt->bind_param('i', $idEvento);
+        }
+        $stmt->execute();
+        $res = $stmt->get_result();
+        while ($row = $res->fetch_assoc()) {
+            $vendidos[] = $row['codigo_asiento'];
+        }
+        $stmt->close();
+
+        $detalle = listarReservasActivasDetalle($idEvento, $idFuncion, $excluirSession);
+        $reservados = array_values(array_unique(array_map(static function ($r) {
+            return $r['codigo'];
+        }, $detalle)));
+
+        $ocupados = array_values(array_unique(array_merge($vendidos, $reservados)));
+
+        return [
+            'success' => true,
+            'vendidos' => $vendidos,
+            'reservados' => $reservados,
+            'reservados_detalle' => $detalle,
+            'ocupados' => $ocupados,
+        ];
+    }
+}
+
+/**
+ * Renueva el TTL de todos los holds activos de una sesión (p. ej. al crear orden).
+ */
+if (!function_exists('renovarReservasSesion')) {
+    function renovarReservasSesion(
+        string $sessionId,
+        int $idEvento,
+        ?int $idFuncion = null,
+        int $ttlSeg = RESERVA_TTL_SEG
+    ): int {
+        $conn = getReservasConnection();
+        if (!$conn || $sessionId === '') {
+            return 0;
+        }
+        limpiarReservasExpiradas($conn);
+        $idFunc = $idFuncion ?: 0;
+        $expira = date('Y-m-d H:i:s', time() + $ttlSeg);
+        $stmt = $conn->prepare("
+            UPDATE reservas_temporales
+            SET expira_en = ?
+            WHERE session_id = ? AND id_evento = ? AND id_funcion = ?
+              AND expira_en > NOW()
+        ");
+        $stmt->bind_param('ssii', $expira, $sessionId, $idEvento, $idFunc);
+        $stmt->execute();
+        $n = $stmt->affected_rows;
+        $stmt->close();
+        return $n;
     }
 }
 

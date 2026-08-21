@@ -347,9 +347,15 @@
                     if (conflict) {
 
                         if (typeof notify !== 'undefined') {
-
-                            notify.error(`El asiento ${asientoId} ${conflict === 'vendido' ? 'acaba de venderse' : 'fue apartado por otra persona'}.`);
-
+                            let msg = `El asiento ${asientoId} fue apartado por otra persona.`;
+                            if (conflict === 'vendido') {
+                                msg = `El asiento ${asientoId} acaba de venderse.`;
+                            } else if (conflict === 'online') {
+                                msg = `El asiento ${asientoId} está apartado por un cliente online. Espere a que expire o se libere.`;
+                            } else if (conflict === 'taquilla') {
+                                msg = `El asiento ${asientoId} está apartado en otra taquilla.`;
+                            }
+                            notify.error(msg);
                         }
 
                         // Solo quitar del carrito si hay conflicto real con este asiento

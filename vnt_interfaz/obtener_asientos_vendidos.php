@@ -1,53 +1,35 @@
 <?php
-header('Content-Type: application/json');
-include "../conexion.php";
+/**
+ * Asientos vendidos (+ holds ajenos) para el mapa de taquilla.
+ * Mantiene compatibilidad: `asientos` = solo vendidos (estatus=1).
+ * Campos nuevos: vendidos, reservados, ocupados.
+ */
+header('Content-Type: application/json; charset=utf-8');
 
-$id_evento = isset($_GET['id_evento']) ? (int)$_GET['id_evento'] : 0;
-$id_funcion = isset($_GET['id_funcion']) ? (int)$_GET['id_funcion'] : 0;
+require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../sync/reservas_helper.php';
+
+$id_evento = isset($_GET['id_evento']) ? (int) $_GET['id_evento'] : 0;
+$id_funcion = isset($_GET['id_funcion']) ? (int) $_GET['id_funcion'] : 0;
+$session_id = isset($_GET['session_id']) ? trim((string) $_GET['session_id']) : null;
 
 if ($id_evento <= 0) {
     echo json_encode(['success' => false, 'message' => 'ID de evento inválido']);
     exit;
 }
 
-// Verificar si la columna id_funcion existe en boletos
-$check_column = $conn->query("SHOW COLUMNS FROM boletos LIKE 'id_funcion'");
-$has_id_funcion = ($check_column && $check_column->num_rows > 0);
-
-// Obtener asientos vendidos (solo los activos, estatus = 1)
-if ($has_id_funcion && $id_funcion > 0) {
-    // Si existe id_funcion y se proporcionó, filtrar por función
-    $stmt = $conn->prepare("
-        SELECT a.codigo_asiento 
-        FROM boletos b
-        INNER JOIN asientos a ON b.id_asiento = a.id_asiento
-        WHERE b.id_evento = ? AND b.id_funcion = ? AND b.estatus = 1
-    ");
-    $stmt->bind_param("ii", $id_evento, $id_funcion);
-} else {
-    // Si no existe id_funcion o no se proporcionó, filtrar solo por evento
-    $stmt = $conn->prepare("
-        SELECT a.codigo_asiento 
-        FROM boletos b
-        INNER JOIN asientos a ON b.id_asiento = a.id_asiento
-        WHERE b.id_evento = ? AND b.estatus = 1
-    ");
-    $stmt->bind_param("i", $id_evento);
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-
-$asientos = [];
-while ($row = $result->fetch_assoc()) {
-    $asientos[] = $row['codigo_asiento'];
-}
-
-$stmt->close();
-$conn->close();
+$idFuncion = $id_funcion > 0 ? $id_funcion : null;
+$disp = obtenerDisponibilidadFuncion($id_evento, $idFuncion, $session_id ?: null, $conn);
 
 echo json_encode([
     'success' => true,
-    'asientos' => $asientos
-]);
-?>
+    'asientos' => $disp['vendidos'], // compat
+    'vendidos' => $disp['vendidos'],
+    'reservados' => $disp['reservados'],
+    'reservados_detalle' => $disp['reservados_detalle'],
+    'ocupados' => $disp['ocupados'],
+], JSON_UNESCAPED_UNICODE);
+
+if (isset($conn) && $conn instanceof mysqli) {
+    $conn->close();
+}

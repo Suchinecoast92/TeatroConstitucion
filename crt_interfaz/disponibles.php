@@ -19,6 +19,7 @@ $mapa_guardado = [];
 $colores_por_id = [];
 $info_categorias = []; // Para guardar nombre y precio
 $asientos_vendidos = [];
+$asientos_reservados = [];
 $texto_funcion = '';
 
 if ($id_evento > 0) {
@@ -46,41 +47,13 @@ if ($id_evento > 0) {
         }
     }
 
-    // C. Cargar Asientos Vendidos (por evento o por función si aplica)
-    $check_column = $conn->query("SHOW COLUMNS FROM boletos LIKE 'id_funcion'");
-    $has_id_funcion = ($check_column && $check_column->num_rows > 0);
-
-    if ($has_id_funcion && $id_funcion > 0) {
-        $stmt_v = $conn->prepare("
-            SELECT a.codigo_asiento 
-            FROM boletos b 
-            JOIN asientos a ON b.id_asiento = a.id_asiento 
-            WHERE b.id_evento = ? AND b.id_funcion = ? AND b.estatus = 1
-        ");
-        if ($stmt_v) {
-            $stmt_v->bind_param("ii", $id_evento, $id_funcion);
-        }
-    } else {
-        $stmt_v = $conn->prepare("
-            SELECT a.codigo_asiento 
-            FROM boletos b 
-            JOIN asientos a ON b.id_asiento = a.id_asiento 
-            WHERE b.id_evento = ? AND b.estatus = 1
-        ");
-        if ($stmt_v) {
-            $stmt_v->bind_param("i", $id_evento);
-        }
-    }
-
-    if (isset($stmt_v) && $stmt_v) {
-        $stmt_v->execute();
-        $res_ven = $stmt_v->get_result();
-        if ($res_ven) {
-            while ($v = $res_ven->fetch_assoc()) {
-                $asientos_vendidos[] = $v['codigo_asiento'];
-            }
-        }
-        $stmt_v->close();
+    // C. Disponibilidad unificada: vendidos (estatus=1) + holds temporales
+    require_once __DIR__ . '/../sync/reservas_helper.php';
+    $idFuncionDisp = $id_funcion > 0 ? $id_funcion : null;
+    $disp = obtenerDisponibilidadFuncion($id_evento, $idFuncionDisp, null, $conn);
+    if (!empty($disp['success'])) {
+        $asientos_vendidos = $disp['vendidos'];
+        $asientos_reservados = $disp['reservados'];
     }
 
     // D. Texto descriptivo de la función (si se proporcionó id_funcion)
@@ -145,10 +118,11 @@ $id_categoria_general = 0;
 $color_default = '#BDBDBD'; 
 
 // --- FUNCIÓN HELPER PARA RENDERIZAR ASIENTO ---
-function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_def) {
+function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_def, $reservados = []) {
     $id_cat = $mapa[$codigo] ?? $id_def;
     $color = $colores[$id_cat] ?? $col_def;
-    $esta_vendido = in_array($codigo, $vendidos);
+    $esta_vendido = in_array($codigo, $vendidos, true);
+    $esta_reservado = !$esta_vendido && in_array($codigo, $reservados, true);
 
     // Datos para tooltip
     $nombre_cat = $infos[$id_cat]['nombre'] ?? 'General';
@@ -162,6 +136,10 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
         $clase .= ' vendido';
         $style = '';
         $title = "$codigo | Ocupado";
+    } elseif ($esta_reservado) {
+        $clase .= ' reservado';
+        $style = '';
+        $title = "$codigo | Apartado temporalmente";
     }
 
     $class_attr = htmlspecialchars($clase, ENT_QUOTES, 'UTF-8');
@@ -288,6 +266,18 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
         box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.9), 0 4px 8px rgba(0,0,0,0.4);
     }
 
+    .seat.reservado {
+        background: repeating-linear-gradient(
+            -45deg,
+            #f59e0b,
+            #f59e0b 10px,
+            #d97706 10px,
+            #d97706 20px
+        ) !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 0 2px rgba(146, 64, 14, 0.85), 0 4px 8px rgba(0,0,0,0.35);
+    }
+
     .screen {
         background: #334155; color: white; padding: 10px; text-align: center;
         border-radius: 8px; margin-bottom: 40px; font-weight: bold; letter-spacing: 2px;
@@ -354,6 +344,16 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
         ) !important;
         box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.9), 0 4px 8px rgba(0,0,0,0.4);
     }
+    body.theme-light .seat.reservado {
+        background: repeating-linear-gradient(
+            -45deg,
+            #f59e0b,
+            #f59e0b 10px,
+            #d97706 10px,
+            #d97706 20px
+        ) !important;
+        box-shadow: 0 0 0 2px rgba(146, 64, 14, 0.85), 0 4px 8px rgba(0,0,0,0.35);
+    }
     body.theme-light .leyenda {
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(229, 231, 235, 0.95));
         border-color: #e5e7eb;
@@ -397,13 +397,13 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
                             <div class="row-label"><?= $nombre_fila ?></div>
                             <div class="seats-block">
                                 <?php for ($i=1; $i<=6; $i++): 
-                                    echo renderSeat($nombre_fila . '-' . $numero_en_fila_pb++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default);
+                                    echo renderSeat($nombre_fila . '-' . $numero_en_fila_pb++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default, $asientos_reservados);
                                 endfor; ?>
                             
                                 <div style="width: 80px; flex-shrink: 0;"></div>
                             
                                 <?php for ($i=1; $i<=6; $i++): 
-                                    echo renderSeat($nombre_fila . '-' . $numero_en_fila_pb++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default);
+                                    echo renderSeat($nombre_fila . '-' . $numero_en_fila_pb++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default, $asientos_reservados);
                                 endfor; ?>
                             </div>
                             <div class="row-label"><?= $nombre_fila ?></div>
@@ -427,19 +427,19 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
                     <div class="row-label"><?= $fila ?></div>
                     <div class="seats-block">
                         <?php for ($i=0;$i<6;$i++): 
-                            echo renderSeat($fila . $numero_en_fila++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default);
+                            echo renderSeat($fila . $numero_en_fila++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default, $asientos_reservados);
                         endfor; ?>
                         
                         <div class="pasillo"></div>
                     
                         <?php for ($i=0;$i<14;$i++): 
-                            echo renderSeat($fila . $numero_en_fila++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default);
+                            echo renderSeat($fila . $numero_en_fila++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default, $asientos_reservados);
                         endfor; ?>
                     
                         <div class="pasillo"></div>
                     
                         <?php for ($i=0;$i<6;$i++): 
-                            echo renderSeat($fila . $numero_en_fila++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default);
+                            echo renderSeat($fila . $numero_en_fila++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default, $asientos_reservados);
                         endfor; ?>
                     </div>
                     <div class="row-label"><?= $fila ?></div>
@@ -450,7 +450,7 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
                     <div class="row-label">P</div>
                     <div class="seats-block">
                         <?php $numero_en_fila_p = 1; for ($i=0;$i<30;$i++): 
-                            echo renderSeat('P' . $numero_en_fila_p++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default);
+                            echo renderSeat('P' . $numero_en_fila_p++, $mapa_guardado, $asientos_vendidos, $colores_por_id, $info_categorias, $id_categoria_general, $color_default, $asientos_reservados);
                         endfor; ?>
                     </div>
                     <div class="row-label">P</div>
@@ -465,6 +465,7 @@ function renderSeat($codigo, $mapa, $vendidos, $colores, $infos, $id_def, $col_d
 
 <div class="leyenda">
     <div class="leyenda-item"><div class="dot" style="background: #6b7280; border: 1px solid #4b5563;"></div> Ocupado</div>
+    <div class="leyenda-item"><div class="dot" style="background: #f59e0b; border: 1px solid #d97706;"></div> Apartado</div>
     <div class="leyenda-item"><div class="dot" style="background: #e2e8f0; border: 1px solid #cbd5e1;"></div> Disponible</div>
 </div>
 
