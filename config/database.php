@@ -6,6 +6,9 @@
  * local. Se eliminó toda la lógica de servidor remoto / sincronización online.
  * Se conservan los nombres de las funciones para mantener la compatibilidad
  * con el resto del código.
+ *
+ * Valores por defecto = WAMP local. Si existe `.env` en la raíz, puede
+ * sobrescribir host/usuario/clave/nombre de BD sin tocar este archivo.
  */
 
 // Protección contra inclusión múltiple
@@ -14,11 +17,13 @@ if (defined('DATABASE_CONFIG_INCLUDED')) {
 }
 define('DATABASE_CONFIG_INCLUDED', true);
 
-// Configuración del servidor LOCAL (WAMP/XAMPP)
-define('DB_LOCAL_HOST', 'localhost');
-define('DB_LOCAL_USER', 'root');
-define('DB_LOCAL_PASS', '');
-define('DB_LOCAL_NAME', 'trt_25');
+require_once __DIR__ . '/env.php';
+
+// Configuración del servidor LOCAL (WAMP/XAMPP) — override opcional vía .env
+define('DB_LOCAL_HOST', teatro_env('DB_HOST', 'localhost'));
+define('DB_LOCAL_USER', teatro_env('DB_USER', 'root'));
+define('DB_LOCAL_PASS', teatro_env('DB_PASS', ''));
+define('DB_LOCAL_NAME', teatro_env('DB_NAME', 'trt_25'));
 
 // Servidor primario (siempre local en modo standalone)
 define('PRIMARY_SERVER', 'local');

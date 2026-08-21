@@ -1,0 +1,40 @@
+# Entorno y secretos
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+**/vendor/
+composer.lock
+
+# Logs
+*.log
+php_errors.log
+**/php_errors.log
+
+# QR generados en runtime
+boletos_qr/*
+!boletos_qr/.gitkeep
+vnt_interfaz/qr_codes/
+vnt_interfaz/boletos_qr/
+
+# Dumps y respaldos (no subir BD real)
+*.sql.gz
+*.sql.bak
+c/*.sql
+!c/.gitkeep
+backups/
+*.dump
+
+# IDE / SO
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporales y diagnóstico local
+es --oneline
+*.tmp
+*.temp

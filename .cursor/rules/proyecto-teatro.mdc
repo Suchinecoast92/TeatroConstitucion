@@ -1,0 +1,63 @@
+---
+description: Reglas permanentes del proyecto Teatro Constitución
+alwaysApply: true
+---
+
+# Teatro Constitución - reglas de desarrollo
+
+## Contexto
+
+Proyecto PHP/MySQL para gestión de teatro, taquilla, funciones, butacas, boletos, QR y administración. Se está agregando venta online con pasarela de pago.
+
+## Regla principal
+
+Preservar la funcionalidad existente de taquilla, administración y control de entrada.
+
+Antes de modificar un archivo grande o una tabla existente, analizar dependencias y usos reales.
+
+## Arquitectura
+
+La producción debe usar una única BD central y un backend central. Taquilla, administración y web consumen el backend por HTTPS.
+
+No diseñar dos BD independientes para resolver disponibilidad de butacas.
+
+## Reservas
+
+El proyecto ya tiene `reservas_temporales` y `sync/reservas_helper.php`. Reutilizar antes de crear otra solución paralela.
+
+La BD es la autoridad final para concurrencia y disponibilidad.
+
+## Pagos
+
+Mercado Pago será el primer proveedor, pero toda integración debe quedar aislada detrás de un servicio de pago para facilitar cambiar a Stripe/Conekta posteriormente.
+
+Nunca confiar en el retorno del frontend como confirmación de pago. Usar webhook/verificación en backend.
+
+Nunca confiar en precios enviados por el navegador.
+
+## Seguridad
+
+Nunca exponer MySQL públicamente.
+Nunca guardar secretos en Git.
+Nunca usar una BD de producción como BD de desarrollo.
+No subir dumps reales ni datos personales reales a GitHub.
+
+## Base de datos
+
+`trt_25 (3).sql` es la referencia de la BD actual analizada.
+`trt_25_online.sql` es un esquema alternativo/prototipo hasta demostrar lo contrario.
+No fusionarlos automáticamente.
+
+## Backups
+
+Los backups son para recuperación, no para resolver disponibilidad online en tiempo real.
+
+## Desarrollo
+
+Preferir migraciones reversibles.
+Preferir cambios pequeños, probables y comprobables.
+No eliminar código existente sin reemplazo probado.
+
+## Documentación
+
+Consultar `docs/CONTEXTO_PROYECTO.md`, `docs/ARQUITECTURA.md`, `docs/BASE_DE_DATOS.md`, `docs/VENTA_ONLINE.md` y `docs/PLAN_IMPLEMENTACION.md` antes de realizar cambios de arquitectura.

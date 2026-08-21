@@ -1,21 +1,9 @@
 <?php
 // Conexión específica para APIs que devuelven JSON
 // No genera salida HTML en caso de error
+// Usa la misma config central (.env opcional) que el resto del sistema.
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$database = "trt_25";
+require_once __DIR__ . '/../config/database.php';
 
-$conn = new mysqli($servername, $username, $password, $database);
-
-if ($conn->connect_error) {
-    // No usar die() para evitar salida HTML
-    $conn = null;
-}
-
-// Configurar charset UTF-8
-if ($conn) {
-    $conn->set_charset("utf8mb4");
-}
+$conn = getLocalConnection();
 ?>

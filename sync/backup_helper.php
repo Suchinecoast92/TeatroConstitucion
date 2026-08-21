@@ -13,13 +13,18 @@
 if (!function_exists('getBackupConnection')) {
     function getBackupConnection() {
         static $conn = null;
-        if ($conn !== null) return $conn;
+        if ($conn !== null) {
+            return $conn;
+        }
+
+        require_once dirname(__DIR__) . '/config/database.php';
+        $backupName = teatro_env('DB_BACKUP_NAME', 'trt_25_backup');
 
         @mysqli_report(MYSQLI_REPORT_OFF);
         try {
-            $c = @new mysqli('localhost', 'root', '', 'trt_25_backup');
+            $c = @new mysqli(DB_LOCAL_HOST, DB_LOCAL_USER, DB_LOCAL_PASS, $backupName);
             if ($c->connect_error) {
-                error_log('[Backup] No se pudo conectar a trt_25_backup: ' . $c->connect_error);
+                error_log('[Backup] No se pudo conectar a ' . $backupName . ': ' . $c->connect_error);
                 return null;
             }
             $c->set_charset('utf8mb4');

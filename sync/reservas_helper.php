@@ -18,15 +18,20 @@ if (!defined('RESERVA_TTL_SEG')) define('RESERVA_TTL_SEG', 300); // 5 min
 
 /**
  * Devuelve una conexión a trt_25 (donde vive la tabla compartida).
+ * Usa config/database.php (.env opcional) en lugar de credenciales fijas.
  */
 if (!function_exists('getReservasConnection')) {
     function getReservasConnection() {
         static $c = null;
-        if ($c !== null && !$c->connect_errno) return $c;
-        @mysqli_report(MYSQLI_REPORT_OFF);
-        $c = @new mysqli('localhost', 'root', '', 'trt_25');
-        if ($c->connect_error) { $c = null; return null; }
-        $c->set_charset('utf8mb4');
+        if ($c !== null && !$c->connect_errno) {
+            return $c;
+        }
+
+        require_once dirname(__DIR__) . '/config/database.php';
+        $c = getLocalConnection();
+        if (!$c) {
+            return null;
+        }
         asegurarTablaReservasTemporales($c);
         return $c;
     }
