@@ -720,6 +720,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                     <thead>
                         <tr>
                             <th>Código</th>
+                            <th>Origen</th>
                             <th>Asiento</th>
                             <th>Evento</th>
                             <th>Tipo Evento</th>
@@ -982,9 +983,15 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 const tipoEventoText = ticket.db_source === 'actual' ? 'Activo' : 'Archivado';
                 const tipoEventoIcon = ticket.db_source === 'actual' ? 'check-circle-fill' : 'archive-fill';
 
+                const origen = (ticket.origen || 'local') === 'online' ? 'online' : 'local';
+                const origenBadge = origen === 'online'
+                    ? '<span class="status-badge activo"><i class="bi bi-globe2"></i> Online</span>'
+                    : '<span class="status-badge" style="background:#334155;color:#cbd5e1"><i class="bi bi-shop"></i> Local</span>';
+
                 return `
                     <tr>
                         <td><strong>${ticket.codigo_unico}</strong></td>
+                        <td>${origenBadge}</td>
                         <td>${ticket.codigo_asiento}</td>
                         <td>${ticket.evento_titulo}</td>
                         <td>
@@ -1038,6 +1045,10 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 <div class="info-item">
                     <div class="info-label">Asiento</div>
                     <div class="info-value">${ticket.codigo_asiento}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Origen</div>
+                    <div class="info-value">${(ticket.origen || 'local') === 'online' ? 'Online' : 'Local (taquilla)'}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Evento</div>
@@ -1098,6 +1109,10 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 <div class="info-item">
                     <div class="info-label">Asiento</div>
                     <div class="info-value">${ticket.codigo_asiento}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Origen</div>
+                    <div class="info-value">${(ticket.origen || 'local') === 'online' ? 'Online' : 'Local (taquilla)'}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Evento</div>

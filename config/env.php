@@ -81,3 +81,9 @@ if (!function_exists('teatro_env')) {
 }
 
 teatro_load_env();
+
+// Alinear PHP con la zona del servidor MySQL (México). Los holds usan reloj MySQL;
+// esto evita otros date() desfasados en reportes/UI.
+if (function_exists('date_default_timezone_set')) {
+    @date_default_timezone_set((string) teatro_env('APP_TIMEZONE', 'America/Mexico_City'));
+}

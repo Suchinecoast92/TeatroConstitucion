@@ -58,7 +58,15 @@ try {
             api_online_respond(['success' => false, 'error' => 'Máximo 20 asientos por solicitud'], 400);
         }
 
-        $r = reservarAsientos($idEvento, $idFuncion, $asientos, $sessionId, $origen, $clienteInfo);
+        $ttl = isset($data['ttl']) ? (int) $data['ttl'] : RESERVA_TTL_SEG;
+        if ($ttl < 60) {
+            $ttl = 60;
+        }
+        if ($ttl > 1800) {
+            $ttl = 1800;
+        }
+
+        $r = reservarAsientos($idEvento, $idFuncion, $asientos, $sessionId, $origen, $clienteInfo, $ttl);
         api_online_respond($r, $r['success'] ? 200 : 409);
     }
 
@@ -93,6 +101,17 @@ try {
         if ($sessionId === '') {
             api_online_respond(['success' => false, 'error' => 'Falta session_id'], 400);
         }
+        // No liberar si hay cobro en curso (timer del navegador vs pasarela)
+        require_once dirname(__DIR__, 2) . '/includes/ordenes_helper.php';
+        $connLib = getReservasConnection();
+        if ($connLib && sesion_tiene_pago_pendiente_activo($connLib, $sessionId)) {
+            api_online_respond([
+                'success' => true,
+                'liberados' => 0,
+                'retenidos' => true,
+                'motivo' => 'pago_en_curso',
+            ]);
+        }
         $n = liberarReservasSesion($sessionId);
         api_online_respond(['success' => true, 'liberados' => $n]);
     }
@@ -108,15 +127,24 @@ try {
         if ($ttl < 60) {
             $ttl = 60;
         }
-        if ($ttl > 1800) {
-            $ttl = 1800;
+        if ($ttl > 3600) {
+            $ttl = 3600;
         }
-        $n = renovarReservasSesion($sessionId, $idEvento, $idFuncion, $ttl);
+        $gracia = isset($data['gracia']) ? (int) $data['gracia'] : 0;
+        if ($gracia > 0) {
+            $n = renovarReservasSesionConGracia($sessionId, $idEvento, $idFuncion, $ttl, $gracia);
+        } else {
+            $n = renovarReservasSesion($sessionId, $idEvento, $idFuncion, $ttl);
+        }
+        $connR = getReservasConnection();
+        $exp = $connR
+            ? calcularExpiraReserva($connR, $ttl)
+            : ['iso' => gmdate('Y-m-d\TH:i:s\Z', time() + $ttl)];
         api_online_respond([
             'success' => true,
             'renovados' => $n,
             'ttl' => $ttl,
-            'expira_en' => date('c', time() + $ttl),
+            'expira_en' => $exp['iso'],
         ]);
     }
 

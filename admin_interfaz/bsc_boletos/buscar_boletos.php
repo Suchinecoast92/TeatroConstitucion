@@ -8,6 +8,10 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 require_once '../../conexion.php';
+require_once '../../includes/emision_helper.php';
+if (isset($conn) && $conn) {
+    asegurar_origen_boletos($conn);
+}
 
 $action = $_GET['action'] ?? '';
 $db = $_GET['db'] ?? 'ambas';
@@ -137,6 +141,7 @@ try {
                         b.estatus,
                         b.id_evento,
                         b.id_categoria,
+                        IFNULL(b.origen, 'local') AS origen,
                         a.codigo_asiento,
                         e.titulo as evento_titulo,
                         c.nombre_categoria,
@@ -171,6 +176,7 @@ try {
                             b.estatus,
                             b.id_evento,
                             b.id_categoria,
+                            'local' AS origen,
                             a.codigo_asiento,
                             e.titulo as evento_titulo,
                             c.nombre_categoria,

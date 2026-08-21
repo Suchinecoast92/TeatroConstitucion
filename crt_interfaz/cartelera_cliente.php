@@ -151,28 +151,27 @@ if ($resultado && $resultado->num_rows > 0) {
         }
         .brand-name {
             font-weight: 600;
-            font-height: 1.55rem;
             font-size: 1.55rem;
         }
-        .nav {
+        .site-nav {
             display: flex;
             align-items: center;
             gap: 18px;
             margin-left: auto;
         }
-        .nav a {
+        .site-nav a {
             color: #e8e8e8;
             text-decoration: none;
             font-weight: 600;
             transition: color .2s ease, transform .2s ease;
         }
-        .nav a:not(.cta) {
+        .site-nav a:not(.cta) {
             padding: 8px 10px;
             border-radius: 10px;
             transition: color .2s ease, transform .2s ease, background-color .2s ease, box-shadow .2s ease;
         }
-        .nav a:not(.cta):hover,
-        .nav a:not(.cta).active {
+        .site-nav a:not(.cta):hover,
+        .site-nav a:not(.cta).active {
             color: #ffffff;
             transform: translateY(-1px);
             background: rgba(148, 163, 184, 0.25);
@@ -230,20 +229,104 @@ if ($resultado && $resultado->num_rows > 0) {
             border-radius: 8px;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            z-index: 1103;
         }
-        @media (max-width: 900px) {
-            .nav {
+        .nav-backdrop {
+            display: none;
+        }
+
+        /* Desktop: nav fuera del header, alineado al header */
+        @media (min-width: 1101px) {
+            .site-nav {
                 position: fixed;
-                inset: 64px 0 0 0;
-                background: rgba(10,10,12,.98);
-                flex-direction: column;
-                padding: 24px;
-                gap: 12px;
-                transform: translateY(-120%);
-                transition: transform .25s ease;
+                top: 0;
+                right: 0;
+                left: 0;
+                height: 74px;
+                z-index: 1001;
+                justify-content: flex-end;
+                align-items: center;
+                padding: 0 24px 0 180px;
+                margin: 0;
+                background: transparent;
+                pointer-events: none;
+                box-sizing: border-box;
             }
-            .nav.open { transform: translateY(0); }
-            .hamburger { display: inline-flex; }
+            .site-nav a { pointer-events: auto; }
+            .hamburger { display: none !important; }
+        }
+
+        @media (max-width: 1100px) {
+            body {
+                background-attachment: scroll;
+            }
+            .header-inner {
+                padding: 10px 14px;
+                gap: 10px;
+            }
+            .brand {
+                gap: 10px;
+                margin-right: 0;
+                min-width: 0;
+                flex: 1;
+            }
+            .brand-logo {
+                width: 40px;
+                height: 40px;
+                margin-left: 0;
+            }
+            .brand-name {
+                font-size: 0.95rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            #mainNav.site-nav {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: auto;
+                width: min(86vw, 320px);
+                max-width: 100%;
+                height: 100dvh;
+                margin: 0;
+                display: flex !important;
+                flex-direction: column !important;
+                flex-wrap: nowrap !important;
+                align-items: stretch !important;
+                justify-content: flex-start;
+                padding: calc(64px + env(safe-area-inset-top, 0px)) 20px 24px;
+                gap: 6px;
+                background: rgba(8, 12, 22, 0.98);
+                transform: translateX(105%);
+                transition: transform .28s ease;
+                z-index: 1102;
+                box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+                border-left: 1px solid rgba(255, 255, 255, 0.08);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                pointer-events: auto;
+            }
+            #mainNav.site-nav.open { transform: translateX(0); }
+            #mainNav.site-nav a:not(.cta) {
+                display: block;
+                width: 100%;
+                padding: 14px 12px;
+                font-size: 1.05rem;
+                box-sizing: border-box;
+            }
+            #mainNav.site-nav .cta { display: none !important; }
+            .hamburger { display: inline-flex; margin-left: auto; }
+            .nav-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.55);
+                z-index: 1101;
+            }
+            .nav-backdrop.show { display: block; }
         }
 
         /* Contenido principal */
@@ -508,8 +591,57 @@ if ($resultado && $resultado->num_rows > 0) {
         }
 
         @media (max-width: 768px) {
+            .main-content {
+                padding: 24px 14px 40px;
+            }
+            .hero-section {
+                margin-bottom: 24px;
+            }
             .hero-section h1 {
-                font-size: 2rem;
+                font-size: 1.75rem;
+            }
+            .hero-section p {
+                font-size: 0.95rem;
+            }
+            .eventos-lista {
+                gap: 20px;
+                margin-top: 16px;
+            }
+            .evento-content {
+                padding: 16px;
+                gap: 16px;
+            }
+            .evento-imagen {
+                height: auto;
+                aspect-ratio: 2 / 3;
+                max-height: 420px;
+            }
+            .evento-header h2 {
+                font-size: 1.35rem;
+            }
+            .evento-descripcion {
+                font-size: 0.9rem;
+                max-height: 8.5em;
+                overflow: hidden;
+            }
+            .funciones-titulo {
+                font-size: 1.05rem;
+            }
+            .funcion-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .funcion-acciones {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .funcion-acciones .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .site-footer {
+                margin-top: 40px;
             }
         }
 
@@ -558,30 +690,50 @@ if ($resultado && $resultado->num_rows > 0) {
         body.theme-light .footer-links a,
         body.theme-light .social a { color: #e5e7eb; }
         body.theme-light .footer-links a:hover { color: #ffffff; }
-        @media (max-width: 900px){
+        @media (max-width: 1100px){
             .footer-inner { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 600px){
             .footer-inner { grid-template-columns: 1fr; }
             .footer-bottom-inner { flex-direction: column; align-items: flex-start; }
         }
+
+        /* Celular landscape: hero y header compactos */
+        @media (max-width: 1100px) and (orientation: landscape) and (max-height: 520px) {
+            .header-inner { padding: 6px 12px; }
+            .brand-logo { width: 32px; height: 32px; margin-left: 0; }
+            .brand-name { font-size: 0.82rem; }
+            .hamburger { width: 36px; height: 36px; }
+            .main-content { padding: 16px 16px 28px; }
+            .hero-section { margin-bottom: 14px; }
+            .hero-section h1 { font-size: 1.35rem; margin-bottom: 6px; }
+            .hero-section p { font-size: 0.85rem; line-height: 1.4; max-width: 36rem; }
+            .evento-content { padding: 12px; gap: 12px; }
+            .evento-imagen { max-height: 220px; }
+            .evento-header h2 { font-size: 1.15rem; }
+            .site-footer { margin-top: 28px; }
+            #mainNav.site-nav {
+                width: min(70vw, 280px);
+                padding-top: calc(52px + env(safe-area-inset-top, 0px));
+            }
+        }
     </style>
 </head>
 <body>
-
+    <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
+    <nav class="site-nav" id="mainNav" aria-label="Principal">
+        <a href="index.php">Inicio</a>
+        <a href="acerca.php">Acerca del teatro</a>
+        <a href="contacto.php">Contacto / Reservaciones</a>
+        <a href="cartelera_cliente.php" class="cta active">Ver cartelera completa <i class="bi bi-arrow-right"></i></a>
+    </nav>
     <header class="site-header">
         <div class="header-inner">
             <a href="index.php" class="brand" aria-label="Inicio">
                 <div class="brand-logo"><img src="imagenes_teatro/nat.png" alt="Teatro Constitución" class="logo-img"></div>
                 <div class="brand-name">Teatro Constitución · Apatzingan</div>
             </a>
-            <nav class="nav" id="mainNav">
-                <a href="index.php">Inicio</a>
-                <a href="acerca.php">Acerca del teatro</a>
-                <a href="contacto.php">Contacto / Reservaciones</a>
-                <a href="cartelera_cliente.php" class="cta">Ver cartelera completa <i class="bi bi-arrow-right"></i></a>
-            </nav>
-            <button class="hamburger" id="hamburgerBtn" aria-label="Menú">
+            <button class="hamburger" id="hamburgerBtn" aria-label="Menú" aria-expanded="false" aria-controls="mainNav">
                 <i class="bi bi-list" style="font-size:1.25rem"></i>
             </button>
         </div>
@@ -677,8 +829,8 @@ if ($resultado && $resultado->num_rows > 0) {
                                                             <?php echo $disponibles; ?> disponible<?php echo $disponibles !== 1 ? 's' : ''; ?>
                                                         </span>
                                                         <?php endif; ?>
-                                                        <a href="disponibles.php?id_evento=<?php echo $evento['id_evento']; ?>&id_funcion=<?php echo $funcion['id_funcion']; ?>" class="btn btn-outline-light btn-sm">
-                                                            Ver disponibilidad
+                                                        <a href="comprar.php?id_evento=<?php echo (int)$evento['id_evento']; ?>&id_funcion=<?php echo (int)$funcion['id_funcion']; ?>" class="btn btn-primary btn-sm">
+                                                            <i class="bi bi-ticket-perforated"></i> Comprar boletos
                                                         </a>
                                                     <?php endif; ?>
                                                 </div>
@@ -739,13 +891,35 @@ if ($resultado && $resultado->num_rows > 0) {
     <script>
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const mainNav = document.getElementById('mainNav');
+        const navBackdrop = document.getElementById('navBackdrop');
+
+        function setNavOpen(open) {
+            if (!mainNav || !hamburgerBtn) return;
+            mainNav.classList.toggle('open', open);
+            hamburgerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (navBackdrop) {
+                navBackdrop.classList.toggle('show', open);
+                navBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+            }
+            const icon = hamburgerBtn.querySelector('i');
+            if (icon) {
+                icon.className = open ? 'bi bi-x-lg' : 'bi bi-list';
+                icon.style.fontSize = '1.25rem';
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             if (hamburgerBtn && mainNav) {
                 hamburgerBtn.addEventListener('click', () => {
-                    mainNav.classList.toggle('open');
+                    setNavOpen(!mainNav.classList.contains('open'));
                 });
             }
+            if (navBackdrop) {
+                navBackdrop.addEventListener('click', () => setNavOpen(false));
+            }
+            mainNav?.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', () => setNavOpen(false));
+            });
         });
     </script>
 

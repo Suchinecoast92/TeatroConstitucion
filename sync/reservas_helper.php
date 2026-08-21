@@ -74,6 +74,28 @@ if (!function_exists('limpiarReservasExpiradas')) {
 }
 
 /**
+ * Calcula expira_en con el reloj de MySQL (evita desfase PHP UTC vs MySQL local).
+ *
+ * @return array{db:string,iso:string,ttl:int}
+ */
+if (!function_exists('calcularExpiraReserva')) {
+    function calcularExpiraReserva(mysqli $conn, int $ttlSeg): array
+    {
+        $ttlSeg = max(1, (int) $ttlSeg);
+        $st = $conn->prepare('SELECT DATE_ADD(NOW(), INTERVAL ? SECOND) AS e, UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL ? SECOND)) AS u');
+        $st->bind_param('ii', $ttlSeg, $ttlSeg);
+        $st->execute();
+        $row = $st->get_result()->fetch_assoc();
+        $st->close();
+        $db = (string) ($row['e'] ?? '');
+        $unix = (int) ($row['u'] ?? (time() + $ttlSeg));
+        // ISO en UTC para el timer del navegador
+        $iso = gmdate('Y-m-d\TH:i:s\Z', $unix);
+        return ['db' => $db, 'iso' => $iso, 'ttl' => $ttlSeg];
+    }
+}
+
+/**
  * Reserva (apartado) de un conjunto de asientos para un cliente.
  *
  * @return array {
@@ -100,7 +122,9 @@ if (!function_exists('reservarAsientos')) {
 
         $reservados = [];
         $conflictos = [];
-        $expira = date('Y-m-d H:i:s', time() + $ttlSeg);
+        $expCalc = calcularExpiraReserva($conn, $ttlSeg);
+        $expira = $expCalc['db'];
+        $expiraIso = $expCalc['iso'];
 
         // Consulta sobre boletos vendidos (sistema local únicamente)
         $bdsBoletos = ['trt_25'];
@@ -235,7 +259,7 @@ if (!function_exists('reservarAsientos')) {
             'success'    => count($conflictos) === 0,
             'reservados' => $reservados,
             'conflictos' => $conflictos,
-            'expira_en'  => $expira,
+            'expira_en'  => $expiraIso,
         ];
     }
 }
@@ -572,7 +596,8 @@ if (!function_exists('renovarReservasSesion')) {
         }
         limpiarReservasExpiradas($conn);
         $idFunc = $idFuncion ?: 0;
-        $expira = date('Y-m-d H:i:s', time() + $ttlSeg);
+        $expCalc = calcularExpiraReserva($conn, $ttlSeg);
+        $expira = $expCalc['db'];
         $stmt = $conn->prepare("
             UPDATE reservas_temporales
             SET expira_en = ?
@@ -580,6 +605,43 @@ if (!function_exists('renovarReservasSesion')) {
               AND expira_en > NOW()
         ");
         $stmt->bind_param('ssii', $expira, $sessionId, $idEvento, $idFunc);
+        $stmt->execute();
+        $n = $stmt->affected_rows;
+        $stmt->close();
+        return $n;
+    }
+}
+
+/**
+ * Renueva holds de la sesión aunque acaben de caducar (gracia en segundos).
+ * Útil al clic en Pagar con 1–2 s en el timer: la latencia no debe perder el apartado.
+ */
+if (!function_exists('renovarReservasSesionConGracia')) {
+    function renovarReservasSesionConGracia(
+        string $sessionId,
+        int $idEvento,
+        ?int $idFuncion = null,
+        int $ttlSeg = RESERVA_TTL_SEG,
+        int $graciaSeg = 45
+    ): int {
+        $conn = getReservasConnection();
+        if (!$conn || $sessionId === '') {
+            return 0;
+        }
+        $ttlSeg = max(60, $ttlSeg);
+        $graciaSeg = max(0, min(120, $graciaSeg));
+        $idFunc = $idFuncion ?: 0;
+        $expCalc = calcularExpiraReserva($conn, $ttlSeg);
+        $expira = $expCalc['db'];
+        // No llamar limpiarReservasExpiradas: necesitamos rescatar filas recién vencidas
+        $stmt = $conn->prepare("
+            UPDATE reservas_temporales
+            SET expira_en = ?
+            WHERE session_id = ? AND id_evento = ? AND id_funcion = ?
+              AND origen = 'online'
+              AND expira_en > DATE_SUB(NOW(), INTERVAL ? SECOND)
+        ");
+        $stmt->bind_param('ssiii', $expira, $sessionId, $idEvento, $idFunc, $graciaSeg);
         $stmt->execute();
         $n = $stmt->affected_rows;
         $stmt->close();

@@ -407,6 +407,16 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                         <small>Buscar, ver, imprimir y cancelar</small>
                     </div>
                 </a>
+
+                <a class="settings-menu-item" href="../ordenes_online/index.php" data-title="Órdenes online" data-desc="Pagos, emisión y reembolsos web" data-icon="blue">
+                    <div class="menu-icon blue">
+                        <i class="bi bi-globe2"></i>
+                    </div>
+                    <div class="menu-text">
+                        <span>Órdenes online</span>
+                        <small>Pagos Mercado Pago y reembolsos</small>
+                    </div>
+                </a>
             </div>
 
             <div class="settings-menu-divider"></div>
