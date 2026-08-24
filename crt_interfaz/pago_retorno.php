@@ -28,24 +28,115 @@ $estadoOrden = $orden['estado'] ?? 'desconocido';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confirmación de pago</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
 <style>
-body { min-height:100vh; background:#0b1120; color:#e2e8f0; display:flex; align-items:center; }
-.cardx { background:rgba(15,23,42,.9); border:1px solid rgba(148,163,184,.3); border-radius:16px; padding:28px; max-width:520px; margin:auto; }
+:root {
+  --text: #e8e8ea;
+  --muted: #a1a1aa;
+  --stroke: rgba(255, 255, 255, 0.14);
+}
+* { box-sizing: border-box; }
+body {
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  background-image:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.75) 50%, rgba(0, 0, 0, 0.85) 100%),
+    url('imagenes_teatro/TeatroNoche1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+.cardx {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  padding: 32px 28px 26px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.35));
+  backdrop-filter: blur(22px) saturate(115%);
+  -webkit-backdrop-filter: blur(22px) saturate(115%);
+  border: 1px solid var(--stroke);
+  border-radius: 20px;
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  color: #fafafa;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.25rem, 3.5vw, 1.45rem);
+  font-weight: 750;
+  color: #fafafa;
+  letter-spacing: -0.02em;
+}
+.lead {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+.meta {
+  margin: 0 0 8px;
+  color: #e4e4e7;
+  font-size: 0.98rem;
+}
+.meta strong { color: #fafafa; }
+#estado { font-weight: 650; letter-spacing: 0.02em; }
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  padding: 13px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(220, 220, 224, 0.88));
+  color: #0a0a0a !important;
+  font-weight: 750;
+  font-size: 1rem;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn-glass:hover {
+  color: #000 !important;
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+.foot {
+  margin: 18px 0 0;
+  font-size: 0.78rem;
+  color: rgba(161, 161, 170, 0.85);
+}
 </style>
 </head>
 <body>
-<div class="cardx text-center">
-  <h1 class="h4 mb-3">Estamos confirmando tu pago</h1>
-  <p class="text-secondary">Esta pantalla es solo informativa. La confirmación definitiva la hace el servidor.</p>
+<div class="cardx">
+  <div class="icon" aria-hidden="true">⏳</div>
+  <h1>Estamos confirmando tu pago</h1>
+  <p class="lead">Esta pantalla es solo informativa. La confirmación definitiva la hace el servidor.</p>
   <?php if ($codigo): ?>
-    <p class="mb-1"><strong>Orden:</strong> <?= h($codigo) ?></p>
-    <p class="mb-3"><strong>Estado actual:</strong> <span id="estado"><?= h($estadoOrden) ?></span></p>
-    <a class="btn btn-primary" href="orden.php?codigo=<?= urlencode($codigo) ?>">Ver orden</a>
+    <p class="meta"><strong>Orden:</strong> <?= h($codigo) ?></p>
+    <p class="meta"><strong>Estado actual:</strong> <span id="estado"><?= h($estadoOrden) ?></span></p>
+    <a class="btn-glass" href="orden.php?codigo=<?= urlencode($codigo) ?>">Ver orden</a>
   <?php else: ?>
-    <a class="btn btn-outline-light" href="cartelera_cliente.php">Ir a cartelera</a>
+    <a class="btn-glass" href="cartelera_cliente.php">Ir a cartelera</a>
   <?php endif; ?>
-  <p class="small text-secondary mt-3 mb-0">Return status: <?= h($status) ?></p>
+  <p class="foot">Return status: <?= h($status) ?></p>
 </div>
 <?php if ($codigo): ?>
 <script>

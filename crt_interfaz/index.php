@@ -410,16 +410,17 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 gap: 6px;
                 flex-shrink: 0;
                 margin-left: auto;
-                padding: 8px 12px;
-                border-radius: 8px;
-                background: #2563eb;
-                color: #fff !important;
-                font-weight: 700;
+                padding: 8px 14px;
+                border-radius: 999px;
+                border: 1px solid rgba(255, 255, 255, 0.28);
+                background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(220, 220, 224, 0.88));
+                color: #0a0a0a !important;
+                font-weight: 750;
                 font-size: 0.82rem;
                 text-decoration: none;
                 white-space: nowrap;
                 line-height: 1.2;
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.7);
             }
             .header-cartelera i {
                 font-size: 0.95rem;
@@ -536,10 +537,11 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             .mobile-poster-img {
                 width: 100%;
                 aspect-ratio: 2 / 3;
-                border-radius: 12px;
+                border-radius: 14px;
                 overflow: hidden;
-                background: rgba(15, 23, 42, 0.7);
-                border: 1px solid rgba(148, 163, 184, 0.2);
+                background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.35));
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             }
 
             .mobile-poster-img img {
@@ -593,9 +595,9 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             .mobile-detail-scrim {
                 position: absolute;
                 inset: 0;
-                background: rgba(8, 12, 22, 0.62);
-                backdrop-filter: blur(5px);
-                -webkit-backdrop-filter: blur(5px);
+                background: rgba(0, 0, 0, 0.58);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
             }
 
             .mobile-detail-content {
@@ -609,10 +611,12 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 padding: 14px 16px 18px;
                 display: flex;
                 flex-direction: column;
-                border-radius: 16px;
-                background: rgba(15, 23, 42, 0.97);
-                border: 1px solid rgba(148, 163, 184, 0.28);
-                box-shadow: 0 22px 48px rgba(0, 0, 0, 0.5);
+                border-radius: 18px;
+                background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(12, 12, 14, 0.92));
+                backdrop-filter: blur(22px) saturate(115%);
+                -webkit-backdrop-filter: blur(22px) saturate(115%);
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
                 animation: mobileDetailIn .28s cubic-bezier(.22, 1, .36, 1);
             }
 
@@ -694,32 +698,33 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 min-width: 100px;
                 padding: 10px 12px;
                 border-radius: 12px;
-                border: 2px solid rgba(59, 130, 246, 0.55);
-                background: rgba(15, 23, 42, 0.65);
+                border: 1px solid rgba(255, 255, 255, 0.28);
+                background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.35));
                 color: #fff;
                 text-decoration: none;
                 text-align: center;
                 font-weight: 700;
                 font-size: 0.88rem;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
             }
 
             .mobile-horario .dia {
                 display: block;
                 font-size: 0.7rem;
                 font-weight: 600;
-                color: #93c5fd;
+                color: rgba(228, 228, 231, 0.75);
                 margin-bottom: 3px;
             }
 
             .mobile-horario.agotado {
                 opacity: 0.45;
                 pointer-events: none;
-                border-color: rgba(148, 163, 184, 0.35);
+                border-color: rgba(255, 255, 255, 0.12);
             }
 
             .mobile-horario:not(.agotado):active {
-                background: rgba(37, 99, 235, 0.35);
-                border-color: #3b82f6;
+                background: rgba(255, 255, 255, 0.18);
+                border-color: rgba(255, 255, 255, 0.45);
             }
 
             body.mobile-detail-open {
@@ -774,9 +779,12 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             grid-template-columns: 400px 1fr;
             gap: 40px;
             padding: 40px 60px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-            backdrop-filter: blur(30px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.3));
+            backdrop-filter: blur(24px) saturate(115%);
+            -webkit-backdrop-filter: blur(24px) saturate(115%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 20px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
             animation: fadeIn 0.6s ease;
         }
 
@@ -852,37 +860,43 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         .hero-btn {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: #ffffff;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(220, 220, 224, 0.88));
+            color: #0a0a0a;
             padding: 16px 40px;
             border-radius: 12px;
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 750;
             text-decoration: none;
             display: inline-block;
             width: fit-content;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.6);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
             cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.28);
         }
 
         .hero-btn:hover {
-            transform: translateY(-3px);
-            color: #fff;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.8);
-            background: linear-gradient(135deg, #9ca3af, #4b5563);
+            transform: translateY(-2px);
+            color: #000;
+            filter: brightness(1.05);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            background: linear-gradient(160deg, #fff, rgba(230, 230, 234, 0.95));
         }
 
         .hero-btn-agotado {
-            background: linear-gradient(135deg, #6b7280, #374151);
-            box-shadow: 0 8px 24px rgba(55, 65, 81, 0.6);
+            background: linear-gradient(135deg, rgba(70, 70, 74, 0.95), rgba(40, 40, 44, 0.95));
+            color: #e4e4e7;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             cursor: default;
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         .hero-btn-agotado:hover {
             transform: none;
-            box-shadow: 0 8px 24px rgba(55, 65, 81, 0.6);
-            background: linear-gradient(135deg, #6b7280, #374151);
+            filter: none;
+            color: #e4e4e7;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, rgba(70, 70, 74, 0.95), rgba(40, 40, 44, 0.95));
         }
 
         .btn-hero-nav {
@@ -966,12 +980,13 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         .evento-card {
             flex: 0 0 auto;
             width: 280px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-            backdrop-filter: blur(20px) saturate(180%);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.3));
+            backdrop-filter: blur(22px) saturate(115%);
+            -webkit-backdrop-filter: blur(22px) saturate(115%);
             border-radius: 16px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: inherit;
@@ -980,9 +995,9 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         .evento-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.22);
         }
 
         .evento-card-imagen {
@@ -1035,7 +1050,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
 
         .evento-card-disponibles {
             font-size: 0.85rem;
-            color: #34d399;
+            color: #d4d4d8;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -1044,16 +1059,16 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         .evento-card-disponibles.agotado {
-            color: #f87171;
+            color: #a1a1aa;
         }
 
         .evento-card-disponibles.pocos {
-            color: #fbbf24;
+            color: #fafafa;
         }
 
         .boletos-disponibles {
             font-size: 0.95rem;
-            color: #34d399;
+            color: #d4d4d8;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -1062,11 +1077,11 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         .boletos-disponibles.agotado {
-            color: #f87171;
+            color: #a1a1aa;
         }
 
         .boletos-disponibles.pocos {
-            color: #fbbf24;
+            color: #fafafa;
         }
 
         .btn-nav-carrusel {
@@ -1108,11 +1123,12 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         .no-eventos-msg {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8));
-            backdrop-filter: blur(25px) saturate(180%);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.35));
+            backdrop-filter: blur(22px) saturate(115%);
+            -webkit-backdrop-filter: blur(22px) saturate(115%);
             border-radius: 16px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             color: rgba(249, 250, 251, 0.95);
             padding: 40px;
             text-align: center;

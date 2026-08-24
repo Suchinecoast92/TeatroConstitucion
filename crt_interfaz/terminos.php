@@ -201,8 +201,9 @@
             .nav-backdrop.show { display: block; }
             .main-content { padding: 24px 14px 40px; }
             .terms-card { padding: 20px 16px; }
-            .terms-card h1 { font-size: 1.4rem; }
-            .terms-card h2 { font-size: 0.92rem; }
+            .terms-card h1 { font-size: 1.65rem; }
+            .terms-card h2 { font-size: 1.05rem; }
+            .terms-card h3 { font-size: 1.2rem; }
             .terms-card p, .terms-card li { font-size: 0.92rem; line-height: 1.65; }
             .terms-card ol { padding-left: 18px; }
             .site-footer { margin-top: 40px; }
@@ -243,19 +244,24 @@
             padding: 28px 24px 24px;
         }
         .terms-card h1 {
-            font-size: 1.8rem;
-            margin-bottom: 4px;
+            font-size: 2.05rem;
+            margin-bottom: 6px;
+            font-weight: 750;
+            letter-spacing: -0.02em;
         }
         .terms-card h2 {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #cbd5f5;
-            margin-bottom: 20px;
+            font-size: 1.15rem;
+            font-weight: 550;
+            color: #d4d4d8;
+            margin-bottom: 22px;
         }
         .terms-card h3 {
-            font-size: 1.05rem;
-            margin-top: 20px;
-            margin-bottom: 8px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-top: 26px;
+            margin-bottom: 10px;
+            color: #fafafa;
+            letter-spacing: -0.01em;
         }
         .terms-card p {
             font-size: 0.98rem;

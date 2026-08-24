@@ -368,27 +368,25 @@ if ($resultado && $resultado->num_rows > 0) {
         }
 
         .evento-item {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 45%, rgba(0, 0, 0, 0.28));
+            backdrop-filter: blur(22px) saturate(115%);
+            -webkit-backdrop-filter: blur(22px) saturate(115%);
             border-radius: 20px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.2),
-                inset 0 1px 1px rgba(255, 255, 255, 0.5),
-                inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow:
+                0 24px 64px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.14);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             animation: fadeInUp 0.6s ease;
         }
 
         .evento-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 
-                0 16px 48px rgba(0, 0, 0, 0.3),
-                inset 0 1px 1px rgba(255, 255, 255, 0.6),
-                inset 0 -1px 1px rgba(0, 0, 0, 0.05);
-            border-color: rgba(255, 255, 255, 0.35);
+            transform: translateY(-4px);
+            box-shadow:
+                0 28px 72px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.22);
         }
 
         .evento-content {
@@ -461,23 +459,27 @@ if ($resultado && $resultado->num_rows > 0) {
         }
 
         .funcion-item {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 15px 20px;
-            border-radius: 10px;
-            border-left: 4px solid #9ca3af;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 3px solid rgba(255, 255, 255, 0.35);
             transition: all 0.3s ease;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .funcion-item:hover {
-            background: rgba(0, 0, 0, 0.4);
-            border-left-color: #6b7280;
-            transform: translateX(5px);
+            background: rgba(0, 0, 0, 0.45);
+            border-left-color: rgba(255, 255, 255, 0.55);
+            transform: translateX(4px);
         }
 
         .funcion-item.funcion-agotada {
-            background: rgba(15, 23, 42, 0.85);
-            border-left-color: #9ca3af;
-            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.5);
+            border-left-color: rgba(255, 255, 255, 0.2);
+            opacity: 0.88;
         }
 
         .funcion-fecha {
@@ -505,6 +507,28 @@ if ($resultado && $resultado->num_rows > 0) {
             border-width: 1px;
         }
 
+        .btn-comprar-glass {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(220, 220, 224, 0.88));
+            color: #0a0a0a !important;
+            font-size: 0.88rem;
+            font-weight: 750;
+            text-decoration: none;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            transition: transform .15s ease, filter .15s ease;
+        }
+        .btn-comprar-glass:hover {
+            color: #000 !important;
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
         .boletos-disponibles-badge {
             display: inline-flex;
             align-items: center;
@@ -513,15 +537,16 @@ if ($resultado && $resultado->num_rows > 0) {
             border-radius: 999px;
             font-size: 0.85rem;
             font-weight: 700;
-            background: rgba(52, 211, 153, 0.2);
-            color: #34d399;
-            border: 1px solid rgba(52, 211, 153, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+            color: #e4e4e7;
+            border: 1px solid rgba(255, 255, 255, 0.22);
             margin-right: 10px;
+            backdrop-filter: blur(8px);
         }
         .boletos-disponibles-badge.pocos {
-            background: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(255, 255, 255, 0.12);
+            color: #fafafa;
+            border-color: rgba(255, 255, 255, 0.4);
         }
         .boletos-disponibles-badge i {
             font-size: 0.95rem;
@@ -534,20 +559,21 @@ if ($resultado && $resultado->num_rows > 0) {
             border-radius: 999px;
             font-size: 0.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #6b7280, #374151);
-            color: #fff;
-            border: 1px solid rgba(156, 163, 175, 0.8);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, rgba(60, 60, 64, 0.95), rgba(30, 30, 32, 0.95));
+            color: #f4f4f5;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         .no-eventos {
             text-align: center;
             padding: 80px 20px;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8));
-            backdrop-filter: blur(25px) saturate(180%);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.35));
+            backdrop-filter: blur(22px) saturate(115%);
+            -webkit-backdrop-filter: blur(22px) saturate(115%);
             border-radius: 20px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .no-eventos i {
@@ -698,8 +724,8 @@ if ($resultado && $resultado->num_rows > 0) {
             .footer-bottom-inner { flex-direction: column; align-items: flex-start; }
         }
 
-        /* Celular landscape: hero y header compactos */
-        @media (max-width: 1100px) and (orientation: landscape) and (max-height: 520px) {
+        /* Celular landscape: hero y header compactos; botón comprar grande y centrado */
+        @media (max-width: 1100px) and (orientation: landscape) {
             .header-inner { padding: 6px 12px; }
             .brand-logo { width: 32px; height: 32px; margin-left: 0; }
             .brand-name { font-size: 0.82rem; }
@@ -715,6 +741,48 @@ if ($resultado && $resultado->num_rows > 0) {
             #mainNav.site-nav {
                 width: min(70vw, 280px);
                 padding-top: calc(52px + env(safe-area-inset-top, 0px));
+            }
+
+            .funcion-item {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+            .funcion-item:hover {
+                transform: none;
+            }
+            .funcion-fecha {
+                justify-content: center;
+                text-align: center;
+                flex-wrap: wrap;
+            }
+            .funcion-acciones {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 10px;
+                margin-top: 0;
+            }
+            .boletos-disponibles-badge,
+            .badge-agotado {
+                margin-right: 0;
+            }
+            .funcion-acciones .btn,
+            .funcion-acciones .btn-comprar-glass {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: min(100%, 340px);
+                font-size: 1.05rem;
+                font-weight: 700;
+                padding: 14px 22px;
+                border-radius: 12px;
+                box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.65);
             }
         }
     </style>
@@ -829,7 +897,7 @@ if ($resultado && $resultado->num_rows > 0) {
                                                             <?php echo $disponibles; ?> disponible<?php echo $disponibles !== 1 ? 's' : ''; ?>
                                                         </span>
                                                         <?php endif; ?>
-                                                        <a href="comprar.php?id_evento=<?php echo (int)$evento['id_evento']; ?>&id_funcion=<?php echo (int)$funcion['id_funcion']; ?>" class="btn btn-primary btn-sm">
+                                                        <a href="comprar.php?id_evento=<?php echo (int)$evento['id_evento']; ?>&id_funcion=<?php echo (int)$funcion['id_funcion']; ?>" class="btn-comprar-glass">
                                                             <i class="bi bi-ticket-perforated"></i> Comprar boletos
                                                         </a>
                                                     <?php endif; ?>

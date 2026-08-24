@@ -145,68 +145,111 @@ $tipo_evento = isset($evento['tipo']) ? (int) $evento['tipo'] : 1;
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-:root { --text:#e5e7eb; --accent:#2563eb; }
+:root {
+  --text:#e8e8ea;
+  --text-muted:#a1a1aa;
+  --glass:rgba(18,18,20,.55);
+  --glass-strong:rgba(10,10,12,.72);
+  --stroke:rgba(255,255,255,.14);
+  --stroke-soft:rgba(255,255,255,.08);
+  --shine:rgba(255,255,255,.06);
+}
 body {
   margin:0; min-height:100vh; color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  background-image:url('imagenes_teatro/TeatroNoche1.jpg');
+  font-family:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.72) 45%, rgba(0,0,0,.82) 100%),
+    url('imagenes_teatro/TeatroNoche1.jpg');
   background-size:cover; background-position:center; background-attachment:fixed;
   display:flex; flex-direction:column;
 }
 .header-simple {
   display:flex; justify-content:space-between; align-items:center;
-  padding:18px 24px 20px;
-  background:linear-gradient(180deg, rgba(15,23,42,.97) 0%, rgba(15,23,42,.88) 100%);
-  border-bottom:1px solid rgba(148,163,184,.28);
-  box-shadow:0 8px 28px rgba(0,0,0,.35);
+  padding:16px 22px 18px;
+  background:linear-gradient(180deg, rgba(8,8,10,.78) 0%, rgba(12,12,14,.58) 100%);
+  backdrop-filter:blur(18px) saturate(120%);
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+  border-bottom:1px solid var(--stroke-soft);
+  box-shadow:0 10px 40px rgba(0,0,0,.45);
   gap:16px; flex-wrap:wrap;
 }
 .header-simple .header-copy { min-width:0; flex:1; }
 .header-simple .eyebrow {
   display:inline-block; margin:0 0 6px;
-  font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-  color:#fbbf24;
+  font-size:.7rem; font-weight:650; letter-spacing:.16em; text-transform:uppercase;
+  color:rgba(255,255,255,.55);
 }
 .header-simple h1 {
-  margin:0; font-weight:800; color:#fff;
-  font-size:clamp(1.55rem, 3.2vw, 2.15rem);
-  letter-spacing:.04em; line-height:1.15; text-wrap:balance;
-  text-shadow:0 2px 18px rgba(0,0,0,.45);
+  margin:0; font-weight:750; color:#fafafa;
+  font-size:clamp(1.45rem, 3vw, 2.05rem);
+  letter-spacing:.03em; line-height:1.15; text-wrap:balance;
+  text-shadow:0 2px 24px rgba(0,0,0,.5);
 }
 .header-simple .meta {
-  margin-top:8px; color:#e2e8f0; font-size:clamp(.95rem, 1.6vw, 1.08rem);
-  font-weight:500; letter-spacing:.01em; opacity:.95;
+  margin-top:8px; color:rgba(228,228,231,.88); font-size:clamp(.9rem, 1.5vw, 1.02rem);
+  font-weight:500; letter-spacing:.01em;
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
 }
 .header-simple .meta::before {
   content:""; width:6px; height:6px; border-radius:50%;
-  background:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.25); flex-shrink:0;
+  background:rgba(255,255,255,.7); box-shadow:0 0 0 3px rgba(255,255,255,.12); flex-shrink:0;
+}
+.btn-nav-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 16px; border-radius:999px;
+  border:1px solid var(--stroke);
+  background:linear-gradient(145deg, rgba(40,40,44,.85), rgba(18,18,20,.9));
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  color:#fafafa !important; font-weight:650; font-size:.9rem;
+  text-decoration:none; line-height:1.2;
+  box-shadow:0 8px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
+  transition:transform .15s ease, border-color .15s ease, filter .15s ease;
+}
+.btn-nav-pill:hover {
+  color:#fff !important; border-color:rgba(255,255,255,.32);
+  filter:brightness(1.1); transform:translateY(-1px);
+}
+.btn-nav-pill .ico {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:22px; border-radius:999px;
+  background:rgba(255,255,255,.12); font-size:.85rem; line-height:1;
 }
 .timer-wrap {
   display:none; align-items:center; gap:10px;
-  background:rgba(30,41,59,.95); border:1px solid rgba(148,163,184,.35);
+  background:rgba(20,20,22,.7); border:1px solid var(--stroke-soft);
+  backdrop-filter:blur(10px);
   border-radius:999px; padding:8px 14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
 }
-.timer-wrap .lbl { font-size:.8rem; color:#94a3b8; }
+.timer-wrap .lbl { font-size:.78rem; color:var(--text-muted); letter-spacing:.04em; }
 .timer-wrap #compraTimer {
-  font-variant-numeric:tabular-nums; font-weight:800; font-size:1.15rem; color:#e2e8f0;
+  font-variant-numeric:tabular-nums; font-weight:750; font-size:1.12rem; color:#f4f4f5;
 }
-.timer-wrap #compraTimer.timer-warn { color:#fbbf24; }
-.timer-wrap #compraTimer.timer-danger { color:#f87171; animation:pulse .8s ease infinite; }
+.timer-wrap #compraTimer.timer-warn { color:#e4e4e7; }
+.timer-wrap #compraTimer.timer-danger { color:#fff; animation:pulse .8s ease infinite; }
 @keyframes pulse { 50% { opacity:.65; } }
 .map-viewport {
   flex:1; width:100%;
   overflow-x:hidden; overflow-y:auto;
   display:flex; justify-content:center; align-items:flex-start;
-  padding:16px 8px 168px;
-  background:radial-gradient(circle at top, rgba(15,23,42,.75), rgba(15,23,42,.92));
+  padding:18px 10px 172px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,.06), transparent 55%),
+    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55));
   box-sizing:border-box;
 }
 .map-card {
   display:block; box-sizing:border-box;
-  padding:16px 12px 28px;
-  background:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
-  backdrop-filter:blur(18px); border-radius:16px; border:1px solid rgba(255,255,255,.22);
+  padding:18px 14px 30px;
+  background:linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.04) 40%, rgba(0,0,0,.28));
+  backdrop-filter:blur(22px) saturate(115%);
+  -webkit-backdrop-filter:blur(22px) saturate(115%);
+  border-radius:20px;
+  border:1px solid var(--stroke);
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.14);
   overflow:hidden; max-width:100%;
   flex-shrink:0;
   visibility:hidden;
@@ -243,7 +286,7 @@ body {
   .header-simple h1 { font-size:1.35rem; }
   .header-simple .meta { font-size:.85rem; }
   .map-viewport { padding:10px 4px 168px; }
-  .map-card { padding:12px 8px 20px; border-radius:12px; }
+  .map-card { padding:12px 8px 20px; border-radius:14px; }
   .seat { width:44px; height:44px; font-size:12px; border-radius:7px; }
   .seat.selected {
     outline-width: 3px;
@@ -275,25 +318,48 @@ body {
 .seat.no-venta { background:#0f172a!important; color:#64748b; }
 .leyenda {
   display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:center;
-  padding:8px 16px 0; font-size:.8rem; color:#cbd5e1;
+  padding:10px 16px 2px; font-size:.78rem; color:rgba(228,228,231,.82);
+  letter-spacing:.02em;
 }
 .dot { width:12px; height:12px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:middle; }
 .mini-resumen {
   position:fixed; left:0; right:0; bottom:0; z-index:30;
-  background:#0f172a; border-top:1px solid rgba(148,163,184,.35);
-  box-shadow:0 -8px 24px rgba(0,0,0,.35);
+  background:linear-gradient(180deg, rgba(14,14,16,.72), rgba(6,6,8,.88));
+  backdrop-filter:blur(20px) saturate(120%);
+  -webkit-backdrop-filter:blur(20px) saturate(120%);
+  border-top:1px solid var(--stroke);
+  box-shadow:0 -16px 48px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
 }
 .mini-inner {
-  max-width:1100px; margin:0 auto; padding:8px 16px 12px;
+  max-width:1100px; margin:0 auto; padding:10px 16px 14px;
   display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap;
 }
+.mini-inner .fw-semibold { color:#fafafa; font-weight:650; letter-spacing:.01em; }
 .chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; max-width:65%; }
 .chip {
-  background:#1e293b; border:1px solid #334155; border-radius:999px;
+  background:rgba(255,255,255,.08); border:1px solid var(--stroke-soft); border-radius:999px;
   padding:4px 10px; font-size:.85rem; display:inline-flex; gap:6px; align-items:center;
+  color:#f4f4f5; backdrop-filter:blur(8px);
 }
-.chip button { border:0; background:transparent; color:#f87171; font-size:1rem; line-height:1; padding:0; }
-.msg { font-size:.85rem; color:#7dd3fc; min-height:1.2rem; }
+.chip button { border:0; background:transparent; color:#d4d4d8; font-size:1rem; line-height:1; padding:0; }
+.chip button:hover { color:#fff; }
+.msg { font-size:.85rem; color:rgba(244,244,245,.75); min-height:1.2rem; }
+.mini-inner .text-secondary { color:var(--text-muted) !important; }
+.mini-inner .fs-5 { color:#fafafa; letter-spacing:.02em; }
+.btn-continuar-map {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:140px; padding:12px 22px; border-radius:12px; border:1px solid rgba(255,255,255,.28);
+  background:linear-gradient(160deg, rgba(255,255,255,.92), rgba(220,220,224,.88));
+  color:#0a0a0a; font-weight:750; font-size:.95rem; letter-spacing:.02em;
+  box-shadow:0 10px 28px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.7);
+  transition:transform .15s ease, filter .15s ease, opacity .15s ease;
+}
+.btn-continuar-map:hover:not(:disabled) {
+  filter:brightness(1.05); transform:translateY(-1px); color:#000;
+}
+.btn-continuar-map:disabled {
+  opacity:.38; cursor:not-allowed; box-shadow:none;
+}
 </style>
 </head>
 <body>
@@ -312,7 +378,10 @@ body {
       <span class="lbl">Tiempo restante</span>
       <span id="compraTimer">--:--</span>
     </div>
-    <a href="cartelera_cliente.php" class="btn btn-outline-light btn-sm" id="btnCerrarMapa">Cerrar</a>
+    <a href="cartelera_cliente.php" class="btn-nav-pill" id="btnCerrarMapa">
+      <span class="ico" aria-hidden="true">✕</span>
+      Cerrar
+    </a>
   </div>
 </div>
 
@@ -397,7 +466,7 @@ body {
         <div class="small text-secondary">Total estimado</div>
         <div class="fs-5 fw-bold" id="totalEst">$0.00</div>
       </div>
-      <button type="button" class="btn btn-primary px-4" id="btnContinuar" disabled>Continuar</button>
+      <button type="button" class="btn-continuar-map" id="btnContinuar" disabled>Continuar</button>
     </div>
   </div>
 </div>
