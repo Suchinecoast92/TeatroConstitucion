@@ -64,8 +64,11 @@ try {
         if (!$orden) {
             api_online_respond(['success' => false, 'error' => 'Orden no encontrada'], 404);
         }
-        // No exponer session_id completo al público si no es necesario: sí se necesita para UX propia
-        api_online_respond(['success' => true, 'orden' => $orden]);
+        $sessionClaim = trim((string) ($data['session_id'] ?? ''));
+        api_online_respond([
+            'success' => true,
+            'orden' => orden_para_respuesta_publica($orden, $sessionClaim !== '' ? $sessionClaim : null),
+        ]);
     }
 
     if ($action === 'limpiar') {

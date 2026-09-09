@@ -241,6 +241,39 @@ function obtenerOrdenPorCodigo(mysqli $conn, string $codigo): ?array
 }
 
 /**
+ * Vista pública de una orden para API JSON.
+ * Nunca expone session_id. PII completa solo si session_id coincide con el dueño.
+ *
+ * @param array $orden fila de obtenerOrdenPorCodigo
+ * @param string|null $sessionClaim session_id aportado por el cliente (opcional)
+ */
+function orden_para_respuesta_publica(array $orden, ?string $sessionClaim = null): array
+{
+    $ownerSid = (string) ($orden['session_id'] ?? '');
+    $claim = trim((string) ($sessionClaim ?? ''));
+    $esDueno = $claim !== '' && $ownerSid !== '' && hash_equals($ownerSid, $claim);
+
+    $out = $orden;
+    unset($out['session_id']);
+
+    if (!$esDueno) {
+        $email = (string) ($out['email'] ?? '');
+        if ($email !== '' && str_contains($email, '@')) {
+            [$local, $domain] = explode('@', $email, 2);
+            $localMask = $local !== '' ? (substr($local, 0, 1) . '***') : '***';
+            $out['email'] = $localMask . '@' . $domain;
+        }
+        $tel = (string) ($out['telefono'] ?? '');
+        if ($tel !== '') {
+            $out['telefono'] = strlen($tel) <= 3 ? '***' : ('***' . substr($tel, -2));
+        }
+        $out['pii_redactada'] = true;
+    }
+
+    return $out;
+}
+
+/**
  * Verifica que los asientos estén en hold de esta sesión online.
  */
 function verificarHoldsSesionOnline(
@@ -271,6 +304,50 @@ function verificarHoldsSesionOnline(
 }
 
 /**
+ * Valida datos del comprador online (fuente de verdad del servidor).
+ * @return array{ok:bool,error?:string,nombre?:string,email?:string,telefono?:string}
+ */
+function validar_datos_cliente_online(string $nombre, string $email, string $telefono = ''): array
+{
+    $nombre = trim(preg_replace('/\s+/u', ' ', $nombre) ?? '');
+    $email = trim($email);
+    $telefono = trim($telefono);
+
+    $lenNombre = function_exists('mb_strlen') ? mb_strlen($nombre) : strlen($nombre);
+    if ($nombre === '' || $lenNombre < 3 || $lenNombre > 80) {
+        return ['ok' => false, 'error' => 'Datos del cliente no válidos'];
+    }
+    if (!preg_match("/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ'’\\- ]{3,80}$/u", $nombre)) {
+        return ['ok' => false, 'error' => 'Datos del cliente no válidos'];
+    }
+    if (!preg_match('/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]{2,}/u', $nombre)) {
+        return ['ok' => false, 'error' => 'Datos del cliente no válidos'];
+    }
+
+    if ($email === '' || strlen($email) > 180 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return ['ok' => false, 'error' => 'Datos del cliente no válidos'];
+    }
+    if (!preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/', $email)) {
+        return ['ok' => false, 'error' => 'Datos del cliente no válidos'];
+    }
+
+    if ($telefono !== '') {
+        $digits = preg_replace('/\D+/', '', $telefono);
+        if ($digits === null || !preg_match('/^[0-9]{10}$/', $digits)) {
+            return ['ok' => false, 'error' => 'Datos del cliente no válidos'];
+        }
+        $telefono = $digits;
+    }
+
+    return [
+        'ok' => true,
+        'nombre' => $nombre,
+        'email' => $email,
+        'telefono' => $telefono,
+    ];
+}
+
+/**
  * Crea orden pendiente + items. Renueva holds.
  *
  * @param array $payload {
@@ -286,23 +363,23 @@ function crearOrdenOnline(mysqli $conn, array $payload): array
     $idEvento = (int) ($payload['id_evento'] ?? 0);
     $idFuncion = (int) ($payload['id_funcion'] ?? 0);
     $sessionId = trim((string) ($payload['session_id'] ?? ''));
-    $email = trim((string) ($payload['email'] ?? ''));
-    $nombre = trim((string) ($payload['nombre'] ?? ''));
-    $telefono = trim((string) ($payload['telefono'] ?? ''));
     $asientos = $payload['asientos'] ?? [];
 
     if ($idEvento <= 0 || $idFuncion <= 0 || $sessionId === '') {
         return ['success' => false, 'error' => 'Faltan evento, función o sesión'];
     }
-    if ($nombre === '' || strlen($nombre) > 150) {
-        return ['success' => false, 'error' => 'Nombre inválido'];
+
+    $cli = validar_datos_cliente_online(
+        (string) ($payload['nombre'] ?? ''),
+        (string) ($payload['email'] ?? ''),
+        (string) ($payload['telefono'] ?? '')
+    );
+    if (empty($cli['ok'])) {
+        return ['success' => false, 'error' => $cli['error'] ?? 'Datos del cliente inválidos'];
     }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 180) {
-        return ['success' => false, 'error' => 'Email inválido'];
-    }
-    if ($telefono !== '' && strlen($telefono) > 40) {
-        return ['success' => false, 'error' => 'Teléfono inválido'];
-    }
+    $nombre = $cli['nombre'];
+    $email = $cli['email'];
+    $telefono = $cli['telefono'];
 
     // Ventana de venta abierta
     $horas = (int) HORAS_CIERRE_VENTAS_POST_FUNCION;

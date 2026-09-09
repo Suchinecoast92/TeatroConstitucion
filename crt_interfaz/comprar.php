@@ -596,8 +596,67 @@ body {
   }
 
   async function api(url, opts) {
-    const r = await fetch(url, opts);
-    return r.json();
+    try {
+      const r = await fetch(url, opts);
+      const text = await r.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return { success: false, error: 'Respuesta inválida del servidor' };
+      }
+    } catch (e) {
+      return { success: false, error: 'Sin conexión. Revisa tu red e intenta de nuevo.' };
+    }
+  }
+
+  const API_DISP = APP_ROOT + '/api/online/disponibilidad.php';
+
+  /** Refresca vendidos/reservados ajenos sin recargar la página */
+  async function syncDisponibilidad() {
+    try {
+      const url = API_DISP
+        + '?id_evento=' + encodeURIComponent(ID_EVENTO)
+        + '&id_funcion=' + encodeURIComponent(ID_FUNCION)
+        + '&session_id=' + encodeURIComponent(sessionId());
+      const r = await api(url, { method: 'GET' });
+      if (!r.success) return;
+      const vendidos = new Set(r.vendidos || []);
+      const reservados = new Set(r.reservados || []);
+      document.querySelectorAll('.seat[data-asiento]').forEach((btn) => {
+        const codigo = btn.dataset.asiento;
+        if (!codigo) return;
+        if (carrito.has(codigo)) return;
+
+        const eraVendido = btn.classList.contains('vendido');
+        const eraReservado = btn.classList.contains('reservado');
+        const esVendido = vendidos.has(codigo);
+        const esReservado = !esVendido && reservados.has(codigo);
+
+        if (esVendido && !eraVendido) {
+          btn.classList.remove('selected', 'reservado');
+          btn.classList.add('vendido');
+          btn.style.backgroundColor = '';
+          btn.setAttribute('aria-disabled', 'true');
+          btn.setAttribute('tabindex', '-1');
+          btn.title = codigo + ' | Vendido';
+        } else if (esReservado && !eraReservado && !eraVendido) {
+          btn.classList.remove('selected');
+          btn.classList.add('reservado');
+          btn.style.backgroundColor = '';
+          btn.setAttribute('aria-disabled', 'true');
+          btn.setAttribute('tabindex', '-1');
+          btn.title = codigo + ' | Apartado';
+        } else if (!esVendido && !esReservado && (eraReservado || eraVendido)) {
+          // Liberado: volver a disponible (no tocamos no-venta)
+          if (btn.classList.contains('no-venta')) return;
+          btn.classList.remove('vendido', 'reservado', 'selected');
+          btn.removeAttribute('aria-disabled');
+          btn.setAttribute('tabindex', '0');
+          if (btn.dataset.color) btn.style.backgroundColor = btn.dataset.color;
+          btn.title = codigo;
+        }
+      });
+    } catch (e) {}
   }
 
   async function reservar(codigo) {
@@ -861,6 +920,13 @@ body {
 
   // Un solo ajuste al cargar (sin transición / sin “crecer”)
   requestAnimationFrame(() => ajustarMapa());
+
+  // Mantener mapa al día con holds/ventas de otros (taquilla u online)
+  syncDisponibilidad();
+  setInterval(syncDisponibilidad, 4000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncDisponibilidad();
+  });
 })();
 </script>
 <?php endif; ?>

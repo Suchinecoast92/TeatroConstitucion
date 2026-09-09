@@ -21,6 +21,12 @@ if ($mockPay && $codigo !== '' && function_exists('payment_mock_permitido') && p
 
 $orden = $codigo !== '' ? obtenerOrdenPorCodigo($conn, $codigo) : null;
 $estadoOrden = $orden['estado'] ?? 'desconocido';
+
+// Si ya está confirmada, ir directo a la orden (evita quedarse en “confirmando”)
+if ($codigo !== '' && in_array($estadoOrden, ['pagada', 'fallida', 'reembolsada'], true)) {
+    header('Location: orden.php?codigo=' . rawurlencode($codigo));
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -136,24 +142,38 @@ h1 {
   <?php else: ?>
     <a class="btn-glass" href="cartelera_cliente.php">Ir a cartelera</a>
   <?php endif; ?>
-  <p class="foot">Return status: <?= h($status) ?></p>
+  <p class="foot">Si el pago tarda, no cierres esta pantalla. Guarda tu número de orden.</p>
 </div>
 <?php if ($codigo): ?>
+<script src="js/orden-aviso.js"></script>
 <script>
-try { sessionStorage.removeItem('teatro_pago_en_curso'); } catch (e) {}
+try {
+  sessionStorage.removeItem('teatro_pago_en_curso');
+  TeatroOrdenAviso.guardarCodigo(<?= json_encode($codigo) ?>);
+} catch (e) {}
 (async () => {
   const APP = <?= json_encode(rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/\\') ?: '') ?>;
-  for (let i = 0; i < 8; i++) {
+  const codigo = <?= json_encode($codigo) ?>;
+  for (let i = 0; i < 12; i++) {
     try {
-      const r = await fetch(APP + '/api/online/pagos.php?action=estado&codigo=' + encodeURIComponent(<?= json_encode($codigo) ?>));
+      const r = await fetch(APP + '/api/online/pagos.php?action=estado&codigo=' + encodeURIComponent(codigo));
       const j = await r.json();
       if (j.success && j.orden) {
-        document.getElementById('estado').textContent = j.orden.estado;
-        if (j.orden.estado === 'pagada' || j.orden.estado === 'fallida') break;
+        const est = document.getElementById('estado');
+        if (est) est.textContent = j.orden.estado;
+        if (j.orden.estado === 'pagada' || j.orden.estado === 'fallida' || j.orden.estado === 'reembolsada') {
+          window.location.href = 'orden.php?codigo=' + encodeURIComponent(codigo);
+          return;
+        }
       }
     } catch (e) {}
     await new Promise(res => setTimeout(res, 1500));
   }
+  // Sigue pendiente / sin respuesta: avisar con número de orden
+  TeatroOrdenAviso.mostrar(codigo, {
+    titulo: 'Guarda tu número de orden',
+    mensaje: 'Aún no confirmamos el pago. Conserva este número y, si hay cualquier inconveniente, preséntalo en taquilla para aclarar tu compra.',
+  });
 })();
 </script>
 <?php endif; ?>

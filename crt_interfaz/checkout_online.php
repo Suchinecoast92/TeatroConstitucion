@@ -167,6 +167,19 @@ body {
   background:rgba(0,0,0,.45) !important;
   color:#fff !important;
 }
+.form-control.is-invalid {
+  border-color:rgba(248,113,113,.55) !important;
+  box-shadow:0 0 0 .12rem rgba(248,113,113,.12) !important;
+}
+.msg.msg-invalid {
+  display: block;
+  text-align: center;
+  color: #f87171 !important;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  margin-top: .85rem;
+}
 .form-select {
   background-color:rgba(0,0,0,.35) !important;
   border:1px solid rgba(255,255,255,.16) !important;
@@ -380,23 +393,27 @@ body {
   <div class="cardx">
     <div class="section">
       <h2>Datos personales</h2>
-      <form id="formPago">
+      <form id="formPago" novalidate>
         <div class="row g-3 mb-3">
           <div class="col-md-6">
-            <label class="form-label">Nombre(s)</label>
-            <input type="text" class="form-control" name="nombre" required maxlength="150" placeholder="Nombre">
+            <label class="form-label" for="inpNombre">Nombre(s)</label>
+            <input type="text" class="form-control" id="inpNombre" name="nombre" required minlength="2" maxlength="40"
+              autocomplete="given-name" placeholder="Nombre" inputmode="text" spellcheck="false">
           </div>
           <div class="col-md-6">
-            <label class="form-label">Apellido(s)</label>
-            <input type="text" class="form-control" name="apellido" maxlength="80" placeholder="Apellido">
+            <label class="form-label" for="inpApellido">Apellido(s)</label>
+            <input type="text" class="form-control" id="inpApellido" name="apellido" required minlength="2" maxlength="40"
+              autocomplete="family-name" placeholder="Apellido" inputmode="text" spellcheck="false">
           </div>
           <div class="col-12">
-            <label class="form-label">Correo electrónico</label>
-            <input type="email" class="form-control" name="email" required maxlength="180" placeholder="correo@ejemplo.com">
+            <label class="form-label" for="inpEmail">Correo electrónico</label>
+            <input type="text" class="form-control" id="inpEmail" name="email" required maxlength="180"
+              autocomplete="email" placeholder="correo@ejemplo.com" inputmode="email" spellcheck="false">
           </div>
           <div class="col-12">
-            <label class="form-label">Teléfono <span class="text-muted">(opcional)</span></label>
-            <input type="text" class="form-control" name="telefono" maxlength="40" placeholder="10 dígitos">
+            <label class="form-label" for="inpTelefono">Teléfono <span class="text-muted">(opcional)</span></label>
+            <input type="tel" class="form-control" id="inpTelefono" name="telefono" maxlength="10"
+              autocomplete="tel" placeholder="10 dígitos" inputmode="numeric">
           </div>
         </div>
 
@@ -406,16 +423,28 @@ body {
             <input type="radio" name="metodo" value="mercadopago" checked class="form-check-input m-0">
             <div>
               <div class="fw-semibold">Mercado Pago</div>
-              <div class="small text-muted">Tarjeta, efectivo y más (sandbox / mock local)</div>
+              <div class="small text-muted">Tarjeta, efectivo y más</div>
             </div>
           </div>
           <i class="bi bi-chevron-right text-muted"></i>
         </label>
 
+        <?php
+        $mostrarMockHint = false;
+        if (is_file(dirname(__DIR__) . '/includes/pagos/PaymentService.php')) {
+            require_once dirname(__DIR__) . '/includes/pagos/PaymentService.php';
+            $mostrarMockHint = function_exists('payment_mock_permitido') && payment_mock_permitido();
+        }
+        if ($mostrarMockHint):
+        ?>
         <div class="alert-glass small mt-3 mb-3">
-          Al confirmar se crea la orden y se abre el checkout de pago.
-          Sin <code>MP_ACCESS_TOKEN</code> el sistema usa <strong>modo mock</strong> para pruebas locales.
+          Entorno de prueba: sin token de Mercado Pago el sistema usa <strong>modo mock</strong>.
         </div>
+        <?php else: ?>
+        <div class="alert-glass small mt-3 mb-3">
+          Al confirmar se crea la orden y se abre el checkout de Mercado Pago de forma segura.
+        </div>
+        <?php endif; ?>
 
         <button type="submit" class="btn-pagar" id="btnPagar">
           Pagar
@@ -449,6 +478,7 @@ body {
 </div>
 
 <script src="js/compra-timer.js"></script>
+<script src="js/orden-aviso.js"></script>
 <script>
 (() => {
   const APP_ROOT = <?= json_encode($appRoot) ?>;
@@ -488,6 +518,15 @@ body {
   const btn = document.getElementById('btnPagar');
 
   function money(n) { return '$' + Number(n).toFixed(2); }
+
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   async function expirarSesion() {
     // Tras clic en Pagar o con cobro en curso: no liberar asientos
@@ -555,14 +594,15 @@ body {
   function renderItems(items) {
     lista.innerHTML = items.map(it => {
       const tipo = ETIQUETAS[it.tipo_boleto] || it.tipo_boleto;
+      const cat = it.nombre_categoria ? ' · ' + esc(it.nombre_categoria) : '';
       return `<div class="item">
         <div class="d-flex gap-2">
           <span class="seat-ico"><i class="bi bi-ticket-perforated"></i></span>
           <div>
-            <div class="fw-semibold">${it.codigo_asiento}</div>
-            <div class="small text-muted">${tipo}${it.nombre_categoria ? ' · ' + it.nombre_categoria : ''}</div>
-            <select class="form-select form-select-sm mt-1 tipo-sel" data-asiento="${it.codigo_asiento}" style="max-width:10rem">
-              ${TIPOS.map(t => `<option value="${t}" ${t===it.tipo_boleto?'selected':''}>${ETIQUETAS[t]||t}</option>`).join('')}
+            <div class="fw-semibold">${esc(it.codigo_asiento)}</div>
+            <div class="small text-muted">${esc(tipo)}${cat}</div>
+            <select class="form-select form-select-sm mt-1 tipo-sel" data-asiento="${esc(it.codigo_asiento)}" style="max-width:10rem">
+              ${TIPOS.map(t => `<option value="${esc(t)}" ${t===it.tipo_boleto?'selected':''}>${esc(ETIQUETAS[t]||t)}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -686,19 +726,29 @@ body {
     } catch (err) {}
 
     msg.textContent = 'Creando orden…';
-    const r = await fetch(API_ORD + '?action=crear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id_evento: ID_EVENTO,
-        id_funcion: ID_FUNCION,
-        session_id: data.session_id,
-        nombre,
-        email: payload.email,
-        telefono: payload.telefono || '',
-        asientos: data.asientos,
-      }),
-    }).then(x => x.json());
+    let r;
+    try {
+      r = await fetch(API_ORD + '?action=crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_evento: ID_EVENTO,
+          id_funcion: ID_FUNCION,
+          session_id: data.session_id,
+          nombre,
+          email: payload.email,
+          telefono: payload.telefono || '',
+          asientos: data.asientos,
+        }),
+      }).then(x => x.json());
+    } catch (err) {
+      leavingToPay = false;
+      msg.textContent = 'No se pudo conectar. Intenta de nuevo.';
+      msg.className = 'msg mt-2 text-danger';
+      btn.disabled = false;
+      TeatroCompraTimer.start({ onExpire: expirarSesion, arm: true });
+      return;
+    }
 
     if (!r.success) {
       leavingToPay = false;
@@ -709,24 +759,38 @@ body {
       return;
     }
 
+    try { TeatroOrdenAviso.guardarCodigo(r.codigo_publico); } catch (e) {}
+
     msg.textContent = 'Iniciando pago…';
-    const p = await fetch(API_PAGOS + '?action=iniciar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigo_publico: r.codigo_publico }),
-    }).then(x => x.json());
+    let p;
+    try {
+      p = await fetch(API_PAGOS + '?action=iniciar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo_publico: r.codigo_publico, session_id: data.session_id }),
+      }).then(x => x.json());
+    } catch (err) {
+      leavingToPay = false;
+      btn.disabled = false;
+      TeatroCompraTimer.start({ onExpire: expirarSesion, arm: true });
+      TeatroOrdenAviso.mostrar(r.codigo_publico, {
+        titulo: 'Tu orden quedó registrada',
+        mensaje: 'No pudimos abrir el pago. Guarda este número y preséntalo en taquilla si necesitas aclaración.',
+      });
+      return;
+    }
 
     if (!p.success || !p.init_point) {
       leavingToPay = false;
-      msg.textContent = p.error || 'No se pudo iniciar el pago. Orden: ' + r.codigo_publico;
-      msg.className = 'msg mt-2 text-danger';
-      document.getElementById('resultado').innerHTML = `
-        <div class="alert alert-warning mb-0">
-          Orden creada: <strong>${r.codigo_publico}</strong> (pendiente de pago).
-          <a href="orden.php?codigo=${encodeURIComponent(r.codigo_publico)}">Ver orden</a>
-        </div>`;
+      msg.textContent = '';
+      msg.className = 'msg mt-2';
+      document.getElementById('resultado').innerHTML = '';
       btn.disabled = false;
       TeatroCompraTimer.start({ onExpire: expirarSesion, arm: true });
+      TeatroOrdenAviso.mostrar(r.codigo_publico, {
+        titulo: 'Tu orden quedó registrada',
+        mensaje: 'No pudimos iniciar el cobro. Guarda este número y preséntalo en taquilla si necesitas aclaración o reintentar tu compra.',
+      });
       return;
     }
 
@@ -739,15 +803,122 @@ body {
 
   document.getElementById('formPago').addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!e.target.reportValidity()) return;
     const fd = new FormData(e.target);
-    const nombre = ((fd.get('nombre') || '') + ' ' + (fd.get('apellido') || '')).trim();
+    const nombre = String(fd.get('nombre') || '').trim();
+    const apellido = String(fd.get('apellido') || '').trim();
+    const email = String(fd.get('email') || '').trim();
+    const telefono = String(fd.get('telefono') || '').trim();
+
+    const badNombre = !validarNombrePersona(nombre);
+    const badApellido = !validarNombrePersona(apellido);
+    const badEmail = !validarEmail(email);
+    const badTel = !validarTelefono(telefono);
+
+    marcarCampo('inpNombre', badNombre);
+    marcarCampo('inpApellido', badApellido);
+    marcarCampo('inpEmail', badEmail);
+    marcarCampo('inpTelefono', badTel);
+
+    if (badNombre || badApellido || badEmail || badTel) {
+      msg.textContent = 'Verifica los datos ingresados';
+      msg.className = 'msg msg-invalid mt-2';
+      const firstBad = document.querySelector('#formPago .form-control.is-invalid');
+      if (firstBad) firstBad.focus();
+      return;
+    }
+
+    const nombreCompleto = (nombre + ' ' + apellido).replace(/\s+/g, ' ').trim();
+    if (nombreCompleto.length > 80) {
+      marcarCampo('inpNombre', true);
+      marcarCampo('inpApellido', true);
+      msg.textContent = 'Verifica los datos ingresados';
+      msg.className = 'msg msg-invalid mt-2';
+      return;
+    }
+
+    msg.textContent = '';
+    msg.className = 'msg mt-2';
     abrirConfirm({
-      nombre,
-      email: String(fd.get('email') || '').trim(),
-      telefono: String(fd.get('telefono') || '').trim(),
+      nombre: nombreCompleto,
+      email,
+      telefono,
     });
   });
+
+  const inpTel = document.getElementById('inpTelefono');
+  if (inpTel) {
+    inpTel.addEventListener('input', () => {
+      inpTel.value = inpTel.value.replace(/\D/g, '').slice(0, 10);
+      if (inpTel.classList.contains('is-invalid')) {
+        marcarCampo('inpTelefono', !validarTelefono(inpTel.value));
+      }
+    });
+  }
+
+  ['inpNombre', 'inpApellido'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      // Limitar longitud y recortar espacios extremos al final lo hace blur/submit
+      if (el.value.length > 40) el.value = el.value.slice(0, 40);
+      if (el.classList.contains('is-invalid')) {
+        marcarCampo(id, !validarNombrePersona(el.value));
+      }
+    });
+    el.addEventListener('blur', () => {
+      el.value = el.value.trim().replace(/\s+/g, ' ');
+      if (el.classList.contains('is-invalid') || el.value !== '') {
+        marcarCampo(id, !validarNombrePersona(el.value));
+      }
+    });
+  });
+
+  const inpEmail = document.getElementById('inpEmail');
+  if (inpEmail) {
+    inpEmail.addEventListener('blur', () => {
+      if (inpEmail.classList.contains('is-invalid') || inpEmail.value.trim() !== '') {
+        marcarCampo('inpEmail', !validarEmail(inpEmail.value));
+      }
+    });
+    inpEmail.addEventListener('input', () => {
+      if (inpEmail.classList.contains('is-invalid')) {
+        marcarCampo('inpEmail', !validarEmail(inpEmail.value));
+      }
+    });
+  }
+
+  function marcarCampo(inputId, invalido) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (invalido) {
+      input.classList.add('is-invalid');
+      input.setAttribute('aria-invalid', 'true');
+    } else {
+      input.classList.remove('is-invalid');
+      input.removeAttribute('aria-invalid');
+    }
+  }
+
+  /** @returns {boolean} true si es válido */
+  function validarNombrePersona(raw) {
+    const s = String(raw || '').trim().replace(/\s+/g, ' ');
+    if (s.length < 2 || s.length > 40) return false;
+    if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ'’\- ]+$/u.test(s)) return false;
+    if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]{2,}/u.test(s)) return false;
+    return true;
+  }
+
+  function validarEmail(raw) {
+    const s = String(raw || '').trim();
+    if (!s || s.length > 180) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+  }
+
+  function validarTelefono(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return true; // opcional
+    return /^[0-9]{10}$/.test(s);
+  }
 
   btnConfirmCancel?.addEventListener('click', () => cerrarConfirm());
   overlay?.addEventListener('click', (e) => {

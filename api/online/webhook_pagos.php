@@ -18,8 +18,14 @@ if (!$conn) {
     exit;
 }
 
-// Validar secreto si está configurado (debe ir en notification_url ?secret=)
 $secret = (string) teatro_env('MP_WEBHOOK_SECRET', '');
+$env = strtolower((string) teatro_env('APP_ENV', 'local'));
+if ($secret === '' && in_array($env, ['production', 'prod'], true)) {
+    error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío en producción — rechazando');
+    http_response_code(503);
+    echo json_encode(['success' => false, 'error' => 'webhook misconfigured']);
+    exit;
+}
 if ($secret !== '') {
     $notifSecret = (string) ($_GET['secret'] ?? '');
     if ($notifSecret === '' || !hash_equals($secret, $notifSecret)) {

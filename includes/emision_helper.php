@@ -385,12 +385,16 @@ function emitir_boletos_orden_pagada(mysqli $conn, int $idOrden): array
             $conn->rollback();
         }
         error_log('[emision] orden ' . $idOrden . ': ' . $e->getMessage());
+        // Evitar que otro canal venda el asiento mientras se reintenta emisión / reembolso
+        $prot = proteger_asientos_orden_sin_boleto($conn, $idOrden, 86400);
         return [
             'success' => false,
             'emitidos' => 0,
             'ya_emitidos' => $ya,
             'boletos' => [],
             'error' => $e->getMessage(),
+            'holds_protegidos' => (int) ($prot['protegidos'] ?? 0),
+            'holds_conflictos' => $prot['conflictos'] ?? [],
         ];
     }
 
@@ -416,11 +420,72 @@ function emitir_boletos_orden_pagada(mysqli $conn, int $idOrden): array
         emision_notificar_venta($conn, $idEvento, $idFuncion, $asientosNotify);
     }
 
+    // Si quedó pagada a medias (algún item sin boleto), proteger esos asientos
+    if (!emision_orden_completa($conn, $idOrden)) {
+        proteger_asientos_orden_sin_boleto($conn, $idOrden, 86400);
+    }
+
     return [
         'success' => true,
         'emitidos' => $emitidos,
         'ya_emitidos' => $ya,
         'boletos' => $todos ?: $boletosOut,
+    ];
+}
+
+/**
+ * Orden pagada sin boleto(s): re-aparte asientos libres bajo la sesión de la orden
+ * para que no se revendan (taquilla/online) hasta reemitir o reembolsar.
+ *
+ * @return array{protegidos:int,conflictos:array<string,string>,error?:string}
+ */
+function proteger_asientos_orden_sin_boleto(mysqli $conn, int $idOrden, int $ttlSeg = 86400): array
+{
+    $st = $conn->prepare('SELECT id_orden, session_id, id_evento, id_funcion, estado FROM ordenes WHERE id_orden = ? LIMIT 1');
+    $st->bind_param('i', $idOrden);
+    $st->execute();
+    $orden = $st->get_result()->fetch_assoc();
+    $st->close();
+    if (!$orden || (string) $orden['estado'] !== 'pagada') {
+        return ['protegidos' => 0, 'conflictos' => [], 'error' => 'orden no pagada'];
+    }
+
+    $si = $conn->prepare('SELECT codigo_asiento FROM orden_items WHERE id_orden = ? AND id_boleto IS NULL');
+    $si->bind_param('i', $idOrden);
+    $si->execute();
+    $codigos = [];
+    $res = $si->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $codigos[] = (string) $row['codigo_asiento'];
+    }
+    $si->close();
+    if (!$codigos) {
+        return ['protegidos' => 0, 'conflictos' => []];
+    }
+
+    $sessionId = (string) $orden['session_id'];
+    if ($sessionId === '') {
+        $sessionId = 'pago_sin_boleto_' . $idOrden;
+        $up = $conn->prepare('UPDATE ordenes SET session_id = ? WHERE id_orden = ? AND (session_id IS NULL OR session_id = \'\')');
+        $up->bind_param('si', $sessionId, $idOrden);
+        $up->execute();
+        $up->close();
+    }
+
+    $ttlSeg = max(3600, (int) $ttlSeg);
+    $r = reservarAsientos(
+        (int) $orden['id_evento'],
+        (int) $orden['id_funcion'],
+        $codigos,
+        $sessionId,
+        'online',
+        'pago-sin-boleto',
+        $ttlSeg
+    );
+
+    return [
+        'protegidos' => count($r['reservados'] ?? []),
+        'conflictos' => $r['conflictos'] ?? [],
     ];
 }
 

@@ -36,8 +36,19 @@ try {
             api_online_respond(['success' => false, 'error' => 'Método no permitido'], 405);
         }
         $codigo = trim((string) ($data['codigo_publico'] ?? $data['codigo'] ?? ''));
+        $sessionId = trim((string) ($data['session_id'] ?? ''));
         if ($codigo === '') {
             api_online_respond(['success' => false, 'error' => 'codigo_publico requerido'], 400);
+        }
+        if ($sessionId === '') {
+            api_online_respond(['success' => false, 'error' => 'session_id requerido'], 400);
+        }
+        $orden = obtenerOrdenPorCodigo($conn, $codigo);
+        if (!$orden) {
+            api_online_respond(['success' => false, 'error' => 'Orden no encontrada'], 404);
+        }
+        if (!hash_equals((string) $orden['session_id'], $sessionId)) {
+            api_online_respond(['success' => false, 'error' => 'No autorizado'], 403);
         }
         $r = payment_crear_para_orden($conn, $codigo);
         api_online_respond($r, $r['success'] ? 200 : 400);
@@ -47,11 +58,8 @@ try {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             api_online_respond(['success' => false, 'error' => 'Método no permitido'], 405);
         }
-        $env = strtolower((string) teatro_env('APP_ENV', 'local'));
-        $mode = strtolower((string) teatro_env('MP_MODE', ''));
-        $token = (string) teatro_env('MP_ACCESS_TOKEN', '');
-        if ($env === 'production' && $token !== '' && $mode !== 'mock') {
-            api_online_respond(['success' => false, 'error' => 'Simulación no permitida en producción'], 403);
+        if (!payment_mock_permitido()) {
+            api_online_respond(['success' => false, 'error' => 'Simulación no permitida en este entorno'], 403);
         }
         $codigo = trim((string) ($data['codigo_publico'] ?? $data['codigo'] ?? ''));
         $result = strtolower((string) ($data['result'] ?? 'approved'));
@@ -69,7 +77,10 @@ try {
             api_online_respond(['success' => false, 'error' => 'Orden no encontrada'], 404);
         }
         $idOrden = (int) $orden['id_orden'];
-        $st = $conn->prepare('SELECT id_pago, proveedor, ref_externa, estado_interno, monto, actualizado_en FROM pagos WHERE id_orden = ? ORDER BY id_pago DESC');
+        $st = $conn->prepare("
+            SELECT id_pago, proveedor, estado_interno, monto, actualizado_en
+            FROM pagos WHERE id_orden = ? ORDER BY id_pago DESC
+        ");
         $st->bind_param('i', $idOrden);
         $st->execute();
         $pagos = [];

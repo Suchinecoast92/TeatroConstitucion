@@ -236,6 +236,34 @@ body {
   display: inline-block;
   max-width: 100%;
   color: #f4f4f5;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+button.codigo-mono {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  text-align: center;
+  line-height: 1.35;
+}
+.codigo-mono:active,
+.codigo-mono.copied {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.codigo-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.codigo-hint.is-copied {
+  color: #86efac;
 }
 
 .btn-descargar-img {
@@ -353,7 +381,13 @@ body {
             <div class="ticket-meta">
               <p class="seat mb-0">Asiento <?= h($b['codigo_asiento']) ?></p>
               <div class="tipo"><?= h($b['tipo_boleto']) ?> · $<?= number_format((float) $b['precio_final'], 2) ?></div>
-              <div class="codigo-mono"><?= h($b['codigo_unico']) ?></div>
+              <button type="button"
+                class="codigo-mono js-copy-code"
+                data-code="<?= h($b['codigo_unico']) ?>"
+                aria-label="Tocar para copiar código">
+                <?= h($b['codigo_unico']) ?>
+              </button>
+              <span class="codigo-hint js-copy-hint">Toca para copiar</span>
             </div>
           </div>
         <?php endforeach; ?>
@@ -388,7 +422,19 @@ body {
                   <td><?= h($it['codigo_asiento']) ?></td>
                   <td><?= h($it['tipo_boleto']) ?></td>
                   <td>$<?= number_format((float) $it['precio_final'], 2) ?></td>
-                  <td class="codigo-mono" style="background:none;border:0;padding:0"><?= $codBol !== '' ? h($codBol) : '—' ?></td>
+                  <td style="background:none;border:0;padding:0">
+                    <?php if ($codBol !== ''): ?>
+                      <button type="button"
+                        class="codigo-mono js-copy-code"
+                        data-code="<?= h($codBol) ?>"
+                        aria-label="Tocar para copiar código"
+                        style="padding:4px 8px;font-size:.78rem">
+                        <?= h($codBol) ?>
+                      </button>
+                    <?php else: ?>
+                      —
+                    <?php endif; ?>
+                  </td>
                 </tr>
               <?php endforeach; ?>
               </tbody>
@@ -441,11 +487,13 @@ body {
           <?php if ($esperaPago): ?>
             <div class="alert-glass warn soft">Si ya iniciaste el pago en Mercado Pago, no cierres esa ventana. Tus asientos se mantienen mientras el cobro está en curso.</div>
           <?php endif; ?>
-          <div class="alert-glass soft">Pago pendiente. Si ya pagaste, espera la confirmación del servidor o vuelve desde Mercado Pago.</div>
+          <div class="alert-glass soft">Pago pendiente. Si ya pagaste, espera la confirmación del servidor o vuelve desde Mercado Pago. Conserva tu número de orden por si necesitas aclaración en taquilla.</div>
         <?php elseif ($orden['estado'] === 'pagada'): ?>
-          <div class="alert-glass warn soft">Pago confirmado. Los boletos se están generando; recarga en unos segundos.</div>
+          <div class="alert-glass warn soft">Pago confirmado. Los boletos se están generando; recarga en unos segundos. Si no aparecen, presenta tu número de orden en taquilla.</div>
         <?php elseif ($orden['estado'] === 'fallida'): ?>
-          <div class="alert-glass danger soft">El pago no se completó.</div>
+          <div class="alert-glass danger soft">El pago no se completó. Guarda tu número de orden y acude a taquilla si necesitas aclaración.</div>
+        <?php elseif ($orden['estado'] === 'reembolsada'): ?>
+          <div class="alert-glass soft">Esta orden fue reembolsada.</div>
         <?php endif; ?>
       </div>
     <?php endif; ?>
@@ -453,12 +501,113 @@ body {
   <?php endif; ?>
 </div>
 <?php if ($codigo !== ''): ?>
+<script src="js/orden-aviso.js"></script>
 <script>
 try {
   if (<?= json_encode(($orden['estado'] ?? '') === 'pagada' || ($orden['estado'] ?? '') === 'fallida') ?>) {
     sessionStorage.removeItem('teatro_pago_en_curso');
   }
+  if (<?= json_encode(!empty($pagadaConBoletos)) ?>) {
+    sessionStorage.removeItem('teatro_emit_retry_' + <?= json_encode($codigo) ?>);
+  }
+  if (<?= json_encode(!empty($orden['codigo_publico'])) ?>) {
+    TeatroOrdenAviso.guardarCodigo(<?= json_encode($orden['codigo_publico']) ?>);
+  }
 } catch (e) {}
+
+<?php
+$mostrarAvisoOrden = $orden && in_array($orden['estado'], ['fallida', 'pendiente'], true);
+$mostrarAvisoSinBoleto = $orden && ($orden['estado'] ?? '') === 'pagada' && !$pagadaConBoletos;
+if ($mostrarAvisoOrden || $mostrarAvisoSinBoleto):
+  $msgAviso = $mostrarAvisoSinBoleto
+    ? 'Tu pago está confirmado, pero los boletos aún no están listos. Guarda este número y, si no aparecen, preséntalo en taquilla.'
+    : (($orden['estado'] ?? '') === 'fallida'
+      ? 'El pago no se completó. Conserva este número y preséntalo en taquilla si necesitas aclaración.'
+      : 'Tu compra está en proceso. Conserva este número; si hay cualquier inconveniente, preséntalo en taquilla.');
+?>
+TeatroOrdenAviso.mostrar(<?= json_encode($orden['codigo_publico']) ?>, {
+  once: true,
+  verOrden: false,
+  titulo: 'Guarda tu número de orden',
+  mensaje: <?= json_encode($msgAviso, JSON_UNESCAPED_UNICODE) ?>,
+});
+<?php endif; ?>
+
+(function () {
+  async function copiarTexto(texto) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    }
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  document.querySelectorAll('.js-copy-code').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const code = btn.getAttribute('data-code') || btn.textContent.trim();
+      if (!code) return;
+      try {
+        const ok = await copiarTexto(code);
+        if (!ok) return;
+        btn.classList.add('copied');
+        const hint = btn.parentElement && btn.parentElement.querySelector('.js-copy-hint');
+        const prev = btn.textContent;
+        if (hint) {
+          hint.textContent = 'Copiado';
+          hint.classList.add('is-copied');
+        } else {
+          btn.textContent = 'Copiado';
+        }
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          if (hint) {
+            hint.textContent = 'Toca para copiar';
+            hint.classList.remove('is-copied');
+          } else {
+            btn.textContent = prev;
+          }
+        }, 1600);
+      } catch (e) {}
+    });
+  });
+})();
+<?php if ($orden && ($orden['estado'] ?? '') === 'pagada' && !$pagadaConBoletos): ?>
+// Pago OK pero boletos aún no listos: reintentar emisión recargando (máx. 8 veces)
+(function () {
+  const key = 'teatro_emit_retry_' + <?= json_encode($codigo) ?>;
+  let n = 0;
+  try { n = parseInt(sessionStorage.getItem(key) || '0', 10) || 0; } catch (e) {}
+  if (n >= 8) return;
+  try { sessionStorage.setItem(key, String(n + 1)); } catch (e) {}
+  setTimeout(() => { window.location.reload(); }, 2000);
+})();
+<?php elseif ($esperaPago && $orden && ($orden['estado'] ?? '') === 'pendiente'): ?>
+(async () => {
+  const codigo = <?= json_encode($codigo) ?>;
+  const APP = <?= json_encode($appRoot) ?>;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const r = await fetch(APP + '/api/online/pagos.php?action=estado&codigo=' + encodeURIComponent(codigo));
+      const j = await r.json();
+      if (j.success && j.orden && (j.orden.estado === 'pagada' || j.orden.estado === 'fallida')) {
+        window.location.reload();
+        return;
+      }
+    } catch (e) {}
+  }
+})();
+<?php endif; ?>
 </script>
 <?php endif; ?>
 </body>

@@ -92,11 +92,20 @@ body { background: var(--bg-primary, #0f172a); color: var(--text-primary, #e2e8f
 <script>
 const API = 'api.php';
 
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function badgeEstado(e) {
   const map = { PAID: 'pagada', PENDING: 'pendiente', FAILED: 'fallida', REFUNDED: 'reembolsada' };
   const raw = e || 'pendiente';
-  const key = map[raw] || String(raw).toLowerCase();
-  return `<span class="badge-e badge-${key}">${raw}</span>`;
+  const key = map[raw] || String(raw).toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  return `<span class="badge-e badge-${esc(key)}">${esc(raw)}</span>`;
 }
 
 async function cargar() {
@@ -106,7 +115,7 @@ async function cargar() {
   const r = await fetch(url).then(x => x.json());
   const tb = document.getElementById('tbody');
   if (!r.success) {
-    tb.innerHTML = `<tr><td colspan="8" class="text-danger">${r.error || 'Error'}</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="8" class="text-danger">${esc(r.error || 'Error')}</td></tr>`;
     return;
   }
   if (!r.ordenes.length) {
@@ -118,15 +127,16 @@ async function cargar() {
       ? ' <span class="badge-e badge-alerta">sin boletos</span>'
       : '';
     const bol = (o.items_con_boleto || 0) + '/' + (o.items_total || 0);
+    const titulo = o.titulo_evento || ('#' + o.id_evento);
     return `<tr>
-      <td class="mono">${o.codigo_publico}</td>
-      <td>${o.titulo_evento || ('#' + o.id_evento)}</td>
-      <td>${o.nombre}<div class="small text-secondary">${o.email}</div></td>
+      <td class="mono">${esc(o.codigo_publico)}</td>
+      <td>${esc(titulo)}</td>
+      <td>${esc(o.nombre)}<div class="small text-secondary">${esc(o.email)}</div></td>
       <td>$${Number(o.total).toFixed(2)}</td>
       <td>${badgeEstado(o.estado)}${alerta}</td>
-      <td>${badgeEstado((o.pago_estado || '').toLowerCase() || '—')}<div class="small text-secondary">${o.proveedor || ''}</div></td>
-      <td>${bol}</td>
-      <td><button class="btn btn-sm btn-outline-info" data-cod="${o.codigo_publico}">Ver</button></td>
+      <td>${badgeEstado((o.pago_estado || '').toLowerCase() || '—')}<div class="small text-secondary">${esc(o.proveedor || '')}</div></td>
+      <td>${esc(bol)}</td>
+      <td><button class="btn btn-sm btn-outline-info" data-cod="${esc(o.codigo_publico)}">Ver</button></td>
     </tr>`;
   }).join('');
 }
@@ -136,18 +146,18 @@ async function ver(codigo) {
   const box = document.getElementById('detalle');
   if (!r.success) {
     box.style.display = '';
-    box.innerHTML = `<div class="text-danger">${r.error}</div>`;
+    box.innerHTML = `<div class="text-danger">${esc(r.error)}</div>`;
     return;
   }
   const o = r.orden;
   const items = (o.items || []).map(it =>
-    `<tr><td>${it.codigo_asiento}</td><td>${it.tipo_boleto}</td><td>$${Number(it.precio_final).toFixed(2)}</td><td>${it.id_boleto || '—'}</td></tr>`
+    `<tr><td>${esc(it.codigo_asiento)}</td><td>${esc(it.tipo_boleto)}</td><td>$${Number(it.precio_final).toFixed(2)}</td><td>${esc(it.id_boleto || '—')}</td></tr>`
   ).join('');
   const bols = (r.boletos || []).map(b =>
-    `<div class="mono small">${b.codigo_asiento}: ${b.codigo_unico}</div>`
+    `<div class="mono small">${esc(b.codigo_asiento)}: ${esc(b.codigo_unico)}</div>`
   ).join('') || '<div class="text-secondary small">Sin boletos emitidos</div>';
   const pagos = (r.pagos || []).map(p =>
-    `<div class="small">${p.proveedor} · ${p.estado_interno} · ref ${p.ref_pago_proveedor || p.ref_externa}</div>`
+    `<div class="small">${esc(p.proveedor)} · ${esc(p.estado_interno)} · ref ${esc(p.ref_pago_proveedor || p.ref_externa)}</div>`
   ).join('');
 
   let actions = '';
@@ -162,10 +172,10 @@ async function ver(codigo) {
   box.style.display = '';
   box.innerHTML = `
     <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-      <h2 class="h5 mb-0">Orden ${o.codigo_publico}</h2>
+      <h2 class="h5 mb-0">Orden ${esc(o.codigo_publico)}</h2>
       ${badgeEstado(o.estado)}
     </div>
-    <p class="mb-1">${r.titulo_evento} · Cliente: ${o.nombre} · ${o.email}</p>
+    <p class="mb-1">${esc(r.titulo_evento)} · Cliente: ${esc(o.nombre)} · ${esc(o.email)}</p>
     <p class="mb-2">Total: <strong>$${Number(o.total).toFixed(2)}</strong></p>
     ${r.alerta_sin_boletos ? '<div class="alert alert-warning py-2">Pagada pero faltan boletos. Reintenta emisión o reembolsa.</div>' : ''}
     <table class="table-darkish mb-3"><thead><tr><th>Asiento</th><th>Tipo</th><th>Precio</th><th>id_boleto</th></tr></thead><tbody>${items}</tbody></table>

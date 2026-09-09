@@ -129,12 +129,24 @@ function payment_crear_para_orden(mysqli $conn, string $codigoPublico): array
     if ($orden['estado'] === 'pagada') {
         return ['success' => false, 'error' => 'La orden ya está pagada'];
     }
-    if ($orden['estado'] !== 'pendiente') {
+    // Tras rechazo de pasarela la orden queda 'fallida'; permitir reintento.
+    if (!in_array($orden['estado'], ['pendiente', 'fallida'], true)) {
         return ['success' => false, 'error' => 'La orden no está pendiente de pago'];
     }
 
     $idOrden = (int) $orden['id_orden'];
     $ttlPago = payment_ttl_pasarela();
+
+    if ($orden['estado'] === 'fallida') {
+        $rst = $conn->prepare("UPDATE ordenes SET estado = 'pendiente' WHERE id_orden = ? AND estado = 'fallida'");
+        $rst->bind_param('i', $idOrden);
+        $rst->execute();
+        $rst->close();
+        $orden = obtenerOrdenPorCodigo($conn, $codigoPublico);
+        if (!$orden || $orden['estado'] !== 'pendiente') {
+            return ['success' => false, 'error' => 'No se pudo reabrir la orden para pago'];
+        }
+    }
 
     // Extender ANTES de expirar otras órdenes: evita carrera timer→Pagar
     renovarReservasSesion($orden['session_id'], (int) $orden['id_evento'], (int) $orden['id_funcion'], $ttlPago);
@@ -309,22 +321,19 @@ function payment_aplicar_estado(
         // Emite boletos/QR y libera holds (idempotente)
         $emi = emitir_boletos_orden_pagada($conn, $idOrden);
         if (empty($emi['success'])) {
-            // Si la emisión falló, mantener hold corto para reintento por webhook
-            $so = $conn->prepare('SELECT session_id, id_evento, id_funcion FROM ordenes WHERE id_orden = ?');
-            $so->bind_param('i', $idOrden);
-            $so->execute();
-            $ord = $so->get_result()->fetch_assoc();
-            $so->close();
-            if ($ord) {
-                renovarReservasSesion($ord['session_id'], (int) $ord['id_evento'], (int) $ord['id_funcion'], 3600);
-            }
-            error_log('[payment] emisión fallida orden ' . $idOrden . ': ' . ($emi['error'] ?? ''));
+            $prot = proteger_asientos_orden_sin_boleto($conn, $idOrden, 86400);
+            error_log(
+                '[payment] emisión fallida orden ' . $idOrden . ': ' . ($emi['error'] ?? '')
+                . ' holds_protegidos=' . (int) ($prot['protegidos'] ?? 0)
+            );
             return [
                 'success' => true,
                 'changed' => $prev !== $estadoInterno,
                 'estado' => 'PAID',
                 'emision_ok' => false,
                 'emision_error' => $emi['error'] ?? 'emision fallida',
+                'holds_protegidos' => (int) ($prot['protegidos'] ?? 0),
+                'holds_conflictos' => $prot['conflictos'] ?? [],
             ];
         }
         return [

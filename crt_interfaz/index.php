@@ -1504,6 +1504,15 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             return img;
         }
 
+        function escHtml(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function firstImageUrl(evento) {
             const cands = buildImageCandidates(evento);
             return cands[0] || '';
@@ -1590,7 +1599,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                     const { dia, hora } = formatearHorarioCorto(f.fecha_hora);
                     const a = document.createElement(f.agotado ? 'span' : 'a');
                     a.className = 'mobile-horario' + (f.agotado ? ' agotado' : '');
-                    a.innerHTML = `<span class="dia">${dia}</span>${hora}${f.agotado ? '<br><small>Agotado</small>' : ''}`;
+                    a.innerHTML = `<span class="dia">${escHtml(dia)}</span>${escHtml(hora)}${f.agotado ? '<br><small>Agotado</small>' : ''}`;
                     if (!f.agotado) {
                         a.href = `comprar.php?id_evento=${encodeURIComponent(evento.id_evento)}&id_funcion=${encodeURIComponent(f.id_funcion)}`;
                     }
@@ -1653,7 +1662,10 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 const contenido = document.createElement('div');
                 contenido.className = 'hero-contenido';
 
-                const descripcion = evento.descripcion ? evento.descripcion.substring(0, 200) + '...' : '';
+                const descripcionRaw = evento.descripcion ? String(evento.descripcion).substring(0, 200) + '...' : '';
+                const descripcion = escHtml(descripcionRaw);
+                const tituloEsc = escHtml(evento.titulo || '');
+                const fechaEsc = escHtml(formatearFecha(evento.proxima_funcion_fecha));
                 const agotado = agotadoHero;
 
                 const disponibles = evento.disponibles || 0;
@@ -1666,11 +1678,11 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 }
 
                 contenido.innerHTML = `
-                    <h2 class="hero-titulo">${evento.titulo}</h2>
+                    <h2 class="hero-titulo">${tituloEsc}</h2>
                     ${descripcion ? `<p class="hero-descripcion">${descripcion}</p>` : ''}
                     <p class="hero-fecha">
                         <i class="bi bi-calendar-event"></i>
-                        ${formatearFecha(evento.proxima_funcion_fecha)}
+                        ${fechaEsc}
                     </p>
                     ${totalAsientos > 0 ? `
                     <p class="boletos-disponibles ${claseDisponibles}">
@@ -1770,10 +1782,10 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 }
 
                 info.innerHTML = `
-                    <h4 class="evento-card-titulo">${evento.titulo}</h4>
+                    <h4 class="evento-card-titulo">${escHtml(evento.titulo)}</h4>
                     <p class="evento-card-fecha">
                         <i class="bi bi-calendar-event"></i>
-                        ${formatearFecha(evento.proxima_funcion_fecha)}
+                        ${escHtml(formatearFecha(evento.proxima_funcion_fecha))}
                     </p>
                     ${totalAsientos > 0 ? `
                     <p class="evento-card-disponibles ${claseDisponibles}">

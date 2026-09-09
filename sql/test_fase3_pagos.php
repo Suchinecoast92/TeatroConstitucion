@@ -89,12 +89,13 @@ if (($got['estado'] ?? '') !== 'pagada') {
     exit(1);
 }
 
-// cleanup soft
-$up = $conn->prepare("UPDATE ordenes SET estado = 'cancelada' WHERE id_orden = ?");
-$idO = (int) $ord['id_orden'];
-$up->bind_param('i', $idO);
-$up->execute();
-$up->close();
+// cleanup: reembolso mock (evita basura PAID + orden cancelada)
+require_once dirname(__DIR__) . '/includes/reembolso_helper.php';
+$ref = reembolsar_orden_online($conn, $ord['codigo_publico'], 'cleanup test_fase3');
+if (!$ref['success']) {
+    fwrite(STDERR, 'FAIL cleanup reembolso: ' . ($ref['error'] ?? '') . "\n");
+    exit(1);
+}
 liberarReservasSesion($session);
 
 // --- Protección: no expirar/liberar con pago PENDING activo ---
@@ -166,10 +167,11 @@ if (($got2b['estado'] ?? '') !== 'pagada') {
     fwrite(STDERR, "FAIL no pagó tras protección\n");
     exit(1);
 }
-$up2 = $conn->prepare("UPDATE ordenes SET estado = 'cancelada' WHERE id_orden = ?");
-$up2->bind_param('i', $idO2);
-$up2->execute();
-$up2->close();
+$ref2 = reembolsar_orden_online($conn, $ord2['codigo_publico'], 'cleanup test_fase3 curso');
+if (!$ref2['success']) {
+    fwrite(STDERR, 'FAIL cleanup2 reembolso: ' . ($ref2['error'] ?? '') . "\n");
+    exit(1);
+}
 liberarReservasSesion($session2);
 echo "pago_en_curso OK\n";
 
