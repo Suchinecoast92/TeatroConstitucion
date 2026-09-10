@@ -117,6 +117,19 @@ function resolver_categoria_asiento(mysqli $conn, int $idEvento, string $codigoA
 }
 
 /**
+ * Tipo de boleto online según la categoría mapeada del asiento.
+ * El cliente no puede elegir otro tipo (evita cambiar VIP/General a Discapacitado gratis).
+ */
+function tipo_boleto_desde_categoria_asiento(array $cat): string
+{
+    $tipo = tipo_boleto_desde_nombre_categoria((string) ($cat['nombre_categoria'] ?? ''));
+    if ($tipo && !in_array($tipo, ['cortesia', 'general', 'adulto'], true)) {
+        return $tipo;
+    }
+    return 'adulto';
+}
+
+/**
  * Precio unitario según tipo (adulto usa precio de categoría del asiento).
  */
 function calcular_precio_unitario_tipo(string $tipoBoleto, float $precioCategoria, array $preciosTipo): float
@@ -239,20 +252,19 @@ function calcular_cotizacion_online(mysqli $conn, int $idEvento, array $asientos
         }
         $vistos[$codigo] = true;
 
-        $tipo = is_array($raw) ? strtolower(trim((string) ($raw['tipo_boleto'] ?? 'adulto'))) : 'adulto';
-        if ($tipo === 'general') {
-            $tipo = 'adulto';
-        }
-        if ($tipo === 'cortesia' || !in_array($tipo, $tiposPermitidos, true)) {
-            $tipo = $tiposPermitidos[0];
-        }
-
+        // Online: el tipo lo fija el mapa del asiento, no el navegador
         $cat = resolver_categoria_asiento($conn, $idEvento, $codigo);
         if (!$cat) {
             return ['success' => false, 'error' => "Asiento no está en el mapa: $codigo"];
         }
         if (es_categoria_no_venta($cat['nombre_categoria'])) {
             return ['success' => false, 'error' => "Asiento no disponible para venta: $codigo"];
+        }
+
+        $tipo = tipo_boleto_desde_categoria_asiento($cat);
+        if (!in_array($tipo, $tiposPermitidos, true)) {
+            // Zona especial no listada como tipo de venta → vender como adulto al precio del asiento
+            $tipo = 'adulto';
         }
 
         $precioBase = calcular_precio_unitario_tipo($tipo, (float) $cat['precio'], $preciosTipo);

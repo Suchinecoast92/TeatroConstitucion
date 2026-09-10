@@ -211,7 +211,8 @@
         .hero-section {
             text-align: center;
             margin-bottom: 36px;
-            animation: fadeInUp 0.8s ease;
+            /* Solo mover: animar opacity en el padre rompe backdrop-filter del glass card */
+            animation: fadeInUpSoft 0.8s ease;
         }
 
         .hero-section h1 {
@@ -319,9 +320,11 @@
             overflow: hidden;
         }
 
-        /* El contenedor principal del hero no debe esperar la animación de scroll */
+        /* El contenedor principal del hero: visible de inmediato, sin pelear con opacity */
         .hero-section .featured-section {
             animation: none;
+            opacity: 1;
+            transform: none;
             text-align: left;
             max-width: 100%;
         }
@@ -576,6 +579,15 @@
             }
             to {
                 opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUpSoft {
+            from {
+                transform: translateY(18px);
+            }
+            to {
                 transform: translateY(0);
             }
         }
@@ -898,7 +910,9 @@
                 });
             }, observerOptions);
 
+            // No observar el primer contenedor del hero: inline opacity + glass = bug visual
             document.querySelectorAll('.info-card, .featured-section').forEach(el => {
+                if (el.closest('.hero-section')) return;
                 observer.observe(el);
             });
         });

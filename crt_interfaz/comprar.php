@@ -105,13 +105,16 @@ function renderSeatBuy($codigo, $mapa, $vendidos, $reservados, $colores, $info_c
         $disabled = true;
         $title = $codigo . ' | No disponible';
     }
-    $style = ($vendido || $reservado || $noVenta) ? '' : 'background-color:' . h($color) . ';';
+    // Conservar color de categoría (también en apartados) para no confundir con estados
+    $style = ($vendido || $noVenta) ? '' : 'background-color:' . h($color) . ';';
     $dataCat = $idCat ?: 0;
     $precio = $cat ? (float) $cat['precio'] : 0;
     $disAttr = $disabled ? ' aria-disabled="true" tabindex="-1"' : ' tabindex="0"';
-    $dataColor = ($vendido || $reservado || $noVenta) ? '' : ' data-color="' . h($color) . '"';
+    $dataColor = ($vendido || $noVenta) ? '' : ' data-color="' . h($color) . '"';
+    $tipoCat = ($cat ? tipo_boleto_desde_nombre_categoria($cat['nombre_categoria']) : null) ?: '';
+    $dataTipo = $tipoCat !== '' ? ' data-tipo-cat="' . h($tipoCat) . '"' : '';
     return '<button type="button" class="' . h($clase) . '" data-asiento="' . h($codigo) . '" data-categoria="' . $dataCat . '" data-precio="' . h((string) $precio) . '"'
-        . $dataColor . $disAttr . ' title="' . h($title) . '" style="' . $style . '">' . h($codigo) . '</button>';
+        . $dataColor . $dataTipo . $disAttr . ' title="' . h($title) . '" style="' . $style . '">' . h($codigo) . '</button>';
 }
 
 $id_categoria_general = 0;
@@ -290,30 +293,56 @@ body {
   .seat { width:44px; height:44px; font-size:12px; border-radius:7px; }
   .seat.selected {
     outline-width: 3px;
-    box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.95), 0 4px 12px rgba(37, 99, 235, 0.6);
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.95),
+      0 0 0 4px rgba(15, 23, 42, 0.55);
   }
   .seats-block { gap:5px; }
   .row-label { width:28px; font-size:.75rem; }
   .pasillo { width:18px; }
   .screen { margin-bottom:20px; padding:8px; font-size:.85rem; width:90%; }
 }
+/* Selección: mantiene color de categoría + anillo blanco/oscuro legible */
 .seat.selected {
-  background: #2563eb !important;
-  color: #fff !important;
-  outline: 3px solid #7dd3fc;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.55), 0 4px 14px rgba(37, 99, 235, 0.45);
+  color: #0f172a !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.85),
+    0 0 0 5px rgba(255, 255, 255, 0.92),
+    0 4px 14px rgba(0, 0, 0, 0.35);
   transform: scale(1.06);
   z-index: 2;
   position: relative;
   font-weight: 800;
+  filter: none;
 }
 .seat.vendido, .seat.reservado, .seat.no-venta { cursor:not-allowed; }
 .seat.vendido {
   background:repeating-linear-gradient(45deg,#6b7280,#6b7280 10px,#4b5563 10px,#4b5563 20px)!important;
 }
+/* Apartado: sin naranja sólido; velo rayado + contorno discontinuo */
 .seat.reservado {
-  background:repeating-linear-gradient(-45deg,#f59e0b,#f59e0b 10px,#d97706 10px,#d97706 20px)!important;
-  color:#fff!important;
+  position: relative;
+  color: rgba(255, 255, 255, 0.75) !important;
+  outline: 2px dashed rgba(255, 255, 255, 0.65);
+  outline-offset: 1px;
+  box-shadow: inset 0 0 0 999px rgba(15, 23, 42, 0.45);
+  filter: grayscale(0.4) brightness(0.72);
+  opacity: 0.94;
+}
+.seat.reservado::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.14) 0 5px,
+    transparent 5px 10px
+  );
 }
 .seat.no-venta { background:#0f172a!important; color:#64748b; }
 .leyenda {
@@ -360,6 +389,22 @@ body {
 .btn-continuar-map:disabled {
   opacity:.38; cursor:not-allowed; box-shadow:none;
 }
+.aviso-accesibilidad {
+  display: none;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(30, 41, 59, 0.55);
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+.aviso-accesibilidad.visible { display: flex; gap: 8px; align-items: flex-start; }
+.aviso-accesibilidad i { color: rgba(186, 230, 253, 0.95); margin-top: 1px; flex-shrink: 0; }
+.aviso-accesibilidad strong { color: #f8fafc; font-weight: 650; }
 </style>
 </head>
 <body>
@@ -451,12 +496,19 @@ body {
 <div class="mini-resumen">
   <div class="leyenda">
     <span><span class="dot" style="background:#cbd5e1;border:1px solid #94a3b8"></span>Disponible</span>
-    <span><span class="dot" style="background:#2563eb;box-shadow:0 0 0 2px #7dd3fc"></span>Seleccionado</span>
-    <span><span class="dot" style="background:#f59e0b"></span>Apartado</span>
+    <span><span class="dot" style="background:#cbd5e1;box-shadow:0 0 0 2px #0f172a,0 0 0 4px #fff;color:#0f172a"></span>Seleccionado</span>
+    <span><span class="dot" style="background:repeating-linear-gradient(-45deg,#334155,#334155 3px,#94a3b8 3px,#94a3b8 6px);border:1px dashed #e2e8f0"></span>Apartado</span>
     <span><span class="dot" style="background:#6b7280"></span>Vendido</span>
   </div>
   <div class="mini-inner">
-    <div>
+    <div style="flex:1; min-width:220px;">
+      <div class="aviso-accesibilidad" id="avisoAccesibilidad" role="status" aria-live="polite">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <div>
+          <strong>Asiento de accesibilidad.</strong>
+          Preferente para personas con discapacidad o movilidad reducida. Gracias por respetar esta zona.
+        </div>
+      </div>
       <div class="fw-semibold mb-1">Tu selección <span id="countSeats">(0)</span></div>
       <div class="chips" id="chips"><span class="text-secondary small">Toca un asiento libre para apartarlo</span></div>
       <div class="msg" id="msg"></div>
@@ -535,7 +587,10 @@ body {
     btn.classList.add('selected');
     btn.removeAttribute('aria-disabled');
     btn.setAttribute('tabindex', '0');
-    btn.style.backgroundColor = '';
+    // Mantener color de categoría; la selección es el contorno blanco
+    if (btn.dataset.color) {
+      btn.style.backgroundColor = btn.dataset.color;
+    }
     btn.title = (btn.dataset.asiento || '') + ' | Seleccionado';
   }
 
@@ -642,7 +697,7 @@ body {
         } else if (esReservado && !eraReservado && !eraVendido) {
           btn.classList.remove('selected');
           btn.classList.add('reservado');
-          btn.style.backgroundColor = '';
+          if (btn.dataset.color) btn.style.backgroundColor = btn.dataset.color;
           btn.setAttribute('aria-disabled', 'true');
           btn.setAttribute('tabindex', '-1');
           btn.title = codigo + ' | Apartado';
@@ -709,9 +764,24 @@ body {
     window.location.href = 'sesion_expirada.php';
   }
 
+  function hayAsientoAccesibilidadEnCarrito() {
+    for (const codigo of carrito.keys()) {
+      const btn = seatByCodigo(codigo);
+      if (btn && btn.dataset.tipoCat === 'discapacitado') return true;
+    }
+    return false;
+  }
+
+  function actualizarAvisoAccesibilidad() {
+    const aviso = document.getElementById('avisoAccesibilidad');
+    if (!aviso) return;
+    aviso.classList.toggle('visible', hayAsientoAccesibilidadEnCarrito());
+  }
+
   function renderMini() {
     countSeats.textContent = '(' + carrito.size + ')';
     btnContinuar.disabled = carrito.size === 0;
+    actualizarAvisoAccesibilidad();
     if (!carrito.size) {
       chips.innerHTML = '<span class="text-secondary small">Toca un asiento libre para apartarlo</span>';
       totalEst.textContent = '$0.00';

@@ -231,6 +231,22 @@ body {
 .msg { min-height:1.25rem; font-size:.9rem; color:rgba(244,244,245,.8); }
 .msg.text-primary { color:#e4e4e7 !important; }
 .msg.text-danger { color:#f4f4f5 !important; opacity:.9; }
+.aviso-accesibilidad {
+  display: none;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 10px 0 4px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(30, 41, 59, 0.45);
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.aviso-accesibilidad.visible { display: flex; }
+.aviso-accesibilidad i { color: rgba(186, 230, 253, 0.95); margin-top: 1px; flex-shrink: 0; }
+.aviso-accesibilidad strong { color: #f8fafc; font-weight: 650; }
 
 .alert-glass {
   background:rgba(255,255,255,.08);
@@ -382,6 +398,13 @@ body {
       </div>
       <div class="fw-semibold mb-2">Asientos <span id="countItems">(0)</span></div>
       <div id="listaItems"></div>
+      <div class="aviso-accesibilidad" id="avisoAccesibilidad" role="status" aria-live="polite">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <div>
+          <strong>Incluye asiento de accesibilidad.</strong>
+          Preferente para personas con discapacidad o movilidad reducida. Gracias por respetar esta zona.
+        </div>
+      </div>
       <div class="totals">
         <div class="d-flex justify-content-between"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
         <div class="d-flex justify-content-between fw-bold mt-1"><span>Total</span><span id="total">$0.00</span></div>
@@ -594,21 +617,32 @@ body {
   function renderItems(items) {
     lista.innerHTML = items.map(it => {
       const tipo = ETIQUETAS[it.tipo_boleto] || it.tipo_boleto;
-      const cat = it.nombre_categoria ? ' · ' + esc(it.nombre_categoria) : '';
+      const cat = it.nombre_categoria ? esc(it.nombre_categoria) : esc(tipo);
+      const detalle = it.nombre_categoria && ETIQUETAS[it.tipo_boleto] && it.nombre_categoria !== ETIQUETAS[it.tipo_boleto]
+        ? `${esc(tipo)} · ${esc(it.nombre_categoria)}`
+        : cat;
       return `<div class="item">
         <div class="d-flex gap-2">
           <span class="seat-ico"><i class="bi bi-ticket-perforated"></i></span>
           <div>
             <div class="fw-semibold">${esc(it.codigo_asiento)}</div>
-            <div class="small text-muted">${esc(tipo)}${cat}</div>
-            <select class="form-select form-select-sm mt-1 tipo-sel" data-asiento="${esc(it.codigo_asiento)}" style="max-width:10rem">
-              ${TIPOS.map(t => `<option value="${esc(t)}" ${t===it.tipo_boleto?'selected':''}>${esc(ETIQUETAS[t]||t)}</option>`).join('')}
-            </select>
+            <div class="small text-muted">${detalle}</div>
           </div>
         </div>
         <div class="fw-semibold">${money(it.precio_final)}</div>
       </div>`;
     }).join('');
+
+    const aviso = document.getElementById('avisoAccesibilidad');
+    if (aviso) {
+      const hayAcc = (items || []).some(it =>
+        it.tipo_boleto === 'discapacitado'
+        || String(it.nombre_categoria || '').toLowerCase() === 'discapacitado'
+      );
+      aviso.classList.toggle('visible', hayAcc);
+    }
+    const countEl = document.getElementById('countItems');
+    if (countEl) countEl.textContent = '(' + (items ? items.length : 0) + ')';
   }
 
   async function cotizar() {
@@ -623,21 +657,19 @@ body {
       return;
     }
     renderItems(r.items);
+    // Alinear sessionStorage con lo que fijó el backend (mapa), no el cliente
+    if (Array.isArray(r.items)) {
+      data.asientos = r.items.map(it => ({
+        asiento: it.codigo_asiento,
+        tipo_boleto: it.tipo_boleto,
+      }));
+    }
     document.getElementById('subtotal').textContent = money(r.total);
     document.getElementById('total').textContent = money(r.total);
     document.getElementById('totalHead').textContent = money(r.total);
     data._cotizacion = r;
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
-
-  lista.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('tipo-sel')) return;
-    const codigo = e.target.dataset.asiento;
-    const item = data.asientos.find(a => a.asiento === codigo);
-    if (!item) return;
-    item.tipo_boleto = e.target.value;
-    cotizar();
-  });
 
   const API_PAGOS = APP_ROOT + '/api/online/pagos.php';
   const overlay = document.getElementById('confirmOverlay');

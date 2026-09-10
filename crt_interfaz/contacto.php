@@ -247,6 +247,8 @@
                 inset 0 -1px 1px rgba(0, 0, 0, 0.05);
             position: relative;
             overflow: hidden;
+            /* Misma entrada que las tarjetas de Acerca, sin opacity (rompe backdrop-filter) */
+            animation: fadeInUpSoft 0.8s ease 0.12s both;
         }
 
         .location-section::before {
@@ -331,6 +333,15 @@
             }
             to {
                 opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUpSoft {
+            from {
+                transform: translateY(18px);
+            }
+            to {
                 transform: translateY(0);
             }
         }

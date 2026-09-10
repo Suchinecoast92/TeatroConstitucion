@@ -506,6 +506,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             .mobile-home {
                 display: block;
                 padding: 16px 14px 24px;
+                animation: fadeInUpSoft 0.8s ease both;
             }
 
             .mobile-home-title {
@@ -755,50 +756,93 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             margin-left: -20px;
             margin-right: -20px;
             padding: 0;
+            animation: fadeInUpSoft 0.8s ease both;
         }
 
         .hero-carrusel {
             position: relative;
             width: 100%;
             height: 500px;
+            border-radius: 20px;
+            touch-action: pan-y;
+            user-select: none;
+        }
+
+        .hero-viewport {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             border-radius: 20px;
         }
 
-        .hero-slide {
-            display: none;
-            position: relative;
-            width: 100%;
+        .hero-track {
+            display: flex;
             height: 100%;
-            text-decoration: none;
-            color: inherit;
+            will-change: transform;
+            cursor: grab;
         }
 
-        .hero-slide.active {
+        .hero-carrusel.is-dragging .hero-track {
+            cursor: grabbing;
+        }
+
+        .hero-carrusel.is-dragging .hero-slide {
+            pointer-events: none;
+        }
+
+        .hero-slide {
+            position: relative;
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
             display: grid;
             grid-template-columns: 400px 1fr;
             gap: 40px;
             padding: 40px 60px;
+            text-decoration: none;
+            color: inherit;
+            box-sizing: border-box;
             background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.3));
             backdrop-filter: blur(24px) saturate(115%);
             -webkit-backdrop-filter: blur(24px) saturate(115%);
             border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 20px;
             box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-            animation: fadeIn 0.6s ease;
+            transform: scale(0.985);
+            transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeIn {
+        .hero-slide.is-active {
+            transform: scale(1);
+        }
+
+        @keyframes fadeInUpSoft {
             from {
-                opacity: 0;
-                transform: scale(0.98);
+                transform: translateY(18px);
             }
 
             to {
-                opacity: 1;
-                transform: scale(1);
+                transform: translateY(0);
             }
         }
+
+        .hero-slide .hero-contenido > * {
+            transform: translateY(18px);
+            opacity: 0.22;
+            transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease;
+        }
+
+        .hero-slide.is-active .hero-contenido > * {
+            transform: none;
+            opacity: 1;
+        }
+
+        .hero-slide.is-active .hero-contenido > *:nth-child(1) { transition-delay: 0.06s; }
+        .hero-slide.is-active .hero-contenido > *:nth-child(2) { transition-delay: 0.14s; }
+        .hero-slide.is-active .hero-contenido > *:nth-child(3) { transition-delay: 0.22s; }
+        .hero-slide.is-active .hero-contenido > *:nth-child(4) { transition-delay: 0.3s; }
+        .hero-slide.is-active .hero-contenido > *:nth-child(5) { transition-delay: 0.38s; }
+
         .hero-imagen {
             width: 100%;
             height: 100%;
@@ -815,11 +859,10 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             width: 100%;
             height: 100%;
             object-fit: contain;
-            transition: transform 0.4s ease;
-        }
-
-        .hero-slide:hover .hero-imagen img {
-            transform: scale(1.05);
+            will-change: transform;
+            transform: translate3d(0, 0, 0) scale(1.12);
+            transition: none;
+            pointer-events: none;
         }
 
         .hero-contenido {
@@ -949,37 +992,51 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             background: rgba(255, 255, 255, 0.3);
             border-radius: 2px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1), background 0.45s ease;
         }
 
         .indicador.active {
-            background: #9ca3af;
+            background: #e5e7eb;
             width: 60px;
         }
 
         /* PROXIMOS EVENTOS */
         .carrusel-horizontal {
             position: relative;
-            padding: 0 60px;
+            padding: 0 56px;
         }
 
-        .eventos-scroll-container {
+        .proximos-viewport {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+            touch-action: pan-y;
+            container-type: inline-size;
+            container-name: proximos;
+        }
+
+        .eventos-track {
             display: flex;
             gap: 20px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            padding: 10px 0;
+            will-change: transform;
+            cursor: grab;
+            padding: 10px 0 14px;
         }
 
-        .eventos-scroll-container::-webkit-scrollbar {
-            display: none;
+        .carrusel-horizontal.is-dragging .eventos-track {
+            cursor: grabbing;
+        }
+
+        .carrusel-horizontal.is-dragging .evento-card {
+            pointer-events: none;
         }
 
         .evento-card {
-            flex: 0 0 auto;
-            width: 280px;
+            flex: 0 0 calc((100cqw - 40px) / 3);
+            width: calc((100cqw - 40px) / 3);
+            max-width: none;
+            min-width: 0;
+            box-sizing: border-box;
             background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.3));
             backdrop-filter: blur(22px) saturate(115%);
             -webkit-backdrop-filter: blur(22px) saturate(115%);
@@ -987,7 +1044,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.14);
             box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease, border-color 0.35s ease;
             text-decoration: none;
             color: inherit;
             display: block;
@@ -1120,6 +1177,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
 
         .eventos-proximos-section {
             margin-bottom: 60px;
+            animation: fadeInUpSoft 0.8s ease 0.12s both;
         }
 
         .no-eventos-msg {
@@ -1369,8 +1427,11 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
     <main class="hero" id="inicio">
         <section class="eventos-semana-section desktop-only">
             <div class="hero-carrusel" id="hero-carrusel">
-                <button class="btn-hero-nav prev" id="btn-hero-prev"><i class="bi bi-chevron-left"></i></button>
-                <button class="btn-hero-nav next" id="btn-hero-next"><i class="bi bi-chevron-right"></i></button>
+                <div class="hero-viewport">
+                    <div class="hero-track" id="hero-track"></div>
+                </div>
+                <button type="button" class="btn-hero-nav prev" id="btn-hero-prev" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
+                <button type="button" class="btn-hero-nav next" id="btn-hero-next" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
                 <div class="hero-indicadores" id="hero-indicadores"></div>
             </div>
         </section>
@@ -1378,11 +1439,12 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         <?php if (!empty($eventos_proximos)): ?>
             <section class="eventos-proximos-section desktop-only">
                 <h2 class="section-title">Próximos Eventos</h2>
-                <div class="carrusel-horizontal">
-                    <div id="eventos-proximos-container" class="eventos-scroll-container"></div>
-                    <button class="btn-nav-carrusel prev" id="btn-prev-proximos"><i class="bi bi-chevron-left"></i></button>
-                    <button class="btn-nav-carrusel next" id="btn-next-proximos"><i
-                            class="bi bi-chevron-right"></i></button>
+                <div class="carrusel-horizontal" id="carrusel-proximos">
+                    <div class="proximos-viewport">
+                        <div id="eventos-proximos-container" class="eventos-track"></div>
+                    </div>
+                    <button type="button" class="btn-nav-carrusel prev" id="btn-prev-proximos" aria-label="Anteriores"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="btn-nav-carrusel next" id="btn-next-proximos" aria-label="Siguientes"><i class="bi bi-chevron-right"></i></button>
                 </div>
             </section>
         <?php endif; ?>
@@ -1619,27 +1681,243 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             document.body.classList.remove('mobile-detail-open');
         }
 
-        // RENDERIZAR CARRUSEL HERO
+        // RENDERIZAR CARRUSEL HERO (parallax + lerp, sin librerías)
         let heroSlideActual = 0;
         let heroAutoplay = null;
+        let heroRaf = null;
+        let heroCurrentX = 0;
+        let heroTargetX = 0;
+        let heroWidth = 0;
+        let heroDragging = false;
+        let heroDragStartX = 0;
+        let heroDragOriginX = 0;
+        let heroVelocity = 0;
+        let heroLastMoveX = 0;
+        let heroLastMoveT = 0;
+        let heroDidDrag = false;
+        let heroParallaxBound = false;
+        let heroLastTick = 0;
+
+        function heroSlides() {
+            return document.querySelectorAll('#hero-track .hero-slide');
+        }
+
+        function medirHeroWidth() {
+            const viewport = document.querySelector('#hero-carrusel .hero-viewport');
+            heroWidth = viewport ? viewport.clientWidth : 0;
+        }
+
+        function actualizarHeroIndicadores() {
+            document.querySelectorAll('#hero-indicadores .indicador').forEach((el, i) => {
+                el.classList.toggle('active', i === heroSlideActual);
+            });
+            heroSlides().forEach((slide, i) => {
+                slide.classList.toggle('is-active', i === heroSlideActual);
+            });
+        }
+
+        function aplicarHeroParallax() {
+            if (!heroWidth) return;
+            const progress = -heroCurrentX / heroWidth;
+            heroSlides().forEach((slide, i) => {
+                const img = slide.querySelector('.hero-imagen img');
+                if (!img) return;
+                const delta = (i - progress) * (heroWidth * 0.18);
+                img.style.transform = `translate3d(${delta}px, 0, 0) scale(1.12)`;
+            });
+        }
+
+        function heroTick(now) {
+            const t = typeof now === 'number' ? now : performance.now();
+            const dt = heroLastTick ? Math.min(34, t - heroLastTick) : 16.7;
+            heroLastTick = t;
+
+            if (!heroDragging) {
+                // Amortiguación independiente del FPS: más cremosa y estable
+                const lambda = 5.2;
+                const alpha = 1 - Math.exp(-lambda * dt / 1000);
+                heroCurrentX += (heroTargetX - heroCurrentX) * alpha;
+
+                // Micro-inercia residual para que no “pegue” de golpe
+                heroVelocity *= Math.exp(-6.5 * dt / 1000);
+                heroCurrentX += heroVelocity * dt * 0.55;
+
+                if (Math.abs(heroTargetX - heroCurrentX) < 0.2 && Math.abs(heroVelocity) < 0.02) {
+                    heroCurrentX = heroTargetX;
+                    heroVelocity = 0;
+                }
+            }
+
+            const track = document.getElementById('hero-track');
+            if (track) {
+                track.style.transform = `translate3d(${heroCurrentX}px, 0, 0)`;
+            }
+            aplicarHeroParallax();
+            heroRaf = requestAnimationFrame(heroTick);
+        }
+
+        function asegurarHeroLoop() {
+            if (heroRaf == null) {
+                heroLastTick = 0;
+                heroRaf = requestAnimationFrame(heroTick);
+            }
+        }
+
+        function irAHeroSlide(index, { restartAutoplay = true } = {}) {
+            const slides = heroSlides();
+            if (!slides.length || !heroWidth) return;
+
+            const n = slides.length;
+            const prev = heroSlideActual;
+            const next = ((index % n) + n) % n;
+            const wrapping =
+                (prev === n - 1 && next === 0 && index >= prev) ||
+                (prev === 0 && next === n - 1 && index <= prev);
+
+            heroSlideActual = next;
+            heroTargetX = -heroSlideActual * heroWidth;
+            if (wrapping) {
+                // Evita recorrer todos los slides al dar la vuelta
+                heroCurrentX = heroTargetX;
+                heroVelocity = 0;
+            }
+            actualizarHeroIndicadores();
+
+            if (restartAutoplay) {
+                detenerHeroAutoplay();
+                iniciarHeroAutoplay();
+            }
+        }
+
+        function snapHeroDesdeArrastre() {
+            if (!heroWidth) return;
+            // Más “coast” al soltar: proyecta más lejos y suaviza el destino
+            const projected = heroCurrentX + heroVelocity * 280;
+            let index = Math.round(-projected / heroWidth);
+            const n = heroSlides().length;
+            index = Math.max(0, Math.min(n - 1, index));
+            heroVelocity *= 0.35;
+            irAHeroSlide(index);
+        }
+
+        function bindHeroPointer() {
+            if (heroParallaxBound) return;
+            const carrusel = document.getElementById('hero-carrusel');
+            const track = document.getElementById('hero-track');
+            if (!carrusel || !track) return;
+            heroParallaxBound = true;
+            const DRAG_THRESHOLD = 14;
+
+            const onPointerDown = (e) => {
+                if (heroSlides().length < 2) return;
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                // Solo prepara; el arrastre real empieza al superar el umbral
+                heroDragging = false;
+                heroDidDrag = false;
+                heroDragStartX = e.clientX;
+                heroDragOriginX = heroCurrentX;
+                heroLastMoveX = e.clientX;
+                heroLastMoveT = performance.now();
+                heroVelocity = 0;
+                track.dataset.pointerDown = '1';
+                track.dataset.pointerId = String(e.pointerId);
+            };
+
+            const onPointerMove = (e) => {
+                if (track.dataset.pointerDown !== '1') return;
+                if (track.dataset.pointerId && Number(track.dataset.pointerId) !== e.pointerId) return;
+
+                const dx = e.clientX - heroDragStartX;
+                if (!heroDidDrag) {
+                    if (Math.abs(dx) < DRAG_THRESHOLD) return;
+                    heroDidDrag = true;
+                    heroDragging = true;
+                    carrusel.classList.add('is-dragging');
+                    detenerHeroAutoplay();
+                    try { track.setPointerCapture(e.pointerId); } catch (_) {}
+                }
+
+                const n = heroSlides().length;
+                const minX = -(n - 1) * heroWidth;
+                let next = heroDragOriginX + dx;
+                if (next > 0) next *= 0.28;
+                if (next < minX) next = minX + (next - minX) * 0.28;
+                heroCurrentX = next;
+
+                const now = performance.now();
+                const moveDt = Math.max(1, now - heroLastMoveT);
+                const instantV = (e.clientX - heroLastMoveX) / moveDt;
+                heroVelocity = heroVelocity * 0.65 + instantV * 0.35;
+                heroLastMoveX = e.clientX;
+                heroLastMoveT = now;
+            };
+
+            const onPointerUp = (e) => {
+                if (track.dataset.pointerDown !== '1') return;
+                track.dataset.pointerDown = '0';
+                delete track.dataset.pointerId;
+
+                const wasDrag = heroDidDrag;
+                heroDragging = false;
+                carrusel.classList.remove('is-dragging');
+                try { track.releasePointerCapture(e.pointerId); } catch (_) {}
+
+                if (wasDrag) {
+                    snapHeroDesdeArrastre();
+                    // Bloquea solo el click sintético inmediato del drag
+                    const blockClick = (ev) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        track.removeEventListener('click', blockClick, true);
+                    };
+                    track.addEventListener('click', blockClick, true);
+                    setTimeout(() => {
+                        track.removeEventListener('click', blockClick, true);
+                        heroDidDrag = false;
+                    }, 50);
+                } else {
+                    heroDidDrag = false;
+                }
+            };
+
+            track.addEventListener('pointerdown', onPointerDown);
+            track.addEventListener('pointermove', onPointerMove);
+            track.addEventListener('pointerup', onPointerUp);
+            track.addEventListener('pointercancel', onPointerUp);
+
+            window.addEventListener('resize', () => {
+                medirHeroWidth();
+                heroCurrentX = -heroSlideActual * heroWidth;
+                heroTargetX = heroCurrentX;
+                heroVelocity = 0;
+                aplicarHeroParallax();
+            });
+        }
 
         function renderizarHeroCarrusel() {
             const heroCarrusel = document.getElementById('hero-carrusel');
+            const track = document.getElementById('hero-track');
             const indicadores = document.getElementById('hero-indicadores');
-            if (!heroCarrusel) return;
+            if (!heroCarrusel || !track) return;
+
+            track.innerHTML = '';
+            if (indicadores) indicadores.innerHTML = '';
 
             if (!eventosEstaSemana || eventosEstaSemana.length === 0) {
-                heroCarrusel.innerHTML = `
-                    <div class="no-eventos-msg" style="margin: 40px; text-align: center;">
+                track.innerHTML = `
+                    <div class="no-eventos-msg" style="flex: 0 0 100%; margin: 40px; text-align: center; box-sizing: border-box;">
                         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
                         <h4 style="margin-top: 15px;">No hay eventos esta semana</h4>
                         <p>Revisa nuestros próximos eventos más abajo</p>
                     </div>`;
+                heroCarrusel.querySelectorAll('.btn-hero-nav').forEach(b => b.style.display = 'none');
                 return;
             }
 
-            const slides = heroCarrusel.querySelectorAll('.hero-slide');
-            slides.forEach(s => s.remove());
+            const multi = eventosEstaSemana.length > 1;
+            heroCarrusel.querySelectorAll('.btn-hero-nav').forEach(b => {
+                b.style.display = multi ? '' : 'none';
+            });
 
             eventosEstaSemana.forEach((evento, index) => {
                 const slide = document.createElement('a');
@@ -1653,7 +1931,8 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                 } else {
                     slide.href = `cartelera_cliente.php`;
                 }
-                slide.className = `hero-slide ${index === 0 ? 'active' : ''}`;
+                slide.className = `hero-slide${index === 0 ? ' is-active' : ''}`;
+                slide.setAttribute('aria-label', evento.titulo || 'Evento');
 
                 const imagen = document.createElement('div');
                 imagen.className = 'hero-imagen';
@@ -1701,51 +1980,239 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
 
                 slide.appendChild(imagen);
                 slide.appendChild(contenido);
-                heroCarrusel.insertBefore(slide, heroCarrusel.querySelector('.btn-hero-nav'));
+                track.appendChild(slide);
             });
 
-            if (indicadores) {
-                indicadores.innerHTML = '';
+            if (indicadores && multi) {
                 eventosEstaSemana.forEach((_, index) => {
                     const indicador = document.createElement('div');
                     indicador.className = `indicador ${index === 0 ? 'active' : ''}`;
-                    indicador.addEventListener('click', () => cambiarHeroSlide(index));
+                    indicador.addEventListener('click', () => irAHeroSlide(index));
                     indicadores.appendChild(indicador);
                 });
             }
 
+            heroSlideActual = 0;
+            medirHeroWidth();
+            heroCurrentX = 0;
+            heroTargetX = 0;
+            bindHeroPointer();
+            asegurarHeroLoop();
+            actualizarHeroIndicadores();
             iniciarHeroAutoplay();
         }
 
         function cambiarHeroSlide(nuevoIndex) {
-            const slides = document.querySelectorAll('.hero-slide');
-            const indicadores = document.querySelectorAll('.indicador');
-
-            if (!slides.length) return;
-
-            slides[heroSlideActual].classList.remove('active');
-            if (indicadores[heroSlideActual]) indicadores[heroSlideActual].classList.remove('active');
-
-            heroSlideActual = nuevoIndex;
-            if (heroSlideActual >= slides.length) heroSlideActual = 0;
-            if (heroSlideActual < 0) heroSlideActual = slides.length - 1;
-
-            slides[heroSlideActual].classList.add('active');
-            if (indicadores[heroSlideActual]) indicadores[heroSlideActual].classList.add('active');
+            irAHeroSlide(nuevoIndex);
         }
 
         function iniciarHeroAutoplay() {
             clearInterval(heroAutoplay);
             if (eventosEstaSemana && eventosEstaSemana.length > 1) {
                 heroAutoplay = setInterval(() => {
-                    cambiarHeroSlide(heroSlideActual + 1);
-                }, 5000);
+                    irAHeroSlide(heroSlideActual + 1, { restartAutoplay: false });
+                }, 6500);
             }
         }
 
         function detenerHeroAutoplay() { clearInterval(heroAutoplay); }
 
         // RENDERIZAR PRÓXIMOS EVENTOS
+        const PROXIMOS_VISIBLE = 3;
+        const PROXIMOS_GAP = 20;
+        let proximosPage = 0;
+        let proximosCurrentX = 0;
+        let proximosTargetX = 0;
+        let proximosVelocity = 0;
+        let proximosWidth = 0;
+        let proximosCardW = 0;
+        let proximosRaf = null;
+        let proximosLastTick = 0;
+        let proximosDragging = false;
+        let proximosDidDrag = false;
+        let proximosDragStartX = 0;
+        let proximosDragOriginX = 0;
+        let proximosLastMoveX = 0;
+        let proximosLastMoveT = 0;
+        let proximosBound = false;
+
+        function proximosCards() {
+            return document.querySelectorAll('#eventos-proximos-container .evento-card');
+        }
+
+        function proximosMaxPage() {
+            const n = proximosCards().length;
+            return Math.max(0, Math.ceil(n / PROXIMOS_VISIBLE) - 1);
+        }
+
+        function proximosPageStep() {
+            return PROXIMOS_VISIBLE * (proximosCardW + PROXIMOS_GAP);
+        }
+
+        function proximosMaxOffset() {
+            return proximosMaxPage() * proximosPageStep();
+        }
+
+        function medirProximos() {
+            const viewport = document.querySelector('#carrusel-proximos .proximos-viewport');
+            if (!viewport) return;
+            proximosWidth = viewport.clientWidth;
+            proximosCardW = (proximosWidth - PROXIMOS_GAP * (PROXIMOS_VISIBLE - 1)) / PROXIMOS_VISIBLE;
+            proximosCards().forEach(card => {
+                card.style.flex = `0 0 ${proximosCardW}px`;
+                card.style.width = `${proximosCardW}px`;
+            });
+        }
+
+        function actualizarBotonesProximos() {
+            const btnPrev = document.getElementById('btn-prev-proximos');
+            const btnNext = document.getElementById('btn-next-proximos');
+            const maxPage = proximosMaxPage();
+            const multi = maxPage > 0;
+            [btnPrev, btnNext].forEach(btn => {
+                if (!btn) return;
+                btn.style.display = multi ? '' : 'none';
+            });
+            if (!btnPrev || !btnNext) return;
+            btnPrev.style.opacity = proximosPage > 0 ? '1' : '0.3';
+            btnNext.style.opacity = proximosPage < maxPage ? '1' : '0.3';
+            btnPrev.style.pointerEvents = proximosPage > 0 ? 'auto' : 'none';
+            btnNext.style.pointerEvents = proximosPage < maxPage ? 'auto' : 'none';
+        }
+
+        function irAPaginaProximos(page) {
+            const maxPage = proximosMaxPage();
+            proximosPage = Math.max(0, Math.min(maxPage, page));
+            proximosTargetX = -proximosPage * proximosPageStep();
+            actualizarBotonesProximos();
+        }
+
+        function proximosTick(now) {
+            const t = typeof now === 'number' ? now : performance.now();
+            const dt = proximosLastTick ? Math.min(34, t - proximosLastTick) : 16.7;
+            proximosLastTick = t;
+
+            if (!proximosDragging) {
+                const lambda = 5.2;
+                const alpha = 1 - Math.exp(-lambda * dt / 1000);
+                proximosCurrentX += (proximosTargetX - proximosCurrentX) * alpha;
+                proximosVelocity *= Math.exp(-6.5 * dt / 1000);
+                proximosCurrentX += proximosVelocity * dt * 0.55;
+                if (Math.abs(proximosTargetX - proximosCurrentX) < 0.2 && Math.abs(proximosVelocity) < 0.02) {
+                    proximosCurrentX = proximosTargetX;
+                    proximosVelocity = 0;
+                }
+            }
+
+            const track = document.getElementById('eventos-proximos-container');
+            if (track) {
+                track.style.transform = `translate3d(${proximosCurrentX}px, 0, 0)`;
+            }
+            proximosRaf = requestAnimationFrame(proximosTick);
+        }
+
+        function asegurarProximosLoop() {
+            if (proximosRaf == null) {
+                proximosLastTick = 0;
+                proximosRaf = requestAnimationFrame(proximosTick);
+            }
+        }
+
+        function snapProximosDesdeArrastre() {
+            const step = proximosPageStep();
+            if (!step) return;
+            const projected = proximosCurrentX + proximosVelocity * 280;
+            let page = Math.round(-projected / step);
+            proximosVelocity *= 0.35;
+            irAPaginaProximos(page);
+        }
+
+        function bindProximosPointer() {
+            if (proximosBound) return;
+            const wrap = document.getElementById('carrusel-proximos');
+            const track = document.getElementById('eventos-proximos-container');
+            if (!wrap || !track) return;
+            proximosBound = true;
+            const DRAG_THRESHOLD = 14;
+
+            track.addEventListener('pointerdown', (e) => {
+                if (proximosMaxPage() < 1) return;
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                proximosDragging = false;
+                proximosDidDrag = false;
+                proximosDragStartX = e.clientX;
+                proximosDragOriginX = proximosCurrentX;
+                proximosLastMoveX = e.clientX;
+                proximosLastMoveT = performance.now();
+                proximosVelocity = 0;
+                track.dataset.pointerDown = '1';
+                track.dataset.pointerId = String(e.pointerId);
+            });
+
+            track.addEventListener('pointermove', (e) => {
+                if (track.dataset.pointerDown !== '1') return;
+                if (track.dataset.pointerId && Number(track.dataset.pointerId) !== e.pointerId) return;
+
+                const dx = e.clientX - proximosDragStartX;
+                if (!proximosDidDrag) {
+                    if (Math.abs(dx) < DRAG_THRESHOLD) return;
+                    proximosDidDrag = true;
+                    proximosDragging = true;
+                    wrap.classList.add('is-dragging');
+                    try { track.setPointerCapture(e.pointerId); } catch (_) {}
+                }
+
+                const minX = -proximosMaxOffset();
+                let next = proximosDragOriginX + dx;
+                if (next > 0) next *= 0.28;
+                if (next < minX) next = minX + (next - minX) * 0.28;
+                proximosCurrentX = next;
+
+                const now = performance.now();
+                const moveDt = Math.max(1, now - proximosLastMoveT);
+                const instantV = (e.clientX - proximosLastMoveX) / moveDt;
+                proximosVelocity = proximosVelocity * 0.65 + instantV * 0.35;
+                proximosLastMoveX = e.clientX;
+                proximosLastMoveT = now;
+            });
+
+            const endDrag = (e) => {
+                if (track.dataset.pointerDown !== '1') return;
+                track.dataset.pointerDown = '0';
+                delete track.dataset.pointerId;
+
+                const wasDrag = proximosDidDrag;
+                proximosDragging = false;
+                wrap.classList.remove('is-dragging');
+                try { track.releasePointerCapture(e.pointerId); } catch (_) {}
+
+                if (wasDrag) {
+                    snapProximosDesdeArrastre();
+                    const blockClick = (ev) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        track.removeEventListener('click', blockClick, true);
+                    };
+                    track.addEventListener('click', blockClick, true);
+                    setTimeout(() => {
+                        track.removeEventListener('click', blockClick, true);
+                        proximosDidDrag = false;
+                    }, 50);
+                } else {
+                    proximosDidDrag = false;
+                }
+            };
+            track.addEventListener('pointerup', endDrag);
+            track.addEventListener('pointercancel', endDrag);
+
+            window.addEventListener('resize', () => {
+                medirProximos();
+                irAPaginaProximos(proximosPage);
+                proximosCurrentX = proximosTargetX;
+                proximosVelocity = 0;
+            });
+        }
+
         function renderizarEventosCarrusel(eventos, container) {
             if (!eventos || eventos.length === 0 || !container) return;
 
@@ -1803,27 +2270,32 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             });
         }
 
-        // SCROLL CARRUSEL
-        function configurarCarrusel(containerId, btnPrevId, btnNextId) {
-            const container = document.getElementById(containerId);
-            const btnPrev = document.getElementById(btnPrevId);
-            const btnNext = document.getElementById(btnNextId);
+        function configurarCarruselProximos() {
+            const btnPrev = document.getElementById('btn-prev-proximos');
+            const btnNext = document.getElementById('btn-next-proximos');
+            if (!document.getElementById('eventos-proximos-container')) return;
 
-            if (!container || !btnPrev || !btnNext) return;
+            medirProximos();
+            proximosPage = 0;
+            proximosCurrentX = 0;
+            proximosTargetX = 0;
+            proximosVelocity = 0;
+            bindProximosPointer();
+            asegurarProximosLoop();
+            actualizarBotonesProximos();
 
-            const scrollAmount = 300;
-            btnNext.addEventListener('click', () => { container.scrollBy({ left: scrollAmount, behavior: 'smooth' }); });
-            btnPrev.addEventListener('click', () => { container.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); });
-
-            function actualizarBotones() {
-                const maxScroll = container.scrollWidth - container.clientWidth;
-                btnPrev.style.opacity = container.scrollLeft > 0 ? '1' : '0.3';
-                btnNext.style.opacity = container.scrollLeft < maxScroll - 10 ? '1' : '0.3';
-                btnPrev.style.pointerEvents = container.scrollLeft > 0 ? 'auto' : 'none';
-                btnNext.style.pointerEvents = container.scrollLeft < maxScroll - 10 ? 'auto' : 'none';
+            if (btnPrev) {
+                btnPrev.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    irAPaginaProximos(proximosPage - 1);
+                });
             }
-            container.addEventListener('scroll', actualizarBotones);
-            actualizarBotones();
+            if (btnNext) {
+                btnNext.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    irAPaginaProximos(proximosPage + 1);
+                });
+            }
         }
 
         // INICIALIZACIÓN
@@ -1838,27 +2310,27 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             if (btnHeroPrev) {
                 btnHeroPrev.addEventListener('click', (e) => {
                     e.preventDefault();
-                    cambiarHeroSlide(heroSlideActual - 1);
-                    detenerHeroAutoplay();
-                    setTimeout(iniciarHeroAutoplay, 1000);
+                    e.stopPropagation();
+                    irAHeroSlide(heroSlideActual - 1);
                 });
             }
             if (btnHeroNext) {
                 btnHeroNext.addEventListener('click', (e) => {
                     e.preventDefault();
-                    cambiarHeroSlide(heroSlideActual + 1);
-                    detenerHeroAutoplay();
-                    setTimeout(iniciarHeroAutoplay, 1000);
+                    e.stopPropagation();
+                    irAHeroSlide(heroSlideActual + 1);
                 });
             }
             if (heroCarrusel) {
                 heroCarrusel.addEventListener('mouseenter', detenerHeroAutoplay);
-                heroCarrusel.addEventListener('mouseleave', iniciarHeroAutoplay);
+                heroCarrusel.addEventListener('mouseleave', () => {
+                    if (!heroDragging) iniciarHeroAutoplay();
+                });
             }
 
             if (containerProximos) {
                 renderizarEventosCarrusel(eventosProximos, containerProximos);
-                configurarCarrusel('eventos-proximos-container', 'btn-prev-proximos', 'btn-next-proximos');
+                configurarCarruselProximos();
             }
 
             if (hamburgerBtn && mainNav) {

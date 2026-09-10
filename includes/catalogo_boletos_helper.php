@@ -79,6 +79,37 @@ function tipo_boleto_desde_nombre_categoria(string $nombre): ?string
 }
 
 /**
+ * IDs de categoría que tienen al menos un asiento en mapa_json del evento.
+ *
+ * @return int[]
+ */
+function ids_categorias_mapeadas_evento(mysqli $conn, int $id_evento): array
+{
+    $stmt = $conn->prepare('SELECT mapa_json FROM evento WHERE id_evento = ? LIMIT 1');
+    $stmt->bind_param('i', $id_evento);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$row) {
+        return [];
+    }
+
+    $mapa = json_decode($row['mapa_json'] ?? '{}', true);
+    if (!is_array($mapa) || !$mapa) {
+        return [];
+    }
+
+    $ids = [];
+    foreach ($mapa as $idCat) {
+        $id = (int) $idCat;
+        if ($id > 0) {
+            $ids[$id] = true;
+        }
+    }
+    return array_map('intval', array_keys($ids));
+}
+
+/**
  * Tipos estándar de precio (admin) presentes como categoría en el evento.
  * @return string[] ej. ['general', 'nino', 'discapacitado']
  */
@@ -95,17 +126,25 @@ function tipos_precio_estandar_evento(mysqli $conn, int $id_evento): array
 }
 
 /**
- * Tipos seleccionables en el punto de venta para este evento.
+ * Tipos seleccionables en venta (taquilla / web) para este evento.
+ * Solo considera categorías con asientos realmente mapeados en mapa_json.
+ * Así "Discapacitado" no aparece si existe en el catálogo pero nadie lo pintó en el mapa.
+ *
  * @return string[] ej. ['adulto', 'cortesia'] o ['adulto', 'nino', 'discapacitado', 'cortesia']
  */
 function tipos_boleto_venta_evento(mysqli $conn, int $id_evento): array
 {
     $categorias = obtener_categorias_evento_completas($conn, $id_evento);
+    $idsMapeados = array_fill_keys(ids_categorias_mapeadas_evento($conn, $id_evento), true);
     $tipos_std = [];
     $tiene_vendible = false;
 
     foreach ($categorias as $cat) {
         if (es_categoria_no_venta($cat['nombre_categoria'])) {
+            continue;
+        }
+        // Solo categorías usadas en el mapa (misma fuente que ve el admin al pintar)
+        if (!isset($idsMapeados[(int) $cat['id_categoria']])) {
             continue;
         }
         $tiene_vendible = true;
@@ -116,7 +155,7 @@ function tipos_boleto_venta_evento(mysqli $conn, int $id_evento): array
     }
 
     $tipos = [];
-    // Adulto: categoría General o cualquier zona vendible (VIP, etc.)
+    // Adulto: categoría General o cualquier zona vendible mapeada (VIP, etc.)
     if (in_array('general', $tipos_std, true) || $tiene_vendible) {
         $tipos[] = 'adulto';
     }
