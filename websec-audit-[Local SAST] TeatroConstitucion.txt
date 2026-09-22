@@ -1,0 +1,4301 @@
+﻿WEBSEC AUDIT
+// INFORME DE SEGURIDAD WEB v4.0 - 20 modulos de analisis
+
+Target: [Local SAST] TeatroConstitucion
+
+Fecha: 22/9/2026, 11:09:45 a.m.
+
+RIESGO ALTO
+
+5
+1 Criticos 19 Altos 107 Medios 108 Bajos 255 Info
+
+// 23 MODULOS ANALIZADOS
+
+01. Backend detect | 02. Conexion HTTP | 03. Tecnologias | 04. Cabeceras | 05. Cookies | 06. HTTPS/TLS | 07. SSL Certificado | 08. Rutas expuestas
+
+09. WAF/CDN | 10. Codigo HTML | 11. robots.txt | 12. sec.txt/sitemap | 13. Secretos | 14. Libs CVEs ext | 15. Scripts & SRI | 16. DOM XSS
+
+17. CORS/Perf | 18. DNS Security | 19. Subdominios | 20. Port Scanner | 21. Vuln Activas | 22. WP & Plugins | 23. Reporte PDF
+
+// RECONOCIMIENTO
+
+URL: [Local SAST] TeatroConstitucion
+
+HTTP Status: 200
+
+Tecnologias: Inspeccion de codigo fuente estatico (.html, .js, .php, .env, etc.)
+
+Server: -
+
+SPF: AUSENTE
+
+DMARC: AUSENTE
+
+DNSSEC: Inactivo
+
+Subdominios: 0 encontrados
+
+// HALLAZGOS (490)
+
+CRITICO Token/Secret en codigo expuesto en codigo fuente
+
+Se detecto lo que parece ser un Token/Secret en codigo directamente en el HTML publico.
+
+> Mueve todos los secrets al servidor. Nunca expongas keys en el frontend.
+
+secret=' . rawurlencode($whSecret);
+    }
+    $urls = [
+ ...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 1/83
+
+
+
+ALTO 3 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+3 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 2 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+2 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 2/83
+
+
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 sink(s) DOM XSS de alto riesgo detectado(s) (en crear_evento.php)
+
+Se encontraron funciones peligrosas que pueden ser explotadas para inyeccion de codigo JavaScript malicioso.
+
+> Reemplaza eval() con JSON.parse(), document.write con DOM API, innerHTML con textContent cuando sea posible.
+
+document.write (x1) - DOM XSS via document.write
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO Secreto expuesto: Hardcoded Password (1 encontrado) (en
+TeatroConstitucion/includes/pagos/PaymentService.php)
+
+Se detecto un patron que coincide con Hardcoded Password en el codigo fuente HTML. Esto es extremadamente peligroso si es una clave real.
+
+> Elimina inmediatamente este secreto del codigo, revoca la clave comprometida y genera una nueva. Usa variables de entorno del servidor.
+
+secret=' . r...[REDACTED]
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 3/83
+
+
+
+ALTO 2 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+2 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 2 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+2 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO 5 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+5 <form> detectados, 0 tokens CSRF encontrados
+
+ALTO Contrasena en codigo en TeatroConstitucion/INSTRUCCIONES_LOGIN.md
+
+Se detecto una posible contrasena hardcodeada.
+
+> Extrae esta contrasena a la configuracion externa o un gestor de secretos.
+
+Fragmento: password = 'nueva_password'...
+
+ALTO Secreto expuesto: Hardcoded Password (1 encontrado) (en TeatroConstitucion/INSTRUCCIONES_LOGIN.md)
+
+Se detecto un patron que coincide con Hardcoded Password en el codigo fuente HTML. Esto es extremadamente peligroso si es una clave real.
+
+> Elimina inmediatamente este secreto del codigo, revoca la clave comprometida y genera una nueva. Usa variables de entorno del servidor.
+
+password = '...[REDACTED]
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 4/83
+
+
+
+ALTO 1 formulario(s) sin proteccion CSRF visible
+
+No se detectan tokens CSRF en los formularios. Esto puede permitir ataques Cross-Site Request Forgery.
+
+> Implementa tokens CSRF en todos los formularios que modifiquen datos.
+
+1 <form> detectados, 0 tokens CSRF encontrados
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/Ajs_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/bsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = f...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/bsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/bsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 5/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/bsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = v...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/bsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x8) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/datos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = (...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/datos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/datos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 6/83
+
+
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x4) - XSS via innerHTML
+
+MEDIO 1 iframe(s) externo(s) detectado(s)
+
+Los iframes externos pueden ser usados para phishing o inyeccion de contenido malicioso.
+
+> Verifica que los iframes sean de fuentes confiables y usa sandbox.
+
+<iframe src="../../admin_interfaz/rpt_reportes/index.php"
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/dsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/dsc_boletos/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x11) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/limpieza/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 7/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/limpieza/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x2) - XSS via innerHTML
+
+MEDIO Campo de password sin autocomplete="off"
+
+Los campos de contrasena permiten autocompletado del navegador, lo que puede ser un riesgo en computadoras compartidas.
+
+> Agrega autocomplete="off" o autocomplete="new-password" a campos sensibles.
+
+<input type="password"> sin autocomplete="off"
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/ordenes_online/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/ordenes_online/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/ordenes_online/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = r...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 8/83
+
+
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x5) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/rpt_reportes/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = (...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x2) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/transacciones/estadisticas.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/transacciones/estadisticas.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = d...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en estadisticas.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x13) - XSS via innerHTML
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 9/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/transacciones/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/transacciones/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = d...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/transacciones/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/admin_interfaz/transacciones/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = c...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x7) - XSS via innerHTML
+
+MEDIO 1 iframe(s) externo(s) detectado(s)
+
+Los iframes externos pueden ser usados para phishing o inyeccion de contenido malicioso.
+
+> Verifica que los iframes sean de fuentes confiables y usa sandbox.
+
+<iframe id="statsIframe" src="estadisticas.php"
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 10/83
+
+
+
+MEDIO 1 iframe(s) externo(s) detectado(s)
+
+Los iframes externos pueden ser usados para phishing o inyeccion de contenido malicioso.
+
+> Verifica que los iframes sean de fuentes confiables y usa sandbox.
+
+<iframe class="admin-frame" name="contentFrame" id="contentFrame" src="rpt_repor
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/auth/registrar_empleado.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en registrar_empleado.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Campo de password sin autocomplete="off"
+
+Los campos de contrasena permiten autocompletado del navegador, lo que puede ser un riesgo en computadoras compartidas.
+
+> Agrega autocomplete="off" o autocomplete="new-password" a campos sensibles.
+
+<input type="password"> sin autocomplete="off"
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/control_entrada/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/control_entrada/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = v...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 11/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/control_entrada/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/control_entrada/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = i...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x17) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/js/orden-aviso.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en orden-aviso.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO 1 iframe(s) externo(s) detectado(s)
+
+Los iframes externos pueden ser usados para phishing o inyeccion de contenido malicioso.
+
+> Verifica que los iframes sean de fuentes confiables y usa sandbox.
+
+<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4536.51346787
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 12/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/comprar.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/comprar.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en comprar.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x2) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/checkout_online.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = i...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/checkout_online.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en checkout_online.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x2) - XSS via innerHTML
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 13/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/crt_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x10) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/act_evento.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en act_evento.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x5) - XSS via innerHTML
+
+MEDIO Campo de password sin autocomplete="off"
+
+Los campos de contrasena permiten autocompletado del navegador, lo que puede ser un riesgo en computadoras compartidas.
+
+> Agrega autocomplete="off" o autocomplete="new-password" a campos sensibles.
+
+<input type="password"> sin autocomplete="off"
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 14/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/filter_realtime.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en filter_realtime.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/editar_evento.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en editar_evento.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x4) - XSS via innerHTML
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en procesar_evento.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x2) - XSS via innerHTML
+
+MEDIO 1 iframe(s) externo(s) detectado(s)
+
+Los iframes externos pueden ser usados para phishing o inyeccion de contenido malicioso.
+
+> Verifica que los iframes sean de fuentes confiables y usa sandbox.
+
+<iframe class="event-frame" name="contentFrame" id="contentFrame" src="<?php ech
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 15/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/crear_evento.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/crear_evento.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en crear_evento.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x10) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/htr_eventos.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/evt_interfaz/htr_eventos.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en htr_eventos.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x5) - XSS via innerHTML
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 16/83
+
+
+
+MEDIO Campo de password sin autocomplete="off"
+
+Los campos de contrasena permiten autocompletado del navegador, lo que puede ser un riesgo en computadoras compartidas.
+
+> Agrega autocomplete="off" o autocomplete="new-password" a campos sensibles.
+
+<input type="password"> sin autocomplete="off"
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/mp_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/carrito.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/carrito.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/carrito.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = b...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 17/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/carrito.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/carrito.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = o...
+
+MEDIO 2 sink(s) DOM XSS de riesgo medio detectado(s) (en carrito.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x19) - XSS via innerHTML
+insertAdjacentHTML (x4) - XSS via HTML injection
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/escaner_qr.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/escaner_qr.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 2 sink(s) DOM XSS de riesgo medio detectado(s) (en escaner_qr.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x18) - XSS via innerHTML
+insertAdjacentHTML (x2) - XSS via HTML injection
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 18/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/descuentos-modal.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO 2 sink(s) DOM XSS de riesgo medio detectado(s) (en descuentos-modal.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+insertAdjacentHTML (x1) - XSS via HTML injection
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/notifications.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en notifications.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/evento-sync.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en evento-sync.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 19/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/menu-mejoras.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/menu-mejoras.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en menu-mejoras.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x4) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/seleccion-multiple.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en seleccion-multiple.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/js/teatro-sync.js
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 20/83
+
+
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en teatro-sync.js)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x1) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = h...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = n...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x14) - XSS via innerHTML
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 21/83
+
+
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/visor_cliente.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/vnt_interfaz/visor_cliente.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = `...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en visor_cliente.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x6) - XSS via innerHTML
+
+MEDIO Riesgo de DOM XSS en TeatroConstitucion/index.php
+
+Uso de innerHTML asignando un valor dinamico. Si el valor proviene del usuario, puede resultar en XSS.
+
+> Usa .textContent o sanitiza el valor con una libreria como DOMPurify antes de insertarlo.
+
+Fragmento: .innerHTML = ...
+
+MEDIO 1 sink(s) DOM XSS de riesgo medio detectado(s) (en index.php)
+
+Se encontraron funciones que pueden ser vectores de XSS si reciben datos no sanitizados del usuario.
+
+> Sanitiza toda entrada del usuario antes de pasarla a estas funciones. Usa DOMPurify o libraries similares.
+
+innerHTML (x3) - XSS via innerHTML
+
+MEDIO 8 iframe(s) externo(s) detectado(s)
+
+Los iframes externos pueden ser usados para phishing o inyeccion de contenido malicioso.
+
+> Verifica que los iframes sean de fuentes confiables y usa sandbox.
+
+<iframe id="frame-venta" src="vnt_interfaz/index.php"
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 22/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO README.md expuesto y detectado en Local: TeatroConstitucion/admin_interfaz/datos/README.md
+
+Este tipo de archivo suele contener credenciales, tokens o configuraciones criticas. Si el servidor web no esta bien configurado y el archivo se sube a
+internet, la aplicacion entera puede ser comprometida.
+
+> Asegurate de que "README.md" no se transfiera al servidor publico y que este protegido en tu servidor web. Agregalo al archivo .gitignore.
+
+Ruta Local: TeatroConstitucion/admin_interfaz/datos/README.md
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 23/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Links con target="_blank" sin rel="noopener"
+
+Links que abren en nueva pestana sin noopener pueden permitir tab-nabbing.
+
+> Agrega rel="noopener noreferrer" a todos los links con target="_blank".
+
+1 target="_blank", solo 0 con rel="noopener"
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 24/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 25/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO README.md expuesto y detectado en Local: TeatroConstitucion/admin_interfaz/transacciones/README.md
+
+Este tipo de archivo suele contener credenciales, tokens o configuraciones criticas. Si el servidor web no esta bien configurado y el archivo se sube a
+internet, la aplicacion entera puede ser comprometida.
+
+> Asegurate de que "README.md" no se transfiera al servidor publico y que este protegido en tu servidor web. Agregalo al archivo .gitignore.
+
+Ruta Local: TeatroConstitucion/admin_interfaz/transacciones/README.md
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 26/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 27/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 28/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 29/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 30/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 31/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 32/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 33/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 34/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO composer.lock expuesto y detectado en Local: TeatroConstitucion/vnt_interfaz/composer.lock
+
+Este tipo de archivo suele contener credenciales, tokens o configuraciones criticas. Si el servidor web no esta bien configurado y el archivo se sube a
+internet, la aplicacion entera puede ser comprometida.
+
+> Asegurate de que "composer.lock" no se transfiera al servidor publico y que este protegido en tu servidor web. Agregalo al archivo .gitignore.
+
+Ruta Local: TeatroConstitucion/vnt_interfaz/composer.lock
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO composer.json expuesto y detectado en Local: TeatroConstitucion/vnt_interfaz/composer.json
+
+Este tipo de archivo suele contener credenciales, tokens o configuraciones criticas. Si el servidor web no esta bien configurado y el archivo se sube a
+internet, la aplicacion entera puede ser comprometida.
+
+> Asegurate de que "composer.json" no se transfiera al servidor publico y que este protegido en tu servidor web. Agregalo al archivo .gitignore.
+
+Ruta Local: TeatroConstitucion/vnt_interfaz/composer.json
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 35/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO 6 scripts inline dificultan CSP
+
+Muchos scripts inline hacen imposible implementar CSP sin unsafe-inline.
+
+> Mueve la logica JS a archivos externos y usa nonces en CSP.
+
+6 scripts inline detectados
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 36/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 37/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 38/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 39/83
+
+
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+BAJO Meta viewport ausente
+
+Sin viewport configurado, la pagina puede ser vulnerable a ataques de UI redressing en moviles.
+
+> Agrega <meta name="viewport" content="width=device-width, initial-scale=1.0">.
+
+<meta name="viewport"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 40/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 41/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 42/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 43/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 44/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 45/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 46/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 47/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 48/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 49/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 50/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 51/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 52/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 53/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 54/83
+
+
+
+INFO Email(s) expuesto(s): teatroconstitucion@outlook.es
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+teatroconstitucion@outlook.es
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Email(s) expuesto(s): teatroconstitucion@outlook.es
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+teatroconstitucion@outlook.es
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Email(s) expuesto(s): correo@ejemplo.com
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+correo@ejemplo.com
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 55/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO Email(s) expuesto(s): teatroconstitucion@outlook.es
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+teatroconstitucion@outlook.es
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 56/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Email(s) expuesto(s): teatroconstitucion@outlook.es
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+teatroconstitucion@outlook.es
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 57/83
+
+
+
+INFO Email(s) expuesto(s): teatroconstitucion@outlook.es
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+teatroconstitucion@outlook.es
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 58/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 59/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 60/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 61/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 62/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 63/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 64/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 65/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO Email(s) expuesto(s): pago@example.com, pagocurso@example.com
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+pago@example.com
+pagocurso@example.com
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 66/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO Email(s) expuesto(s): emision@example.com
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+emision@example.com
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 67/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO Email(s) expuesto(s): gracia@example.com
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+gracia@example.com
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO Email(s) expuesto(s): test@example.com
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+test@example.com
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 68/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO Email(s) expuesto(s): fase5@example.com
+
+Correos expuestos en codigo fuente pueden ser objetivo de spam. Si son para contacto publico es normal, pero si son internos es un riesgo.
+
+> Si no es publico, usa JavaScript para ocultarlo o emplea un formulario de contacto en su lugar.
+
+fase5@example.com
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 69/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 70/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 71/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 72/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 73/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 74/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 75/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 76/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 77/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 78/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 79/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 80/83
+
+
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 81/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 82/83
+
+
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+INFO No se detecta favicon configurado
+
+Sin favicon puede resultar en 404 repetidos en logs del servidor.
+
+> Agrega un favicon para evitar 404 innecesarios y mejorar UX.
+
+<link rel="icon"> no encontrado
+
+INFO Atributo lang ausente en <html>
+
+Requerido por accesibilidad y ayuda a prevenir ataques i18n.
+
+> Agrega lang="es" o el idioma correspondiente.
+
+<html> sin atributo lang
+
+WEBSEC AUDIT v5.0 - [Local SAST] TeatroConstitucion - Pag. 83/83
