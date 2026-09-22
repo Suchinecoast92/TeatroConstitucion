@@ -2067,7 +2067,7 @@ if ($evento_info):
             .then(res => res.json())
             .then(data => {
                 const select = document.getElementById('buscFuncion');
-                select.innerHTML = '<option value="">Todas</option>';
+                teatroSetHtml(select, '<option value="">Todas</option>');
                 
                 if(data.success && data.funciones) {
                     data.funciones.forEach(f => {
@@ -2085,7 +2085,7 @@ if ($evento_info):
         if(idEvento) {
             cargarFuncionesParaFiltro(idEvento);
         } else {
-             document.getElementById('buscFuncion').innerHTML = '<option value="">Todas</option>';
+             teatroSetHtml(document.getElementById('buscFuncion'), '<option value="">Todas</option>');
         }
     }
 
@@ -2095,7 +2095,7 @@ if ($evento_info):
         const query = document.getElementById('buscInput').value;
         const container = document.getElementById('buscadorResultados');
         
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+        teatroSetHtml(container, '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
         
         const params = new URLSearchParams({
             action: 'buscar',
@@ -2110,11 +2110,11 @@ if ($evento_info):
                 if(data.success) {
                     renderizarResultados(data.data);
                 } else {
-                    container.innerHTML = `<div class="p-4 text-center text-danger">${data.error}</div>`;
+                    teatroSetHtml(container, `<div class="p-4 text-center text-danger">${data.error}</div>`);
                 }
             })
             .catch(err => {
-                container.innerHTML = `<div class="p-4 text-center text-danger">Error de conexión</div>`;
+                teatroSetHtml(container, `<div class="p-4 text-center text-danger">Error de conexión</div>`);
             });
     }
 
@@ -2122,11 +2122,11 @@ if ($evento_info):
         const container = document.getElementById('buscadorResultados');
         
         if(boletos.length === 0) {
-            container.innerHTML = `
+            teatroSetHtml(container, `
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                     <p class="mt-2">No se encontraron boletos</p>
-                </div>`;
+                </div>`);
             return;
         }
 
@@ -2176,7 +2176,7 @@ if ($evento_info):
         window.boletosResultados = boletos;
 
         html += '</tbody></table>';
-        container.innerHTML = html;
+        teatroSetHtml(container, html);
     }
 
     // --- ACCIONES DE VALIDACIÓN ---
@@ -2402,14 +2402,14 @@ if ($evento_info):
     .then(async html => {
         // Create a temporary container to hold the new content
         const temp = document.createElement('div');
-        temp.innerHTML = html;
+        teatroSetHtml(temp, html);
         
         // Update the seat map content
         const newSeatMap = temp.querySelector('.seat-map-content');
         if (newSeatMap) {
             const currentSeatMap = document.querySelector('.seat-map-content');
             if (currentSeatMap) {
-                currentSeatMap.innerHTML = newSeatMap.innerHTML;
+                teatroCopyChildren(currentSeatMap, newSeatMap);
             }
         }
         
@@ -2418,7 +2418,7 @@ if ($evento_info):
         if (newSelect) {
             const currentSelect = document.getElementById('selectFuncion');
             if (currentSelect) {
-                currentSelect.innerHTML = newSelect.innerHTML;
+                teatroCopyChildren(currentSelect, newSelect);
                 currentSelect.value = idFuncion; // Maintain the selected value
             }
         }
@@ -2545,7 +2545,7 @@ function actualizarFuncionesDisponibles() {
                 
                 if (hayNuevasFunciones || hayFuncionesEliminadas || hayCambioEstado) {
                     // Actualizar el select
-                    selectFuncion.innerHTML = '';
+                    teatroClear(selectFuncion);
                     
                     // Agregar opción vacía primero
                     const opcionVacia = document.createElement('option');
@@ -2753,7 +2753,7 @@ window.addEventListener('beforeunload', detenerActualizacionFunciones);
         
         const btnConfirmar = document.getElementById('btnConfirmarCancelacion');
         btnConfirmar.disabled = true;
-        btnConfirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cancelando...';
+        teatroSetHtml(btnConfirmar, '<span class="spinner-border spinner-border-sm me-2"></span>Cancelando...');
         
         fetch('cancelar_boleto.php', {
             method: 'POST',
@@ -2806,7 +2806,7 @@ window.addEventListener('beforeunload', detenerActualizacionFunciones);
                     notify.error(data.message || 'Error al cancelar el boleto');
                 }
                 btnConfirmar.disabled = false;
-                btnConfirmar.innerHTML = '<i class="bi bi-trash"></i> Confirmar Cancelación';
+                teatroSetHtml(btnConfirmar, '<i class="bi bi-trash"></i> Confirmar Cancelación');
             }
         })
         .catch(error => {
@@ -2815,7 +2815,7 @@ window.addEventListener('beforeunload', detenerActualizacionFunciones);
                 notify.error('Error al cancelar el boleto');
             }
             btnConfirmar.disabled = false;
-            btnConfirmar.innerHTML = '<i class="bi bi-trash"></i> Confirmar Cancelación';
+            teatroSetHtml(btnConfirmar, '<i class="bi bi-trash"></i> Confirmar Cancelación');
         });
     }
     
@@ -2987,6 +2987,7 @@ window.URL_PANEL = '<?= $url_panel ?>';
     resetInactividad();
 })();
 </script>
+<script src="../assets/js/teatro-escape.js"></script>
 <script src="js/carrito.js?v=29"></script>
 
 <script src="js/carrito-patch.js"></script>

@@ -1040,7 +1040,7 @@ $activos = $conn->query("
                             id="cantidadBoletos" style="font-weight: 700; color: white;">0</span> boletos vendidos.
                     </div>
                 </div>
-                <input type="password" id="auth_pass" placeholder="••••••" maxlength="20">
+                <input type="password" id="auth_pass" placeholder="••••••" maxlength="20" autocomplete="off">
                 <div class="modal-error" id="errorArchivar"><i class="bi bi-exclamation-circle-fill"></i> <span
                         id="errorArchivarText">Contraseña incorrecta</span></div>
             </div>
@@ -1051,7 +1051,8 @@ $activos = $conn->query("
         </div>
     </div>
 
-    <script>
+    <script src="assets/js/teatro-escape.js"></script>
+<script>
         document.addEventListener('DOMContentLoaded', () => document.body.classList.add('loaded'));
 
         let eventoIdSeleccionado = null;
@@ -1071,10 +1072,10 @@ $activos = $conn->query("
             if (boletosEvento > 0) {
                 warningDiv.style.display = 'flex';
                 cantidadSpan.textContent = boletosEvento;
-                document.getElementById('btnConfirmarFinal').innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Archivar con ' + boletosEvento + ' boletos';
+                teatroSetHtml(document.getElementById('btnConfirmarFinal'), '<i class="bi bi-exclamation-triangle-fill"></i> Archivar con ') + boletosEvento + ' boletos';
             } else {
                 warningDiv.style.display = 'none';
-                document.getElementById('btnConfirmarFinal').innerHTML = '<i class="bi bi-archive-fill"></i> Confirmar Archivo';
+                teatroSetHtml(document.getElementById('btnConfirmarFinal'), '<i class="bi bi-archive-fill"></i> Confirmar Archivo');
             }
 
             document.getElementById('modalArchivar').classList.add('active');
@@ -1094,7 +1095,7 @@ $activos = $conn->query("
 
             const btn = document.getElementById('btnConfirmarFinal');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Procesando...';
+            teatroSetHtml(btn, '<span class="spinner"></span> Procesando...');
             errorDiv.style.display = 'none';
 
             let fd = new FormData();
@@ -1108,9 +1109,9 @@ $activos = $conn->query("
                 .then(r => r.json())
                 .then(data => {
                     if (data.status === 'success') { cerrarModal(); location.reload(); }
-                    else { errorDiv.style.display = 'block'; errorText.textContent = data.message || 'Error al procesar'; btn.disabled = false; btn.innerHTML = '<i class="bi bi-archive-fill"></i> Confirmar Archivo'; document.getElementById('auth_pass').value = ''; document.getElementById('auth_pass').focus(); }
+                    else { errorDiv.style.display = 'block'; errorText.textContent = data.message || 'Error al procesar'; btn.disabled = false; teatroSetHtml(btn, '<i class="bi bi-archive-fill"></i> Confirmar Archivo'); document.getElementById('auth_pass').value = ''; document.getElementById('auth_pass').focus(); }
                 })
-                .catch(() => { errorDiv.style.display = 'block'; errorText.textContent = 'Error de conexión'; btn.disabled = false; btn.innerHTML = '<i class="bi bi-archive-fill"></i> Confirmar Archivo'; });
+                .catch(() => { errorDiv.style.display = 'block'; errorText.textContent = 'Error de conexión'; btn.disabled = false; teatroSetHtml(btn, '<i class="bi bi-archive-fill"></i> Confirmar Archivo'); });
         }
     </script>
 </body>

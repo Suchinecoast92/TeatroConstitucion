@@ -697,25 +697,24 @@ $nombre_completo = $usuario_nombre . ' ' . $usuario_apellido;
             </div>
         </aside>
 
-        <script>
+        <script src="assets/js/teatro-escape.js"></script>
+        <script src="assets/js/teatro-frames.js"></script>
+<script>
             function abrirVisorCliente() {
                 window.open('vnt_interfaz/visor_cliente.php', 'VisorCliente', 'width=1200,height=800,menubar=no,toolbar=no');
             }
         </script>
 
         <main class="content-area" id="contentArea">
-            <iframe id="frame-venta" src="vnt_interfaz/index.php" class="content-frame active"></iframe>
-            <iframe id="frame-evento" src="evt_interfaz/index.php" class="content-frame"></iframe>
-            <iframe id="frame-cartelera" src="crt_interfaz/index.php" class="content-frame"></iframe>
-            <iframe id="frame-mapa" src="mp_interfaz/index.php" class="content-frame"></iframe>
-            <iframe id="frame-transacciones" src="admin_interfaz/transacciones/index.php" class="content-frame"></iframe>
-            <iframe id="frame-ajustes" src="admin_interfaz/Ajs_interfaz/index.php" class="content-frame"></iframe>
+            <div data-teatro-frame data-id="frame-venta" data-src="vnt_interfaz/index.php" data-class="content-frame active" data-title="Punto de venta"></div>
+            <div data-teatro-frame data-id="frame-evento" data-src="evt_interfaz/index.php" data-class="content-frame" data-title="Eventos"></div>
+            <div data-teatro-frame data-id="frame-cartelera" data-src="crt_interfaz/index.php" data-class="content-frame" data-title="Cartelera"></div>
+            <div data-teatro-frame data-id="frame-mapa" data-src="mp_interfaz/index.php" data-class="content-frame" data-title="Mapa de asientos"></div>
+            <div data-teatro-frame data-id="frame-transacciones" data-src="admin_interfaz/transacciones/index.php" data-class="content-frame" data-title="Transacciones"></div>
+            <div data-teatro-frame data-id="frame-ajustes" data-src="admin_interfaz/Ajs_interfaz/index.php" data-class="content-frame" data-title="Ajustes"></div>
 
             <?php if ($usuario_rol === 'admin'): ?>
-                <iframe id="frame-registro" src="auth/registrar_empleado.php" class="content-frame"></iframe>
-                <?php /* Iframe de Ventas oculto temporalmente (se habilitará más adelante)
-                <iframe id="frame-admin-panel" src="ventas/panel_admin.php" class="content-frame"></iframe>
-                */ ?>
+                <div data-teatro-frame data-id="frame-registro" data-src="auth/registrar_empleado.php" data-class="content-frame" data-title="Registro de empleados"></div>
             <?php endif; ?>
         </main>
 
@@ -911,7 +910,8 @@ const password = document.getElementById('adminPassword').value;
 const errorDiv = document.getElementById('modalError');
 
 if (!password) {
-errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Ingresa la contraseña';
+teatroSetHtml(errorDiv, '<i class="bi bi-exclamation-triangle"></i> <span></span>');
+errorDiv.querySelector('span').textContent = 'Ingresa la contraseña';
 errorDiv.style.display = 'block';
 return;
 }
@@ -934,13 +934,15 @@ if (data.success) {
 cancelarVerificacion();
 location.reload();
 } else {
-errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + (data.message || 'Incorrecta');
+teatroSetHtml(errorDiv, '<i class="bi bi-exclamation-triangle"></i> <span></span>');
+errorDiv.querySelector('span').textContent = data.message || 'Incorrecta';
 errorDiv.style.display = 'block';
 document.getElementById('adminPassword').value = '';
 document.getElementById('adminPassword').focus();
 }
 } catch (e) {
-errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error de conexión';
+teatroSetHtml(errorDiv, '<i class="bi bi-exclamation-triangle"></i> <span></span>');
+errorDiv.querySelector('span').textContent = 'Error de conexión';
 errorDiv.style.display = 'block';
 }
 }

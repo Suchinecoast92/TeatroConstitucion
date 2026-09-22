@@ -73,7 +73,7 @@ function abrirModalSeleccionDescuento(descuento) {
     }
 
     // Agregar modal al DOM
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    teatroAppendHtml(document.body, modalHTML);
 
     // Llenar lista de boletos
     llenarListaBoletosDescuento();
@@ -127,8 +127,8 @@ function llenarListaBoletosDescuento() {
                     <label class="form-check-label" for="boleto_${index}">
                         <div class="d-flex justify-content-between align-items-center w-100">
                             <div>
-                                <strong>${item.asiento}</strong>
-                                <small class="d-block text-muted">${item.categoria}</small>
+                                <strong>${typeof escapeHtml === 'function' ? escapeHtml(item.asiento) : item.asiento}</strong>
+                                <small class="d-block text-muted">${typeof escapeHtml === 'function' ? escapeHtml(item.categoria) : item.categoria}</small>
                                 <span class="text-success">$${item.precio.toFixed(2)}</span>
                             </div>
                             <div class="text-end">
@@ -146,7 +146,7 @@ function llenarListaBoletosDescuento() {
         `;
     });
 
-    lista.innerHTML = html;
+    teatroSetHtml(lista, html);
     actualizarContadorDescuentos();
 }
 

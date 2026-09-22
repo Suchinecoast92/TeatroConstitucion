@@ -2293,17 +2293,18 @@ foreach ($categorias_evento as $cat) {
         }
 
         function htmlAsiento(id) {
+            const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s) => String(s ?? '');
             const { fila, numero } = parseAsiento(id);
             if (!numero) {
-                return `<div class="item-asiento-info"><span class="item-fila-val">${fila}</span></div>`;
+                return `<div class="item-asiento-info"><span class="item-fila-val">${esc(fila)}</span></div>`;
             }
             return `
                 <div class="item-asiento-info">
                     <span class="item-fila-label">Fila</span>
-                    <span class="item-fila-val">${fila}</span>
+                    <span class="item-fila-val">${esc(fila)}</span>
                     <span class="item-asiento-sep">·</span>
                     <span class="item-num-label">No.</span>
-                    <span class="item-num-val">${numero}</span>
+                    <span class="item-num-val">${esc(numero)}</span>
                 </div>`;
         }
 
@@ -2318,7 +2319,7 @@ foreach ($categorias_evento as $cat) {
                 el.classList.remove('client-selected');
             });
             const lista = document.getElementById('listaCarrito');
-            if (lista) lista.innerHTML = '';
+            if (lista) teatroClear(lista);
             const total = document.getElementById('txtTotal');
             const totalWrapper = document.querySelector('.total-amount');
             if (total) total.textContent = '0.00';
@@ -2343,7 +2344,7 @@ foreach ($categorias_evento as $cat) {
             });
 
             if (carrito.length === 0) {
-                lista.innerHTML = '';
+                teatroClear(lista);
                 const totalEl = document.getElementById('txtTotal');
                 const totalWrapper = document.querySelector('.total-amount');
                 if (totalEl) totalEl.textContent = '0.00';
@@ -2357,7 +2358,7 @@ foreach ($categorias_evento as $cat) {
             }
 
             toggleCarritoFloat(true);
-            lista.innerHTML = '';
+            teatroClear(lista);
 
             // Actualizar contador de asientos
             const contador = document.getElementById('contadorAsientos');
@@ -2432,16 +2433,18 @@ foreach ($categorias_evento as $cat) {
                     }
                 }
 
-                itemDiv.innerHTML = `
+                teatroSetHtml(itemDiv, `
             <div>
                 ${htmlAsiento(item.id)}
                 <div style="display:flex; gap:4px; align-items:center; margin-top:2px;">
                     ${badgeHTML}
                 </div>
-                <div class="item-categoria">${item.categoria}</div>
+                <div class="item-categoria"></div>
             </div>
             ${precioHTML}
-        `;
+        `);
+                const catEl = itemDiv.querySelector('.item-categoria');
+                if (catEl) catEl.textContent = item.categoria == null ? '' : String(item.categoria);
                 lista.appendChild(itemDiv);
             });
 
@@ -2494,7 +2497,8 @@ foreach ($categorias_evento as $cat) {
 
             const notif = document.createElement('div');
             notif.className = 'visor-notificacion ' + tipo;
-            notif.innerHTML = `<i class="bi bi-stars"></i><span>${mensaje}</span>`;
+            teatroSetHtml(notif, `<i class="bi bi-stars"></i><span></span>`);
+            notif.querySelector('span').textContent = mensaje == null ? '' : String(mensaje);
             document.body.appendChild(notif);
 
             // Animar entrada
@@ -2520,7 +2524,7 @@ foreach ($categorias_evento as $cat) {
                 }
             }
             if (infoEl) {
-                infoEl.innerHTML = `<i class="bi bi-tag-fill"></i> Ahorro: $${monto.toFixed(2)}`;
+                teatroSetHtml(infoEl, `<i class="bi bi-tag-fill"></i> Ahorro: $${monto.toFixed(2)}`);
             }
         }
 
@@ -2564,6 +2568,7 @@ foreach ($categorias_evento as $cat) {
         };
         window.onresize = ajustarMapa;
     </script>
+    <script src="../assets/js/teatro-escape.js"></script>
     <script src="js/teatro-sync.js"></script>
     <script>
         // El visor cliente NO debe auto-recargar ni mostrar notificaciones

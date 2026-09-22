@@ -805,8 +805,14 @@
         <!-- Sección de Ubicación -->
         <div class="featured-section">
             <h2>Nuestra Ubicación</h2>
-            <div class="map-container">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4536.513467875127!2d-102.35703837479456!3d19.08093898212465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8431e18b7682ab11%3A0x363dfe9a4d8dd0c0!2sTeatro%20Constituci%C3%B3n%20de%20Apatzing%C3%A1n!5e0!3m2!1ses-419!2smx!4v1761836595548!5m2!1ses-419!2smx" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="map-container" style="text-align:center;padding:2rem 1rem;">
+                <p style="margin-bottom:1.25rem;opacity:.9;">José Sotero de Castañeda 724, Ferrocarril, 60690 Apatzingán de la Constitución, Mich.</p>
+                <a class="btn btn-primary"
+                   href="https://www.google.com/maps/search/?api=1&amp;query=Teatro+Constituci%C3%B3n+de+Apatzing%C3%A1n"
+                   target="_blank" rel="noopener noreferrer"
+                   style="display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;border-radius:8px;text-decoration:none;">
+                    <i class="bi bi-geo-alt-fill"></i> Ver ubicación en Google Maps
+                </a>
             </div>
             <div style="max-width: 600px; margin: 30px auto 0; text-align: center;">
                 <div class="location-item" style="border-bottom: none; padding-bottom: 0; justify-content: center;">

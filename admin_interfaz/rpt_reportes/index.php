@@ -45,6 +45,7 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../assets/js/teatro-escape.js"></script>
     <style>
         :root {
             --bs-body-bg: #131313;
@@ -342,26 +343,26 @@ function renderDashboard(data) {
 
     // 2. Tabla Eventos
     const tbodyEventos = document.getElementById('lista-eventos');
-    tbodyEventos.innerHTML = (data.eventos || []).map(evt => `
+    teatroSetHtml(tbodyEventos, (data.eventos || []).map(evt => `
         <tr>
-            <td><span class="badge bg-secondary">#${evt.id_evento}</span></td>
-            <td class="fw-bold text-white">${evt.titulo}</td>
+            <td><span class="badge bg-secondary">#${escapeHtml(evt.id_evento)}</span></td>
+            <td class="fw-bold text-white">${escapeHtml(evt.titulo)}</td>
             <td class="text-end">${formatoNumero(evt.total_boletos)}</td>
             <td class="text-end text-success">${formatoMoneda(evt.total_vendido)}</td>
             <td class="text-end text-muted">${formatoMoneda(evt.promedio)}</td>
         </tr>
-    `).join('');
+    `).join(''));
 
     // 3. Tabla Categorías
     const tbodyCats = document.getElementById('lista-categorias');
-    tbodyCats.innerHTML = (data.categorias || []).slice(0, 50).map(cat => `
+    teatroSetHtml(tbodyCats, (data.categorias || []).slice(0, 50).map(cat => `
         <tr>
-            <td><span class="badge bg-dark border border-secondary">${cat.nombre_categoria}</span></td>
-            <td><small>${cat.titulo_evento}</small></td>
+            <td><span class="badge bg-dark border border-secondary">${escapeHtml(cat.nombre_categoria)}</span></td>
+            <td><small>${escapeHtml(cat.titulo_evento)}</small></td>
             <td class="text-end">${formatoNumero(cat.cantidad)}</td>
             <td class="text-end">${formatoMoneda(cat.total)}</td>
         </tr>
-    `).join('');
+    `).join(''));
 
     // 4. CHART: Tendencia (Usando Eventos Top 10)
     const ctxTend = document.getElementById('chartTendencia');

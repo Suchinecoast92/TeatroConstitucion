@@ -1781,6 +1781,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="../assets/js/teatro-escape.js"></script>
     <script>
         // Estado compartido (fuera de DOMContentLoaded para que los modales lo usen)
         let formModificado = false;
@@ -1855,8 +1856,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             els.lockBtn.onclick = () => {
                 cierreBloqueado = !cierreBloqueado;
-                if (cierreBloqueado) { els.lockBtn.innerHTML = '<i class="bi bi-lock-fill"></i>'; els.lockBtn.classList.remove('unlocked'); fpE.set('clickOpens', false); recalcularCierre(); }
-                else { els.lockBtn.innerHTML = '<i class="bi bi-unlock-fill"></i>'; els.lockBtn.classList.add('unlocked'); fpE.set('clickOpens', true); }
+                if (cierreBloqueado) { teatroSetHtml(els.lockBtn, '<i class="bi bi-lock-fill"></i>'); els.lockBtn.classList.remove('unlocked'); fpE.set('clickOpens', false); recalcularCierre(); }
+                else { teatroSetHtml(els.lockBtn, '<i class="bi bi-unlock-fill"></i>'); els.lockBtn.classList.add('unlocked'); fpE.set('clickOpens', true); }
             };
 
             function recalcularCierre() {
@@ -1878,13 +1879,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             };
 
             function upd() {
-                els.list.innerHTML = ''; els.hid.innerHTML = '';
+                teatroClear(els.list); teatroClear(els.hid);
                 if (!funcs.length) { els.list.appendChild(els.no); fpI.set('maxDate', null); fpE.setDate(null); }
                 else {
                     funcs.forEach((d, i) => {
                         const sqlDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:00`;
-                        els.list.innerHTML += htmlFuncionItem(d, i);
-                        els.hid.innerHTML += `<input type="hidden" name="funciones[]" value="${sqlDate}">`;
+                        teatroAppendHtml(els.list, htmlFuncionItem(d, i));
+                        teatroAppendHtml(els.hid, `<input type="hidden" name="funciones[]" value="${sqlDate}">`);
                     });
                     fpI.set('maxDate', new Date(funcs[0].getTime() - 60000)); recalcularCierre();
                 }
@@ -2065,7 +2066,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         function reiniciarContadorConfirmacion() {
             const timerEl = document.getElementById('confTimer');
-            timerEl.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right: 5px;"></i>El botón Continuar se habilitará en <span id="confCountdown">5</span>s...';
+            teatroSetHtml(timerEl, '<i class="bi bi-hourglass-split" style="margin-right: 5px;"></i>El botón Continuar se habilitará en <span id="confCountdown">5</span>s...');
             timerEl.style.display = 'block';
 
             const btn = document.getElementById('btnContinuar');
@@ -2086,7 +2087,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (sec <= 0) {
                     clearInterval(countdownInterval);
                     countdownInterval = null;
-                    timerEl.innerHTML = '<i class="bi bi-check-circle-fill" style="margin-right:5px;color:var(--success)"></i><span style="color:var(--success)">¡Listo! Puedes continuar cuando quieras</span>';
+                    teatroSetHtml(timerEl, '<i class="bi bi-check-circle-fill" style="margin-right:5px;color:var(--success)"></i><span style="color:var(--success)">¡Listo! Puedes continuar cuando quieras</span>');
                     habilitarBotonContinuar();
                 }
             }, 1000);
@@ -2113,18 +2114,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             const funcContainer = document.getElementById('confFunciones');
-            funcContainer.innerHTML = '';
+            teatroClear(funcContainer);
             document.querySelectorAll('input[name="funciones[]"]').forEach(input => {
                 const dt = parseFechaInput(input.value);
                 if (!dt) return;
                 const f = formatFuncionDisplay(dt);
                 const row = document.createElement('div');
                 row.className = 'conf-funcion-row';
-                row.innerHTML = `<div class="conf-funcion-date"><span>${f.dia}</span><small>${f.mesCorto}</small></div>
+                teatroSetHtml(row, `<div class="conf-funcion-date"><span>${escapeHtml(f.dia)}</span><small>${escapeHtml(f.mesCorto)}</small></div>
                     <div class="conf-funcion-info">
-                        <strong>${f.texto}</strong>
-                        <span><i class="bi bi-clock"></i> ${f.hora}</span>
-                    </div>`;
+                        <strong>${escapeHtml(f.texto)}</strong>
+                        <span><i class="bi bi-clock"></i> ${escapeHtml(f.hora)}</span>
+                    </div>`);
                 funcContainer.appendChild(row);
             });
 
@@ -2326,7 +2327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('evtProgressBadge').style.display = 'none';
 
             icon.className = 'evt-icon-circle modo-creando';
-            icon.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+            teatroSetHtml(icon, '<i class="bi bi-hourglass-split"></i>');
             bar.className = 'evt-progress-fill';
             bar.style.transition = 'width 2.5s ease';
             bar.style.width = '15%';
@@ -2357,7 +2358,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             badge.className = 'evt-tipo-badge ' + (esGratis ? 'gratis' : 'pago');
 
             icon.className = 'evt-icon-circle modo-exito ' + (esGratis ? 'gratis' : 'pago');
-            icon.innerHTML = '<i class="bi ' + (esGratis ? 'bi-gift-fill' : 'bi-cash-coin') + '"></i>';
+            teatroSetHtml(icon, '<i class="bi ') + (esGratis ? 'bi-gift-fill' : 'bi-cash-coin') + '"></i>';
 
             bar.className = 'evt-progress-fill ' + (esGratis ? 'gratis' : '');
             bar.style.transition = 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)';

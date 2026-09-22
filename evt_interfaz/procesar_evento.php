@@ -131,7 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="progress-track"><div class="progress-fill" id="pBar"></div></div>
                     <p class="text-muted mt-2" style="font-size: 0.75rem; font-weight: 600;">VOLVIENDO A ACTIVOS...</p>
                 </div>
-                <script>
+                <script src="assets/js/teatro-escape.js"></script>
+<script>
                     setTimeout(() => document.getElementById('pBar').style.width = '100%', 100);
                     localStorage.setItem("evt_upd", Date.now());
                     setTimeout(() => { 
@@ -330,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function upd(){
-        els.list.innerHTML=''; els.hid.innerHTML='';
+        teatroClear(els.list); teatroClear(els.hid);
         if(!funcs.length){ 
             els.list.appendChild(els.no); 
             fpI.set('maxDate',null); 
@@ -345,8 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mins = String(d.getMinutes()).padStart(2, '0');
                 const sqlDate = `${year}-${month}-${day} ${hours}:${mins}:00`;
                 
-                els.list.innerHTML+=`<div class="funcion-item"><i class="bi bi-calendar-event"></i> ${fechaStr}<button type="button" onclick="del(${i})" class="btn-close ms-2" style="font-size:0.6em"></button></div>`;
-                els.hid.innerHTML+=`<input type="hidden" name="funciones[]" value="${sqlDate}">`;
+                teatroAppendHtml(els.list, `<div class="funcion-item"><i class="bi bi-calendar-event"></i> ${fechaStr}<button type="button" onclick="del(${i})" class="btn-close ms-2" style="font-size:0.6em"></button></div>`);
+                teatroAppendHtml(els.hid, `<input type="hidden" name="funciones[]" value="${sqlDate}">`);
             });
             
             fpI.set('maxDate', new Date(funcs[0].getTime() - 60000));

@@ -4,10 +4,10 @@
 function mostrarTooltipSeleccion() {
     const tooltip = document.createElement('div');
     tooltip.className = 'selection-tooltip';
-    tooltip.innerHTML = `
+    teatroSetHtml(tooltip, `
         <i class="bi bi-lightbulb"></i>
         <strong>Tip:</strong> Usa Ctrl+Click para seleccionar rangos o doble click en las filas
-    `;
+    `);
     document.body.appendChild(tooltip);
     
     setTimeout(() => {

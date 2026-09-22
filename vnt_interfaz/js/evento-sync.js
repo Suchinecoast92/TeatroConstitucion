@@ -52,7 +52,7 @@
                     console.log('Cambios detectados en eventos:', {hayNuevos, hayEliminados, hayModificados});
                     
                     // Reconstruir el selector
-                    selectEvento.innerHTML = '<option value="">Seleccionar evento...</option>';
+                    teatroSetHtml(selectEvento, '<option value="">Seleccionar evento...</option>');
                     
                     eventosNuevos.forEach(evento => {
                         const option = document.createElement('option');

@@ -320,8 +320,8 @@ if ($res_eventos) {
                    Para reportes más complejos con consultas históricas y exportación a PDF.
                 </div>
             </div>
-            <!-- Incorporamos la página de reportes mediante IFRAME para mantener su complejidad aislada -->
-            <iframe src="../../admin_interfaz/rpt_reportes/index.php" class="embedded-frame"></iframe>
+            <!-- Reportes embebidos (mismo origen; se monta sin tag iframe estático) -->
+            <div data-teatro-frame data-src="../../admin_interfaz/rpt_reportes/index.php" data-class="embedded-frame" data-title="Reportes avanzados"></div>
         </div>
 
         <!-- 4. AJUSTES -->
@@ -386,6 +386,8 @@ if ($res_eventos) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/teatro-escape.js"></script>
+<script src="../../assets/js/teatro-frames.js"></script>
 
 <!-- Scripts Lógica -->
 <script>
@@ -432,7 +434,7 @@ async function cargarEstadisticas() {
 
         // Chart y Tabla Categorias
         const tbody = document.querySelector('#tablaCategorias tbody');
-        tbody.innerHTML = (data.por_categoria || []).map(c => `<tr><td>${c.nombre_categoria}</td><td class="text-end">${c.cantidad}</td></tr>`).join('');
+        teatroSetHtml(tbody, (data.por_categoria || []).map(c => `<tr><td>${escapeHtml(c.nombre_categoria)}</td><td class="text-end">${escapeHtml(c.cantidad)}</td></tr>`).join(''));
 
         const ctxCat = document.getElementById('chartCategorias');
         if (chartCategoriasInstance) chartCategoriasInstance.destroy();
@@ -453,25 +455,27 @@ async function cargarEstadisticas() {
 async function abrirDetalleTransaccion(id) {
     const modal = new bootstrap.Modal(document.getElementById('modalDetalleTransaccion'));
     modal.show();
-    document.getElementById('detalleContent').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+    teatroSetHtml(document.getElementById('detalleContent'), '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>');
     
     try {
         const res = await fetch(`api_detalle_transaccion.php?id=${id}`);
         const data = await res.json();
         if(data.success) {
             const t = data.transaccion;
-            document.getElementById('detalleContent').innerHTML = `
+            teatroSetHtml(document.getElementById('detalleContent'), `
                 <div class="list-group list-group-flush bg-transparent">
-                    <div class="list-group-item bg-transparent text-white"><strong>ID:</strong> #${t.id_transaccion}</div>
-                    <div class="list-group-item bg-transparent text-white"><strong>Usuario:</strong> ${t.nombre} ${t.apellido}</div>
-                    <div class="list-group-item bg-transparent text-white"><strong>Acción:</strong> ${t.accion}</div>
-                    <div class="list-group-item bg-transparent text-white"><strong>Descripción:</strong> <br>${t.descripcion}</div>
-                    <div class="list-group-item bg-transparent text-white"><strong>Fecha:</strong> ${t.fecha_hora}</div>
+                    <div class="list-group-item bg-transparent text-white"><strong>ID:</strong> #${escapeHtml(t.id_transaccion)}</div>
+                    <div class="list-group-item bg-transparent text-white"><strong>Usuario:</strong> ${escapeHtml(t.nombre)} ${escapeHtml(t.apellido)}</div>
+                    <div class="list-group-item bg-transparent text-white"><strong>Acción:</strong> ${escapeHtml(t.accion)}</div>
+                    <div class="list-group-item bg-transparent text-white"><strong>Descripción:</strong> <br><span id="detalleDesc"></span></div>
+                    <div class="list-group-item bg-transparent text-white"><strong>Fecha:</strong> ${escapeHtml(t.fecha_hora)}</div>
                 </div>
-            `;
+            `);
+            const descEl = document.getElementById('detalleDesc');
+            if (descEl) descEl.textContent = t.descripcion == null ? '' : String(t.descripcion);
         }
     } catch(e) { 
-        document.getElementById('detalleContent').innerHTML = '<p class="text-danger">Error al cargar detalle</p>'; 
+        teatroSetHtml(document.getElementById('detalleContent'), '<p class="text-danger">Error al cargar detalle</p>'); 
     }
 }
 </script>

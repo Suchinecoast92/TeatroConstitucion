@@ -523,6 +523,7 @@ body {
   </div>
 </div>
 
+<script src="assets/js/teatro-escape.js"></script>
 <script src="js/compra-timer.js"></script>
 <script src="js/orden-aviso.js"></script>
 <script>
@@ -638,7 +639,7 @@ body {
   }
 
   function renderItems(items) {
-    lista.innerHTML = items.map(it => {
+    teatroSetHtml(lista, items.map(it => {
       const tipo = ETIQUETAS[it.tipo_boleto] || it.tipo_boleto;
       const cat = it.nombre_categoria ? esc(it.nombre_categoria) : esc(tipo);
       const detalle = it.nombre_categoria && ETIQUETAS[it.tipo_boleto] && it.nombre_categoria !== ETIQUETAS[it.tipo_boleto]
@@ -654,7 +655,7 @@ body {
         </div>
         <div class="fw-semibold">${money(it.precio_final)}</div>
       </div>`;
-    }).join('');
+    }).join(''));
 
     const aviso = document.getElementById('avisoAccesibilidad');
     if (aviso) {
@@ -839,7 +840,7 @@ body {
       leavingToPay = false;
       msg.textContent = '';
       msg.className = 'msg mt-2';
-      document.getElementById('resultado').innerHTML = '';
+      teatroClear(document.getElementById('resultado'));
       btn.disabled = false;
       TeatroCompraTimer.start({ onExpire: expirarSesion, arm: true });
       TeatroOrdenAviso.mostrar(r.codigo_publico, {

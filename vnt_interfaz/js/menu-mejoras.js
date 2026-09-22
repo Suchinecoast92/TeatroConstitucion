@@ -90,12 +90,12 @@ async function verAsientosVendidos() {
     const idEvento = urlParams.get('id_evento');
     
     if (!idEvento) {
-        document.getElementById('listaAsientosVendidos').innerHTML = `
+        teatroSetHtml(document.getElementById('listaAsientosVendidos'), `
             <div class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle"></i> 
                 No hay evento seleccionado
             </div>
-        `;
+        `);
         return;
     }
     
@@ -113,7 +113,7 @@ async function verAsientosVendidos() {
                 html += `
                     <div class="col-6 col-md-4 col-lg-3">
                         <div class="badge bg-danger w-100 p-2 fs-6">
-                            <i class="bi bi-x-circle"></i> ${asiento}
+                            <i class="bi bi-x-circle"></i> ${typeof escapeHtml === 'function' ? escapeHtml(asiento) : String(asiento).replace(/[<>&"']/g, '')}
                         </div>
                     </div>
                 `;
@@ -124,23 +124,23 @@ async function verAsientosVendidos() {
                 <strong>${data.asientos.length}</strong> asiento(s) vendido(s)
             </div>`;
             
-            document.getElementById('listaAsientosVendidos').innerHTML = html;
+            teatroSetHtml(document.getElementById('listaAsientosVendidos'), html);
         } else {
-            document.getElementById('listaAsientosVendidos').innerHTML = `
+            teatroSetHtml(document.getElementById('listaAsientosVendidos'), `
                 <div class="alert alert-success">
                     <i class="bi bi-check-circle"></i> 
                     No hay asientos vendidos aún. ¡Todos disponibles!
                 </div>
-            `;
+            `);
         }
     } catch (error) {
         console.error('Error al cargar asientos vendidos:', error);
-        document.getElementById('listaAsientosVendidos').innerHTML = `
+        teatroSetHtml(document.getElementById('listaAsientosVendidos'), `
             <div class="alert alert-danger">
                 <i class="bi bi-exclamation-circle"></i> 
                 Error al cargar los asientos vendidos
             </div>
-        `;
+        `);
     }
 }
 

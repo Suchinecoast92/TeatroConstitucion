@@ -91,6 +91,7 @@ body { background: var(--bg-primary, #0f172a); color: var(--text-primary, #e2e8f
   <div class="card-panel" id="detalle" style="display:none"></div>
 </div>
 
+<script src="../assets/js/teatro-escape.js"></script>
 <script>
 <?php echo teatro_csrf_js_snippet(); ?>
 const API = 'api.php';
@@ -118,14 +119,14 @@ async function cargar() {
   const r = await fetch(url).then(x => x.json());
   const tb = document.getElementById('tbody');
   if (!r.success) {
-    tb.innerHTML = `<tr><td colspan="8" class="text-danger">${esc(r.error || 'Error')}</td></tr>`;
+    teatroSetHtml(tb, `<tr><td colspan="8" class="text-danger">${esc(r.error || 'Error')}</td></tr>`);
     return;
   }
   if (!r.ordenes.length) {
-    tb.innerHTML = '<tr><td colspan="8" class="text-secondary">Sin órdenes</td></tr>';
+    teatroSetHtml(tb, '<tr><td colspan="8" class="text-secondary">Sin órdenes</td></tr>');
     return;
   }
-  tb.innerHTML = r.ordenes.map(o => {
+  teatroSetHtml(tb, r.ordenes.map(o => {
     const alerta = o.alerta_sin_boletos
       ? ' <span class="badge-e badge-alerta">sin boletos</span>'
       : '';
@@ -141,7 +142,7 @@ async function cargar() {
       <td>${esc(bol)}</td>
       <td><button class="btn btn-sm btn-outline-info" data-cod="${esc(o.codigo_publico)}">Ver</button></td>
     </tr>`;
-  }).join('');
+  }).join(''));
 }
 
 async function ver(codigo) {
@@ -149,7 +150,7 @@ async function ver(codigo) {
   const box = document.getElementById('detalle');
   if (!r.success) {
     box.style.display = '';
-    box.innerHTML = `<div class="text-danger">${esc(r.error)}</div>`;
+    teatroSetHtml(box, `<div class="text-danger">${esc(r.error)}</div>`);
     return;
   }
   const o = r.orden;
@@ -173,7 +174,7 @@ async function ver(codigo) {
   actions += `<a class="btn btn-outline-light btn-sm" target="_blank" href="../../crt_interfaz/orden.php?codigo=${encodeURIComponent(o.codigo_publico)}">Ver como cliente</a>`;
 
   box.style.display = '';
-  box.innerHTML = `
+  teatroSetHtml(box, `
     <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
       <h2 class="h5 mb-0">Orden ${esc(o.codigo_publico)}</h2>
       ${badgeEstado(o.estado)}
@@ -186,7 +187,7 @@ async function ver(codigo) {
     <div class="mb-3"><strong>Pagos</strong>${pagos || '<div class="text-secondary small">—</div>'}</div>
     <div>${actions}</div>
     <div class="mt-2 small text-info" id="msgAccion"></div>
-  `;
+  `);
 
   const msg = document.getElementById('msgAccion');
   const btnR = document.getElementById('btnRefund');

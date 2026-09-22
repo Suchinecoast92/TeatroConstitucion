@@ -545,6 +545,7 @@ body {
   </div>
 </div>
 
+<script src="assets/js/teatro-escape.js"></script>
 <script src="js/compra-timer.js"></script>
 <script>
 (() => {
@@ -814,7 +815,7 @@ body {
     btnContinuar.disabled = carrito.size === 0;
     actualizarAvisoAccesibilidad();
     if (!carrito.size) {
-      chips.innerHTML = '<span class="text-secondary small">Toca un asiento libre para apartarlo</span>';
+      teatroSetHtml(chips, '<span class="text-secondary small">Toca un asiento libre para apartarlo</span>');
       totalEst.textContent = '$0.00';
       return;
     }
@@ -823,7 +824,7 @@ body {
       html += `<span class="chip"><strong>${esc(codigo)}</strong>
         <button type="button" data-quitar="${esc(codigo)}" title="Quitar">&times;</button></span>`;
     });
-    chips.innerHTML = html;
+    teatroSetHtml(chips, html);
     cotizar();
   }
 

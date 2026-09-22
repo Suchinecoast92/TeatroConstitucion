@@ -283,8 +283,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="password">Contraseña</label>
                 <div class="input-wrapper">
                     <i class="bi bi-lock-fill"></i>
-                    <input type="password" id="password" name="password" required
-                           placeholder="••••••••" pattern="[A-Za-z0-9]+" title="Solo letras y números, sin espacios ni símbolos" autocomplete="off">
+                    <input type="password" id="password" name="password" required autocomplete="off"
+                           placeholder="••••••••" pattern="[A-Za-z0-9]+" title="Solo letras y números, sin espacios ni símbolos">
                 </div>
             </div>
             

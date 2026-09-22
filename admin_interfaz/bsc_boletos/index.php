@@ -818,6 +818,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
         </div>
     </div>
 
+    <script src="../../assets/js/teatro-escape.js"></script>
     <script>
     <?php echo teatro_csrf_js_snippet(); ?>
     </script>
@@ -978,12 +979,11 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
             table.style.display = 'table';
             count.textContent = `${filteredTickets.length} boleto${filteredTickets.length !== 1 ? 's' : ''}`;
 
-            tbody.innerHTML = filteredTickets.map(ticket => {
+            teatroSetHtml(tbody, filteredTickets.map(ticket => {
                 const estadoClass = ticket.estatus == 1 ? 'activo' : ticket.estatus == 0 ? 'usado' : 'cancelado';
                 const estadoText = ticket.estatus == 1 ? 'Activo' : ticket.estatus == 0 ? 'Usado' : 'Cancelado';
                 const estadoIcon = ticket.estatus == 1 ? 'check-circle' : ticket.estatus == 0 ? 'x-circle' : 'slash-circle';
 
-                // Tipo de evento según la base de datos
                 const tipoEventoClass = ticket.db_source === 'actual' ? 'activo' : 'archivado';
                 const tipoEventoText = ticket.db_source === 'actual' ? 'Activo' : 'Archivado';
                 const tipoEventoIcon = ticket.db_source === 'actual' ? 'check-circle-fill' : 'archive-fill';
@@ -992,21 +992,22 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 const origenBadge = origen === 'online'
                     ? '<span class="status-badge activo"><i class="bi bi-globe2"></i> Online</span>'
                     : '<span class="status-badge" style="background:#334155;color:#cbd5e1"><i class="bi bi-shop"></i> Local</span>';
+                const codigo = escapeAttr(ticket.codigo_unico);
 
                 return `
                     <tr>
-                        <td><strong>${ticket.codigo_unico}</strong></td>
+                        <td><strong>${escapeHtml(ticket.codigo_unico)}</strong></td>
                         <td>${origenBadge}</td>
-                        <td>${ticket.codigo_asiento}</td>
-                        <td>${ticket.evento_titulo}</td>
+                        <td>${escapeHtml(ticket.codigo_asiento)}</td>
+                        <td>${escapeHtml(ticket.evento_titulo)}</td>
                         <td>
                             <span class="status-badge ${tipoEventoClass}">
                                 <i class="bi bi-${tipoEventoIcon}"></i>
                                 ${tipoEventoText}
                             </span>
                         </td>
-                        <td>${ticket.funcion_fecha ? formatFecha(ticket.funcion_fecha) : 'N/A'}</td>
-                        <td>${ticket.nombre_categoria}</td>
+                        <td>${escapeHtml(ticket.funcion_fecha ? formatFecha(ticket.funcion_fecha) : 'N/A')}</td>
+                        <td>${escapeHtml(ticket.nombre_categoria)}</td>
                         <td><strong>$${parseFloat(ticket.precio_final).toFixed(2)}</strong></td>
                         <td>
                             <span class="status-badge ${estadoClass}">
@@ -1014,17 +1015,17 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                                 ${estadoText}
                             </span>
                         </td>
-                        <td>${formatFecha(ticket.fecha_compra)}</td>
+                        <td>${escapeHtml(formatFecha(ticket.fecha_compra))}</td>
                         <td>
                             <div class="actions">
-                                <button class="btn-action btn-view" onclick="verInfo('${ticket.codigo_unico}')" title="Ver información">
+                                <button type="button" class="btn-action btn-view" data-accion="ver" data-codigo="${codigo}" title="Ver información">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button class="btn-action btn-print" onclick="imprimirBoleto('${ticket.codigo_unico}')" 
+                                <button type="button" class="btn-action btn-print" data-accion="imprimir" data-codigo="${codigo}"
                                     ${ticket.estatus != 1 ? 'disabled' : ''} title="Imprimir">
                                     <i class="bi bi-printer"></i>
                                 </button>
-                                <button class="btn-action btn-cancel" onclick="mostrarCancelar('${ticket.codigo_unico}')" 
+                                <button type="button" class="btn-action btn-cancel" data-accion="cancelar" data-codigo="${codigo}"
                                     ${ticket.estatus != 1 ? 'disabled' : ''} title="Cancelar">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
@@ -1032,7 +1033,17 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                         </td>
                     </tr>
                 `;
-            }).join('');
+            }).join(''));
+
+            tbody.querySelectorAll('[data-accion]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const codigo = btn.getAttribute('data-codigo') || '';
+                    const accion = btn.getAttribute('data-accion');
+                    if (accion === 'ver') verInfo(codigo);
+                    else if (accion === 'imprimir') imprimirBoleto(codigo);
+                    else if (accion === 'cancelar') mostrarCancelar(codigo);
+                });
+            });
         }
 
         // Ver información
@@ -1045,11 +1056,11 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
             const html = `
                 <div class="info-item">
                     <div class="info-label">Código de Boleto</div>
-                    <div class="info-value">${ticket.codigo_unico}</div>
+                    <div class="info-value">${escapeHtml(ticket.codigo_unico)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Asiento</div>
-                    <div class="info-value">${ticket.codigo_asiento}</div>
+                    <div class="info-value">${escapeHtml(ticket.codigo_asiento)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Origen</div>
@@ -1057,17 +1068,17 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 </div>
                 <div class="info-item">
                     <div class="info-label">Evento</div>
-                    <div class="info-value">${ticket.evento_titulo}</div>
+                    <div class="info-value">${escapeHtml(ticket.evento_titulo)}</div>
                 </div>
                 ${ticket.funcion_fecha ? `
                 <div class="info-item">
                     <div class="info-label">Función</div>
-                    <div class="info-value">${formatFecha(ticket.funcion_fecha)}</div>
+                    <div class="info-value">${escapeHtml(formatFecha(ticket.funcion_fecha))}</div>
                 </div>
                 ` : ''}
                 <div class="info-item">
                     <div class="info-label">Categoría</div>
-                    <div class="info-value">${ticket.nombre_categoria}</div>
+                    <div class="info-value">${escapeHtml(ticket.nombre_categoria)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Precio</div>
@@ -1075,27 +1086,27 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 </div>
                 <div class="info-item">
                     <div class="info-label">Estado</div>
-                    <div class="info-value">${estadoText}</div>
+                    <div class="info-value">${escapeHtml(estadoText)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Fecha de Compra</div>
-                    <div class="info-value">${formatFecha(ticket.fecha_compra)}</div>
+                    <div class="info-value">${escapeHtml(formatFecha(ticket.fecha_compra))}</div>
                 </div>
                 ${ticket.cliente_nombre ? `
                 <div class="info-item">
                     <div class="info-label">Cliente</div>
-                    <div class="info-value">${ticket.cliente_nombre}</div>
+                    <div class="info-value">${escapeHtml(ticket.cliente_nombre)}</div>
                 </div>
                 ` : ''}
                 ${ticket.vendedor_nombre ? `
                 <div class="info-item">
                     <div class="info-label">Vendido por</div>
-                    <div class="info-value">${ticket.vendedor_nombre}</div>
+                    <div class="info-value">${escapeHtml(ticket.vendedor_nombre)}</div>
                 </div>
                 ` : ''}
             `;
 
-            document.getElementById('infoContent').innerHTML = html;
+            teatroSetHtml(document.getElementById('infoContent'), html);
             document.getElementById('modalInfo').classList.add('active');
         }
 
@@ -1109,11 +1120,11 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
             const html = `
                 <div class="info-item">
                     <div class="info-label">Código</div>
-                    <div class="info-value">${ticket.codigo_unico}</div>
+                    <div class="info-value">${escapeHtml(ticket.codigo_unico)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Asiento</div>
-                    <div class="info-value">${ticket.codigo_asiento}</div>
+                    <div class="info-value">${escapeHtml(ticket.codigo_asiento)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Origen</div>
@@ -1121,11 +1132,11 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 </div>
                 <div class="info-item">
                     <div class="info-label">Evento</div>
-                    <div class="info-value">${ticket.evento_titulo}</div>
+                    <div class="info-value">${escapeHtml(ticket.evento_titulo)}</div>
                 </div>
             `;
 
-            document.getElementById('cancelInfo').innerHTML = html;
+            teatroSetHtml(document.getElementById('cancelInfo'), html);
             document.getElementById('modalCancelar').classList.add('active');
         }
 
@@ -1261,7 +1272,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
 
         async function initializeCameras() {
             const cameraSelect = document.getElementById('cameraSelect');
-            cameraSelect.innerHTML = '<option value="">Detectando cámaras...</option>';
+            teatroSetHtml(cameraSelect, '<option value="">Detectando cámaras...</option>');
             
             try {
                 // Solicitar permisos primero
@@ -1271,15 +1282,15 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
                 
                 if (videoDevices.length === 0) {
-                    cameraSelect.innerHTML = '<option value="">Sin cámaras</option>';
+                    teatroSetHtml(cameraSelect, '<option value="">Sin cámaras</option>');
                     showCameraError('No se detectaron cámaras');
                     return;
                 }
                 
-                cameraSelect.innerHTML = videoDevices.map((device, index) => {
-                    const label = device.label || `Cámara ${index + 1}`;
-                    return `<option value="${device.deviceId}">${label}</option>`;
-                }).join('');
+                teatroSetHtml(cameraSelect, videoDevices.map((device, index) => {
+                    const label = escapeHtml(device.label || `Cámara ${index + 1}`);
+                    return `<option value="${escapeAttr(device.deviceId)}">${label}</option>`;
+                }).join(''));
                 
                 // Usar la trasera por defecto si es móvil o la primera disponible
                 let selectedDeviceId = videoDevices[0].deviceId;
@@ -1299,7 +1310,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                 } else {
                     showCameraError('Error: ' + error.message);
                 }
-                cameraSelect.innerHTML = '<option value="">Error</option>';
+                teatroSetHtml(cameraSelect, '<option value="">Error</option>');
             }
         }
 
@@ -1366,15 +1377,19 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
 
         function showCameraError(message) {
             const container = document.getElementById('cameraContainer');
-            container.innerHTML = `
+            teatroSetHtml(container, `
                 <div style="text-align: center; color: #ef4444; padding: 20px;">
                     <i class="bi bi-camera-video-off" style="font-size: 2.5rem;"></i>
-                    <p style="margin-top: 10px;">${message}</p>
-                    <button class="btn-action" onclick="initializeCameras()" style="margin-top: 10px;">
+                    <p style="margin-top: 10px;"></p>
+                    <button type="button" class="btn-action" data-accion="retry-cam" style="margin-top: 10px;">
                         <i class="bi bi-arrow-clockwise"></i> Reintentar
                     </button>
                 </div>
-            `;
+            `);
+            const p = container.querySelector('p');
+            if (p) p.textContent = message == null ? '' : String(message);
+            const retry = container.querySelector('[data-accion="retry-cam"]');
+            if (retry) retry.addEventListener('click', () => initializeCameras());
         }
 
         async function onQRCodeScanned(decodedText) {

@@ -465,10 +465,12 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
             </div>
         </div>
 
-        <iframe class="settings-frame" name="contentFrame" id="contentFrame" style="display: none;"></iframe>
+        <div data-teatro-frame data-id="contentFrame" data-name="contentFrame" data-class="settings-frame" data-title="Contenido ajustes" data-style="display: none;"></div>
     </main>
 
-    <script>
+    <script src="../assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-frames.js"></script>
+<script>
         document.addEventListener('DOMContentLoaded', () => {
             const menuItems = document.querySelectorAll('.settings-menu-item');
             const welcomeContent = document.getElementById('welcomeContent');
@@ -516,7 +518,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                     headerTitle.textContent = title;
                     headerDesc.textContent = desc;
                     headerIcon.className = 'settings-header-icon ' + iconColor;
-                    headerIcon.innerHTML = '<i class="' + iconEl + '"></i>';
+                    teatroSetHtml(headerIcon, '<i class="' + iconEl + '"></i>');
                     
                     // Show content
                     welcomeContent.style.display = 'none';

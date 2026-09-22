@@ -938,6 +938,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="../assets/js/teatro-escape.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('loaded');
@@ -963,7 +964,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
             const fpI = flatpickr("#ini", { enableTime: true, minDate: now, dateFormat: "Y-m-d H:i", onChange: () => val(false) });
             const fpE = flatpickr("#fin", { enableTime: true, dateFormat: "Y-m-d H:i", clickOpens: false });
 
-            els.lockBtn.onclick = () => { cierreBloqueado = !cierreBloqueado; if (cierreBloqueado) { els.lockBtn.innerHTML = '<i class="bi bi-lock-fill"></i>'; els.lockBtn.classList.remove('unlocked'); fpE.set('clickOpens', false); recalcularCierre(); } else { els.lockBtn.innerHTML = '<i class="bi bi-unlock-fill"></i>'; els.lockBtn.classList.add('unlocked'); fpE.set('clickOpens', true); } };
+            els.lockBtn.onclick = () => { cierreBloqueado = !cierreBloqueado; if (cierreBloqueado) { teatroSetHtml(els.lockBtn, '<i class="bi bi-lock-fill"></i>'); els.lockBtn.classList.remove('unlocked'); fpE.set('clickOpens', false); recalcularCierre(); } else { teatroSetHtml(els.lockBtn, '<i class="bi bi-unlock-fill"></i>'); els.lockBtn.classList.add('unlocked'); fpE.set('clickOpens', true); } };
 
             function recalcularCierre() { const futuras = funcs.filter(f => !f.past); if (futuras.length) { const funcionMayor = futuras.reduce((max, f) => f.date > max.date ? f : max, futuras[0]); fpE.setDate(new Date(funcionMayor.date.getTime() + <?= (int) MS_CIERRE_VENTAS_POST_FUNCION ?>), true); } }
             function check() { els.add.disabled = !(fpD.selectedDates.length && fpT.selectedDates.length); }
@@ -977,7 +978,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
             };
 
             function upd() {
-                els.list.innerHTML = ''; els.hid.innerHTML = '';
+                teatroClear(els.list); teatroClear(els.hid);
                 const futuras = funcs.filter(f => !f.past);
                 if (!funcs.length) { els.list.appendChild(els.no); fpI.set('maxDate', null); fpE.setDate(null); }
                 else {
@@ -988,10 +989,10 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
                         const clase = f.past ? 'past' : 'future';
                         const icono = f.past ? 'bi-hourglass-bottom' : 'bi-calendar-event';
                         const tieneBoletos = (f.boletos || 0) > 0;
-                        let btnDel = tieneBoletos ? `<span class="func-protected" title="${f.boletos} boletos vendidos"><i class="bi bi-lock-fill"></i></span>` : `<button type="button" onclick="del(${i})">×</button>`;
-                        let boletosInfo = tieneBoletos ? `<span class="boletos-count">${f.boletos} <i class="bi bi-ticket-fill"></i></span>` : '';
-                        els.list.innerHTML += `<div class="funcion-item ${clase}${tieneBoletos ? ' protected' : ''}"><i class="bi ${icono}"></i> ${fechaStr}${boletosInfo}${btnDel}</div>`;
-                        if (!f.past) { els.hid.innerHTML += `<input type="hidden" name="funciones[]" value="${sqlDate}">`; }
+                        let btnDel = tieneBoletos ? `<span class="func-protected" title="${escapeAttr(f.boletos + ' boletos vendidos')}"><i class="bi bi-lock-fill"></i></span>` : `<button type="button" onclick="del(${i})">×</button>`;
+                        let boletosInfo = tieneBoletos ? `<span class="boletos-count">${escapeHtml(f.boletos)} <i class="bi bi-ticket-fill"></i></span>` : '';
+                        teatroAppendHtml(els.list, `<div class="funcion-item ${clase}${tieneBoletos ? ' protected' : ''}"><i class="bi ${icono}"></i> ${escapeHtml(fechaStr)}${boletosInfo}${btnDel}</div>`);
+                        if (!f.past) { teatroAppendHtml(els.hid, `<input type="hidden" name="funciones[]" value="${escapeAttr(sqlDate)}">`); }
                     });
                     if (futuras.length) { fpI.set('maxDate', new Date(futuras[0].date.getTime() - 60000)); }
                     recalcularCierre();

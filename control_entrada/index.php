@@ -492,7 +492,8 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/teatro-escape.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <script>
@@ -505,9 +506,15 @@
         let lastScanTime = 0;
 
         function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text == null ? '' : String(text);
-            return div.innerHTML;
+            if (typeof window.escapeHtml === 'function') {
+                return window.escapeHtml(text);
+            }
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
         function escapeAttr(text) {
             return escapeHtml(text).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
@@ -555,16 +562,16 @@
                 const videoDevices = devices.filter(device => device.kind === 'videoinput');
                 
                 if (videoDevices.length === 0) {
-                    cameraSelect.innerHTML = '<option value="">Sin cámaras</option>';
+                    teatroSetHtml(cameraSelect, '<option value="">Sin cámaras</option>');
                     showCameraError('No se detectaron cámaras');
                     return;
                 }
                 
-                cameraSelect.innerHTML = videoDevices.map((device, index) => {
+                teatroSetHtml(cameraSelect, videoDevices.map((device, index) => {
                     const label = escapeHtml(device.label || `Cámara ${index + 1}`);
                     const id = escapeAttr(device.deviceId);
                     return `<option value="${id}">${label}</option>`;
-                }).join('');
+                }).join(''));
                 
                 await startCamera(videoDevices[0].deviceId);
                 
@@ -574,7 +581,7 @@
                 } else {
                     showCameraError('Error: ' + error.message);
                 }
-                cameraSelect.innerHTML = '<option value="">Error</option>';
+                teatroSetHtml(cameraSelect, '<option value="">Error</option>');
             }
         }
         
@@ -634,13 +641,13 @@
         }
         
         function showCameraError(message) {
-            document.getElementById('cameraLoading').innerHTML = `
+            teatroSetHtml(document.getElementById('cameraLoading'), `
                 <i class="bi bi-camera-video-off" style="font-size: 2.5rem; color: #f5576c;"></i>
                 <p class="mt-2 mb-0"></p>
                 <button class="btn-icon mt-2" onclick="initializeCameras()">
                     <i class="bi bi-arrow-clockwise"></i> Reintentar
                 </button>
-            `;
+            `);
             document.querySelector('#cameraLoading p').textContent = message == null ? '' : String(message);
         }
         
@@ -728,11 +735,11 @@
             const isValid = ticket.estatus == 1;
             
             resultHeader.className = 'result-header ' + (isValid ? 'valid' : 'used');
-            resultHeader.innerHTML = isValid
+            teatroSetHtml(resultHeader, isValid
                 ? '<i class="bi bi-check-circle-fill"></i><h4>Boleto Válido</h4>'
-                : '<i class="bi bi-exclamation-triangle-fill"></i><h4>Ya Usado</h4>';
+                : '<i class="bi bi-exclamation-triangle-fill"></i><h4>Ya Usado</h4>');
             
-            ticketInfo.innerHTML = `
+            teatroSetHtml(ticketInfo, `
                 <div class="ticket-item full">
                     <label>Código</label>
                     <span style="color: #667eea; letter-spacing: 1px;">${escapeHtml(ticket.codigo_unico)}</span>
@@ -749,28 +756,28 @@
                     <label>Categoría</label>
                     <span>${escapeHtml(ticket.nombre_categoria || 'General')}</span>
                 </div>
-            `;
+            `);
             
             if (isValid) {
                 const codigoSafe = safeCodigoBoleto(ticket.codigo_unico);
-                resultActions.innerHTML = `
+                teatroSetHtml(resultActions, `
                     <button class="btn-secondary-custom" type="button" data-accion="cancelar">
                         <i class="bi bi-x-lg"></i> Cancelar
                     </button>
                     <button class="btn-confirm" type="button" data-accion="confirmar" data-codigo="${escapeAttr(codigoSafe)}">
                         <i class="bi bi-check2-circle"></i> Confirmar Entrada
                     </button>
-                `;
+                `);
                 resultActions.querySelector('[data-accion="cancelar"]')?.addEventListener('click', hideResult);
                 resultActions.querySelector('[data-accion="confirmar"]')?.addEventListener('click', (e) => {
                     confirmEntry(e.currentTarget.getAttribute('data-codigo'));
                 });
             } else {
-                resultActions.innerHTML = `
+                teatroSetHtml(resultActions, `
                     <button class="btn-confirm" type="button" style="background: var(--primary-gradient); max-width: 100%;" data-accion="siguiente">
                         <i class="bi bi-qr-code-scan"></i> Escanear Siguiente
                     </button>
-                `;
+                `);
                 resultActions.querySelector('[data-accion="siguiente"]')?.addEventListener('click', hideResult);
             }
             
@@ -783,9 +790,9 @@
             const resultActions = document.getElementById('resultActions');
             
             resultHeader.className = 'result-header invalid';
-            resultHeader.innerHTML = '<i class="bi bi-x-circle-fill"></i><h4>No Válido</h4>';
+            teatroSetHtml(resultHeader, '<i class="bi bi-x-circle-fill"></i><h4>No Válido</h4>');
             
-            ticketInfo.innerHTML = `
+            teatroSetHtml(ticketInfo, `
                 <div class="ticket-item full" style="text-align: center;">
                     <label>Código</label>
                     <span style="color: #f5576c;">${escapeHtml(code)}</span>
@@ -794,13 +801,13 @@
                     <label>Motivo</label>
                     <span>${escapeHtml(message)}</span>
                 </div>
-            `;
+            `);
             
-            resultActions.innerHTML = `
+            teatroSetHtml(resultActions, `
                 <button class="btn-confirm" type="button" style="background: var(--danger-gradient); max-width: 100%;" data-accion="siguiente">
                     <i class="bi bi-qr-code-scan"></i> Escanear Siguiente
                 </button>
-            `;
+            `);
             resultActions.querySelector('[data-accion="siguiente"]')?.addEventListener('click', hideResult);
             
             resultModal.show();
@@ -822,7 +829,7 @@
         async function confirmEntry(codigoUnico) {
             const btn = document.querySelector('.btn-confirm');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Procesando...';
+            teatroSetHtml(btn, '<span class="spinner-border spinner-border-sm me-2"></span> Procesando...');
             
             try {
                 const response = await fetch('../vnt_interfaz/confirmar_entrada.php', {
@@ -839,25 +846,25 @@
                     if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
                     
                     const resultHeader = document.getElementById('resultHeader');
-                    resultHeader.innerHTML = '<i class="bi bi-check-circle-fill"></i><h4>¡Entrada OK!</h4>';
+                    teatroSetHtml(resultHeader, '<i class="bi bi-check-circle-fill"></i><h4>¡Entrada OK!</h4>');
                     
-                    document.getElementById('resultActions').innerHTML = `
+                    teatroSetHtml(document.getElementById('resultActions'), `
                         <button class="btn-confirm" style="max-width: 100%;" onclick="hideResult()">
                             <i class="bi bi-qr-code-scan"></i> Escanear Siguiente
                         </button>
-                    `;
+                    `);
                     
                     // Resetear el último código escaneado para permitir re-escaneo
                     lastScannedCode = null;
                 } else {
                     showToast(data.message || 'Error', 'error');
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-check2-circle"></i> Confirmar Entrada';
+                    teatroSetHtml(btn, '<i class="bi bi-check2-circle"></i> Confirmar Entrada');
                 }
             } catch (error) {
                 showToast('Error de conexión', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-check2-circle"></i> Confirmar Entrada';
+                teatroSetHtml(btn, '<i class="bi bi-check2-circle"></i> Confirmar Entrada');
             }
         }
         
@@ -867,7 +874,7 @@
             
             const toast = document.createElement('div');
             toast.className = `custom-toast ${type}`;
-            toast.innerHTML = `<i class="bi ${icons[type] || icons.success}"></i><span></span>`;
+            teatroSetHtml(toast, `<i class="bi ${icons[type] || icons.success}"></i><span></span>`);
             toast.querySelector('span').textContent = message == null ? '' : String(message);
             
             container.appendChild(toast);

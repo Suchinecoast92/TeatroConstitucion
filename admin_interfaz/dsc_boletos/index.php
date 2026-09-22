@@ -712,6 +712,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/teatro-escape.js"></script>
     <script>
         <?php echo teatro_csrf_js_snippet(); ?>
         const API_URL = 'promos_api.php';
@@ -852,55 +853,67 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
         // Render tabla
         function renderTable() {
             const tb = $('#tabla-promos tbody');
-            tb.innerHTML = '';
+            teatroClear(tb);
 
             if (!state.promos.length) {
-                tb.innerHTML = `<tr><td colspan="5" class="text-center p-4" style="color: var(--text-secondary);">
+                teatroSetHtml(tb, `<tr><td colspan="5" class="text-center p-4" style="color: var(--text-secondary);">
             <i class="bi bi-tag d-block mb-2" style="font-size: 2rem;"></i>
             No hay descuentos configurados
-        </td></tr>`;
+        </td></tr>`);
                 return;
             }
 
             state.promos.forEach(p => {
-                const descTxt = p.modo_calculo === 'porcentaje' ? `${p.valor}%` : fmtMoney(p.valor);
+                const descTxt = p.modo_calculo === 'porcentaje' ? `${escapeHtml(p.valor)}%` : fmtMoney(p.valor);
                 const badgeClass = p.modo_calculo === 'porcentaje' ? 'percent' : 'fixed';
                 const estado = p.activo ? '<span class="status-active">✓ Activo</span>' : '<span class="status-inactive">Inactivo</span>';
                 const eventoNombre = p.evento_titulo || 'Global';
+                const idPromo = parseInt(p.id_promocion, 10) || 0;
 
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
+                teatroSetHtml(tr, `
             <td>
-                <div class="promo-name">${p.nombre}</div>
-                <div class="promo-event">${eventoNombre} - ${fmtMoney(p.precio)}</div>
+                <div class="promo-name">${escapeHtml(p.nombre)}</div>
+                <div class="promo-event">${escapeHtml(eventoNombre)} - ${fmtMoney(p.precio)}</div>
             </td>
             <td><span class="discount-badge ${badgeClass}">${descTxt}</span></td>
-            <td>${p.min_cantidad}</td>
+            <td>${escapeHtml(p.min_cantidad)}</td>
             <td>${estado}</td>
             <td>
-                <button class="btn btn-warning btn-sm" onclick='cargarEnForm(${p.id_promocion})' title="Editar">
+                <button type="button" class="btn btn-warning btn-sm" data-accion="editar" data-id="${idPromo}" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="eliminar(${p.id_promocion}, '${p.nombre.replace(/'/g, "\\'")}')" title="Eliminar">
+                <button type="button" class="btn btn-danger btn-sm" data-accion="eliminar" data-id="${idPromo}" data-nombre="${escapeAttr(p.nombre)}" title="Eliminar">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
-        `;
+        `);
                 tb.appendChild(tr);
+            });
+
+            tb.querySelectorAll('[data-accion]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.getAttribute('data-id'), 10) || 0;
+                    if (btn.getAttribute('data-accion') === 'editar') {
+                        cargarEnForm(id);
+                    } else {
+                        eliminar(id, btn.getAttribute('data-nombre') || '');
+                    }
+                });
             });
         }
 
         // Popular categorías
         function popularCategorias(eventoId) {
             const selectCat = $('#id_categoria_select');
-            selectCat.innerHTML = '';
+            teatroClear(selectCat);
 
             // Categorías a excluir (en minúsculas)
             const categoriasExcluidas = ['no venta', 'noventa', 'no_venta', 'discapacitado', 'discapacidad'];
 
             if (!eventoId) {
                 // Mostrar categorías base para descuentos globales
-                selectCat.innerHTML = '<option value="">-- Selecciona categoría base --</option>';
+                teatroSetHtml(selectCat, '<option value="">-- Selecciona categoría base --</option>');
                 CATEGORIAS_BASE.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.id_categoria;
@@ -912,7 +925,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
                 return;
             }
 
-            selectCat.innerHTML = '<option value="">-- Selecciona una categoría --</option>';
+            teatroSetHtml(selectCat, '<option value="">-- Selecciona una categoría --</option>');
 
             // Filtrar por evento y excluir categorías no deseadas
             const categoriasFiltradas = state.allCategorias.filter(c => {
@@ -922,7 +935,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
             });
 
             if (!categoriasFiltradas.length) {
-                selectCat.innerHTML = '<option value="">-- No hay categorías para este evento --</option>';
+                teatroSetHtml(selectCat, '<option value="">-- No hay categorías para este evento --</option>');
                 return;
             }
 
@@ -947,7 +960,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
             $('#form-title-text').textContent = 'Crear Descuento';
             $('#btn-guardar').className = 'btn btn-success';
-            $('#btn-guardar').innerHTML = '<i class="bi bi-check-circle"></i> Guardar';
+            teatroSetHtml($('#btn-guardar'), '<i class="bi bi-check-circle"></i> Guardar');
             $('#campo-categoria').style.display = 'block';
             $('#fecha-warning').style.display = 'none';
 
@@ -982,7 +995,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
             $('#form-title-text').textContent = 'Editar Descuento';
             $('#btn-guardar').className = 'btn btn-warning';
-            $('#btn-guardar').innerHTML = '<i class="bi bi-save"></i> Actualizar';
+            teatroSetHtml($('#btn-guardar'), '<i class="bi bi-save"></i> Actualizar');
             $('#campo-categoria').style.display = 'none';
 
             validarFechas();
@@ -1032,7 +1045,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
             const action = state.editingId ? 'update' : 'create';
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            teatroSetHtml(btn, '<span class="spinner-border spinner-border-sm"></span>');
 
             try {
                 const data = await api(action, payload, state.editingId);
@@ -1093,7 +1106,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
                 renderTable();
             } catch (e) {
                 if ($('#tabla-promos tbody')) {
-                    $('#tabla-promos tbody').innerHTML = `<tr><td colspan="5" class="text-center text-danger p-4">Error al cargar</td></tr>`;
+                    teatroSetHtml($('#tabla-promos tbody'), `<tr><td colspan="5" class="text-center text-danger p-4">Error al cargar</td></tr>`);
                 }
             }
         }

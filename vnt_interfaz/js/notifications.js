@@ -41,7 +41,7 @@ class NotificationSystem {
             ? message 
             : this.escapeHtml(message);
 
-        toast.innerHTML = `
+        teatroSetHtml(toast, `
             <i class="bi ${icons[type]} toast-icon"></i>
             <div class="toast-content">
                 <div class="toast-title">${titles[type]}</div>
@@ -50,7 +50,7 @@ class NotificationSystem {
             <button class="toast-close" onclick="this.parentElement.remove()">
                 <i class="bi bi-x"></i>
             </button>
-        `;
+        `);
 
         // Agregar barra de progreso si hay duración
         if (duration > 0) {
@@ -133,9 +133,15 @@ class NotificationSystem {
 
     // Método para escapar HTML y prevenir XSS
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        if (typeof window.escapeHtml === 'function') {
+            return window.escapeHtml(text);
+        }
+        return String(text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     // Limpiar todas las notificaciones

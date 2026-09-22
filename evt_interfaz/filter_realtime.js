@@ -59,10 +59,11 @@ if (inputFiltro) {
                 emptyMessage.id = 'emptyMessage';
                 emptyMessage.className = 'alert alert-light border text-center p-5';
                 emptyMessage.style.marginTop = '20px';
-                emptyMessage.innerHTML = `
+                teatroSetHtml(emptyMessage, `
                     <i class="bi bi-search fs-1 mb-3" style="color: white; display: block;"></i>
-                    <p class="mb-0" style="color: white;">No se encontraron eventos con "${this.value}"</p>
-                `;
+                    <p class="mb-0" style="color: white;">No se encontraron eventos con "<span></span>"</p>
+                `);
+                emptyMessage.querySelector('span').textContent = this.value;
                 contentWrapper.appendChild(emptyMessage);
             }
         } else {

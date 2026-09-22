@@ -29,12 +29,18 @@ let descuentos = [];
 let descuentoSeleccionado = null;
 
 function escapeHtml(text) {
+    if (typeof window.escapeHtml === 'function' && window.escapeHtml !== escapeHtml) {
+        return window.escapeHtml(text);
+    }
     if (window.notify && typeof notify.escapeHtml === 'function') {
         return notify.escapeHtml(text == null ? '' : String(text));
     }
-    const div = document.createElement('div');
-    div.textContent = text == null ? '' : String(text);
-    return div.innerHTML;
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function escapeAttr(text) {
@@ -202,7 +208,7 @@ function actualizarSelectDescuentos() {
 
     console.log('Actualizando select con', descuentos.length, 'descuentos');
 
-    select.innerHTML = '<option value="">-- Sin descuento --</option>';
+    teatroSetHtml(select, '<option value="">-- Sin descuento --</option>');
 
     descuentos.forEach(desc => {
         const option = document.createElement('option');
@@ -467,7 +473,7 @@ function actualizarCarrito() {
     const btnPagar = document.getElementById('btnPagar');
 
     if (carrito.length === 0) {
-        carritoContainer.innerHTML = '<div class="carrito-vacio">No hay asientos seleccionados</div>';
+        teatroSetHtml(carritoContainer, '<div class="carrito-vacio">No hay asientos seleccionados</div>');
         totalElement.textContent = '$0.00';
         btnPagar.disabled = true;
 
@@ -536,7 +542,7 @@ function actualizarCarrito() {
         `;
     }
 
-    carritoContainer.innerHTML = html;
+    teatroSetHtml(carritoContainer, html);
     carritoContainer.querySelectorAll('.btn-remove[data-asiento]').forEach((btn) => {
         btn.addEventListener('click', () => removerDelCarrito(btn.getAttribute('data-asiento')));
     });
@@ -727,7 +733,7 @@ function actualizarBotonesDescuentoEnModal() {
         </span>
     ` : '';
 
-    contenedor.innerHTML = botonSinDescuento + nuevosBotones + sinDescuentosMsg;
+    teatroSetHtml(contenedor, botonSinDescuento + nuevosBotones + sinDescuentosMsg);
 
     // Actualizar info de descuento aplicado
     const infoDiv = document.getElementById('descuentoAplicadoInfo');
@@ -868,7 +874,7 @@ function abrirModalTipoBoleto() {
     }
 
     // Agregar modal al DOM
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    teatroAppendHtml(document.body, modalHTML);
 
     // Llenar lista de boletos
     llenarListaBoletosTipo();
@@ -1043,7 +1049,7 @@ function llenarListaBoletosTipo() {
         `;
     });
 
-    lista.innerHTML = html;
+    teatroSetHtml(lista, html);
 
     // Agregar event listeners a los selectores
     document.querySelectorAll('.tipo-boleto-select').forEach(select => {
@@ -1148,7 +1154,7 @@ function actualizarTotalModal() {
     const resumenDescuento = document.getElementById('resumenDescuentoTotal');
     if (resumenDescuento) {
         if (totalDescuento > 0) {
-            resumenDescuento.innerHTML = `<span class="text-danger">-$${totalDescuento.toFixed(2)}</span>`;
+            teatroSetHtml(resumenDescuento, `<span class="text-danger">-$${totalDescuento.toFixed(2)}</span>`);
             resumenDescuento.style.display = 'inline';
         } else {
             resumenDescuento.style.display = 'none';
@@ -1341,7 +1347,7 @@ async function confirmarYProcesarPago() {
 
     const btnPagar = document.getElementById('btnPagar');
     btnPagar.disabled = true;
-    btnPagar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+    teatroSetHtml(btnPagar, '<span class="spinner-border spinner-border-sm"></span> Procesando...');
 
     // BLOQUEO TOTAL: Marcar que vamos a abrir el modal de venta exitosa
     // Esto bloquea TODAS las actualizaciones automáticas hasta que el usuario presione un botón
@@ -1435,7 +1441,7 @@ async function confirmarYProcesarPago() {
         window.TEATRO_VENTA_MODAL_ABIERTO = false;
     } finally {
         btnPagar.disabled = false;
-        btnPagar.innerHTML = '<i class="bi bi-credit-card"></i> Procesar Pago';
+        teatroSetHtml(btnPagar, '<i class="bi bi-credit-card"></i> Procesar Pago');
     }
 }
 
@@ -1696,7 +1702,7 @@ function mostrarBoletosGenerados(boletos) {
     const modalAnterior = document.getElementById('modalBoletosNuevo');
     if (modalAnterior) modalAnterior.remove();
 
-    document.body.insertAdjacentHTML('beforeend', html);
+    teatroAppendHtml(document.body, html);
     const modal = new bootstrap.Modal(document.getElementById('modalBoletosNuevo'));
     modal.show();
 
@@ -1760,7 +1766,7 @@ function mostrarBoletosGenerados(boletos) {
         if (window.getPrinters) {
             window.getPrinters().then(printers => {
                 if (printers && printers.length > 0) {
-                    selectImpresora.innerHTML = '<option value="">-- Seleccionar Impresora --</option>';
+                    teatroSetHtml(selectImpresora, '<option value="">-- Seleccionar Impresora --</option>');
                     printers.forEach(p => {
                         const option = document.createElement('option');
                         option.value = p;
@@ -1778,11 +1784,11 @@ function mostrarBoletosGenerados(boletos) {
                         selectImpresora.selectedIndex = 1;
                     }
                 } else {
-                    selectImpresora.innerHTML = '<option value="default">No se detectaron impresoras (QZ Tray)</option>';
+                    teatroSetHtml(selectImpresora, '<option value="default">No se detectaron impresoras (QZ Tray)</option>');
                 }
             }).catch(err => {
                 console.error("Error cargando impresoras:", err);
-                selectImpresora.innerHTML = '<option value="default" disabled>Error cargando impresoras</option>';
+                teatroSetHtml(selectImpresora, '<option value="default" disabled>Error cargando impresoras</option>');
             });
         }
 
@@ -1844,7 +1850,7 @@ async function continuarVendiendoDesdeModal() {
             overlay = document.createElement('div');
             overlay.id = 'overlaySinHorario';
             overlay.className = 'overlay-sin-horario';
-            overlay.innerHTML = `
+            teatroSetHtml(overlay, `
                 <div class="overlay-sin-horario-content">
                     <i class="bi bi-calendar-x"></i>
                     <h3>Seleccione un horario</h3>
@@ -1853,7 +1859,7 @@ async function continuarVendiendoDesdeModal() {
                         <i class="bi bi-arrow-up"></i>
                     </div>
                 </div>
-            `;
+            `);
             seatMapWrapper.insertBefore(overlay, seatMapWrapper.firstChild);
         }
     }
@@ -1928,7 +1934,7 @@ async function cancelarVentaDesdeModal() {
     const btnCancelar = document.querySelector('.accion-btn.btn-danger');
     if (btnCancelar) {
         btnCancelar.disabled = true;
-        btnCancelar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Cancelando...';
+        teatroSetHtml(btnCancelar, '<span class="spinner-border spinner-border-sm"></span> Cancelando...');
     }
 
     try {
@@ -2001,7 +2007,7 @@ async function cancelarVentaDesdeModal() {
         // Restaurar botón
         if (btnCancelar) {
             btnCancelar.disabled = false;
-            btnCancelar.innerHTML = '<i class="bi bi-x-circle"></i><span>Cancelar Venta</span>';
+            teatroSetHtml(btnCancelar, '<i class="bi bi-x-circle"></i><span>Cancelar Venta</span>');
         }
     }
 }
@@ -2048,7 +2054,7 @@ function mostrarModalSiguienteAccion() {
         </div >
         `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    teatroAppendHtml(document.body, modalHTML);
     const modal = new bootstrap.Modal(document.getElementById('modalSiguienteAccion'));
     modal.show();
 }
@@ -2161,10 +2167,13 @@ async function imprimirTodosBoletos() {
     }
 
     const btnImprimir = document.querySelector('.accion-btn.btn-warning');
-    const originalText = btnImprimir ? btnImprimir.innerHTML : '';
+    const originalText = btnImprimir ? btnImprimir.getAttribute('data-label-html') || '<i class="bi bi-printer"></i> Imprimir' : '';
     if (btnImprimir) {
+        if (!btnImprimir.getAttribute('data-label-html')) {
+            btnImprimir.setAttribute('data-label-html', '<i class="bi bi-printer"></i> Imprimir');
+        }
         btnImprimir.disabled = true;
-        btnImprimir.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Conectando...';
+        teatroSetHtml(btnImprimir, '<span class="spinner-border spinner-border-sm"></span> Conectando...');
     }
 
     // Obtener datos
@@ -2211,7 +2220,7 @@ async function imprimirTodosBoletos() {
 
         if (data.success && data.boletos) {
 
-            if (btnImprimir) btnImprimir.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Imprimiendo...';
+            if (btnImprimir) teatroSetHtml(btnImprimir, '<span class="spinner-border spinner-border-sm"></span> Imprimiendo...');
 
             // ASIGNAR NOMBRES A LOS BOLETOS OBTENIDOS
             data.boletos.forEach(boleto => {
@@ -2251,7 +2260,7 @@ async function imprimirTodosBoletos() {
     } finally {
         if (btnImprimir) {
             btnImprimir.disabled = false;
-            btnImprimir.innerHTML = originalText;
+            teatroSetHtml(btnImprimir, originalText);
         }
     }
 }
@@ -2408,7 +2417,7 @@ async function abrirWhatsAppWeb(codigosBoletos, esMultiple) {
         </div>
         `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    teatroAppendHtml(document.body, modalHTML);
 
     // Guardar códigos de boletos y información en el modal para usarlos después
     const modal = document.getElementById('modalWhatsApp');
@@ -2747,12 +2756,12 @@ function toggleModoSeleccionMultiple() {
     if (modoSeleccionMultiple) {
         btn.classList.remove('btn-outline-primary');
         btn.classList.add('btn-primary');
-        btn.innerHTML = '<i class="bi bi-check-square-fill"></i> Modo Múltiple: ON';
+        teatroSetHtml(btn, '<i class="bi bi-check-square-fill"></i> Modo Múltiple: ON');
         notify.info('Modo selección múltiple activado');
     } else {
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-outline-primary');
-        btn.innerHTML = '<i class="bi bi-check-square"></i> Modo Múltiple';
+        teatroSetHtml(btn, '<i class="bi bi-check-square"></i> Modo Múltiple');
         notify.info('Modo selección múltiple desactivado');
     }
 }

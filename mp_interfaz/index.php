@@ -917,7 +917,8 @@ $conn->close();
     </div>
 
     <input type="hidden" id="current_event_id" value="<?= $id_evento_seleccionado ?>">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/teatro-escape.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     <?php echo teatro_csrf_js_snippet(); ?>
     </script>
@@ -1310,7 +1311,7 @@ $conn->close();
                 toast.className = `position-fixed bottom-0 end-0 m-4 p-3 text-white rounded-3 shadow-lg d-flex align-items-center`;
                 toast.style.zIndex = 10000;
                 toast.style.background = `var(--${type}-color)`; // Usar colores del root
-                toast.innerHTML = `<i class="bi bi-info-circle-fill fs-5 me-3"></i><div class="fw-semibold">${msg}</div>`;
+                teatroSetHtml(toast, `<i class="bi bi-info-circle-fill fs-5 me-3"></i><div class="fw-semibold">${msg}</div>`);
                 document.body.appendChild(toast);
                 // Animación de entrada
                 toast.animate([{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 300 });

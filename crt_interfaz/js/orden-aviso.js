@@ -113,7 +113,7 @@
     overlay.id = 'teatroOrdenAviso';
     overlay.className = 'toa-overlay';
     overlay.setAttribute('aria-hidden', 'true');
-    overlay.innerHTML = `
+    teatroSetHtml(overlay, `
       <div class="toa-modal" role="dialog" aria-modal="true" aria-labelledby="toaTitle">
         <h2 id="toaTitle">Guarda tu número de orden</h2>
         <p id="toaMsg">Si hubo una interrupción, presenta este número en taquilla para cualquier aclaración.</p>
@@ -124,7 +124,7 @@
           <button type="button" class="toa-btn toa-btn-ghost" id="toaCerrar">Entendido</button>
         </div>
       </div>
-    `;
+    `);
     document.body.appendChild(overlay);
 
     const codeBtn = overlay.querySelector('#toaCode');

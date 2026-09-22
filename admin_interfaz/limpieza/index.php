@@ -492,7 +492,7 @@ $conn->close();
                     <label for="password">
                         <i class="bi bi-key"></i> Ingrese su contraseña de administrador para confirmar
                     </label>
-                    <input type="password" id="password" name="password" required
+                    <input type="password" id="password" name="password" required autocomplete="off"
                         placeholder="Contraseña del administrador">
                 </div>
 
@@ -504,7 +504,8 @@ $conn->close();
         </div>
     </div>
 
-    <script>
+    <script src="../assets/js/teatro-escape.js"></script>
+<script>
         const checkbox1 = document.getElementById('confirmacion1');
         const checkbox2 = document.getElementById('confirmacion2');
         const btnLimpiar = document.getElementById('btnLimpiar');
@@ -553,7 +554,7 @@ $conn->close();
                 animation: fadeIn 0.3s ease;
             `;
 
-            overlay.innerHTML = `
+            teatroSetHtml(overlay, `
                 <div style="
                     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
                     border: 3px solid #ef4444;
@@ -597,7 +598,7 @@ $conn->close();
                         </button>
                     </div>
                 </div>
-            `;
+            `);
 
             document.body.appendChild(overlay);
         }
@@ -613,7 +614,7 @@ $conn->close();
             cerrarModalConfirmacion();
 
             // Mostrar indicador de carga
-            btnLimpiar.innerHTML = '<i class="bi bi-hourglass-split" style="animation: spin 1s infinite linear;"></i> Procesando...';
+            teatroSetHtml(btnLimpiar, '<i class="bi bi-hourglass-split" style="animation: spin 1s infinite linear;"></i> Procesando...');
             btnLimpiar.disabled = true;
 
             // Enviar formulario

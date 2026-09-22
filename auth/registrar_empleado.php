@@ -906,14 +906,14 @@ if ($res_admin->num_rows > 0) {
 
                     <div class="form-group">
                         <label>Contraseña (mín. 6 caracteres)</label>
-                        <input type="password" name="password" id="reg_password" required placeholder="••••••" pattern="[A-Za-z0-9]{6,}"
-                            title="Solo letras y números, mínimo 6 caracteres" autocomplete="new-password">
+                        <input type="password" name="password" id="reg_password" required autocomplete="off" placeholder="••••••" pattern="[A-Za-z0-9]{6,}"
+                            title="Solo letras y números, mínimo 6 caracteres">
                     </div>
 
                     <div class="form-group">
                         <label>Confirmar contraseña</label>
-                        <input type="password" name="password_confirm" id="reg_password_confirm" required placeholder="••••••" pattern="[A-Za-z0-9]{6,}"
-                            title="Debe coincidir y solo letras y números" autocomplete="new-password">
+                        <input type="password" name="password_confirm" id="reg_password_confirm" required autocomplete="off" placeholder="••••••" pattern="[A-Za-z0-9]{6,}"
+                            title="Debe coincidir y solo letras y números">
                     </div>
 
                     <div class="form-group">
@@ -1013,7 +1013,7 @@ if ($res_admin->num_rows > 0) {
             <div class="modal-body">
                 <i class="bi bi-key-fill security-icon"></i>
                 <p class="security-text">Ingresa tu contraseña de administrador para continuar</p>
-                <input type="password" id="passwordSeguridad" class="password-input-security" placeholder="••••••"
+                <input type="password" id="passwordSeguridad" class="password-input-security" autocomplete="off" placeholder="••••••"
                     maxlength="20" onkeypress="if(event.key==='Enter') verificarPassword()">
                 <div id="errorSeguridad" style="color: #ef4444; text-align: center; margin-top: 15px; display: none;">
                     <i class="bi bi-exclamation-triangle"></i> <span id="errorSeguridadTexto">Contraseña
@@ -1059,8 +1059,8 @@ if ($res_admin->num_rows > 0) {
                 <div class="form-group">
                     <label>Nueva contraseña (dejar vacío para no cambiar)</label>
                     <div class="password-wrapper">
-                        <input type="password" id="editar_password" placeholder="Dejar vacío para mantener" pattern="[A-Za-z0-9]{6,}"
-                            title="Solo letras y números, mínimo 6 caracteres" autocomplete="new-password">
+                        <input type="password" id="editar_password" autocomplete="off" placeholder="Dejar vacío para mantener" pattern="[A-Za-z0-9]{6,}"
+                            title="Solo letras y números, mínimo 6 caracteres">
                         <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('editar_password', this)">
                             <i class="bi bi-eye"></i>
                         </button>
@@ -1088,7 +1088,8 @@ if ($res_admin->num_rows > 0) {
         </div>
     </div>
 
-    <script>
+    <script src="assets/js/teatro-escape.js"></script>
+<script>
         let accionPendiente = null;
 
         // Mostrar error en modal de seguridad
@@ -1143,7 +1144,8 @@ if ($res_admin->num_rows > 0) {
                     ? 'background: rgba(239, 68, 68, 0.9); color: white; border: 1px solid #ef4444;'
                     : 'background: rgba(16, 185, 129, 0.9); color: white; border: 1px solid #10b981;'}
             `;
-            notif.innerHTML = `<i class="bi bi-${tipo === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> ${mensaje}`;
+            teatroSetHtml(notif, `<i class="bi bi-${tipo === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i> <span></span>`);
+            notif.querySelector('span').textContent = mensaje == null ? '' : String(mensaje);
             document.body.appendChild(notif);
             setTimeout(() => notif.remove(), 4000);
         }

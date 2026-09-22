@@ -480,6 +480,7 @@ if ($check_hist && $check_hist->num_rows > 0) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/teatro-escape.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Chart instances
@@ -507,8 +508,8 @@ if ($check_hist && $check_hist->num_rows > 0) {
             console.log('Cambiando a base de datos:', db);
             
             // Limpiar y repoblar el dropdown de eventos
-            select.innerHTML = '<option value="">🎭 Todos los Eventos</option>';
-            document.getElementById('statsFuncion').innerHTML = '<option value="">🕒 Todas las Funciones</option>';
+            teatroSetHtml(select, '<option value="">🎭 Todos los Eventos</option>');
+            teatroSetHtml(document.getElementById('statsFuncion'), '<option value="">🕒 Todas las Funciones</option>');
             
             let eventos = [];
             if (db === 'actual') {
@@ -516,7 +517,7 @@ if ($check_hist && $check_hist->num_rows > 0) {
             } else if (db === 'historico') {
                 eventos = eventosHistorico || [];
                 if (eventos.length === 0) {
-                    select.innerHTML += '<option disabled>-- No hay eventos históricos --</option>';
+                    teatroAppendHtml(select, '<option disabled>-- No hay eventos históricos --</option>');
                 }
             } else { // ambas
                 eventos = [...(eventosActual || [])];
@@ -532,7 +533,7 @@ if ($check_hist && $check_hist->num_rows > 0) {
             // Agregar opciones al select
             eventos.forEach(ev => {
                 const sufijo = ev.esHistorico ? ' (Hist.)' : '';
-                select.innerHTML += `<option value="${ev.id_evento}">${ev.titulo}${sufijo}</option>`;
+                teatroAppendHtml(select, `<option value="${escapeAttr(ev.id_evento)}">${escapeHtml(ev.titulo)}${escapeHtml(sufijo)}</option>`);
             });
             
             // Cargar estadísticas con el nuevo filtro
@@ -554,7 +555,7 @@ if ($check_hist && $check_hist->num_rows > 0) {
             const comboFunc = document.getElementById('statsFuncion');
             
             // Limpiar combo funciones
-            comboFunc.innerHTML = '<option value="">🕒 Todas las Funciones</option>';
+            teatroSetHtml(comboFunc, '<option value="">🕒 Todas las Funciones</option>');
             
             if (idEvento) {
                 // Cargar funciones via AJAX
@@ -564,7 +565,7 @@ if ($check_hist && $check_hist->num_rows > 0) {
                     
                     if (funcs && funcs.length > 0) {
                         funcs.forEach(f => {
-                            comboFunc.innerHTML += `<option value="${f.id}">${f.label}</option>`;
+                            teatroAppendHtml(comboFunc, `<option value="${escapeAttr(f.id)}">${escapeHtml(f.label)}</option>`);
                         });
                     }
                 } catch(e) {
@@ -578,10 +579,10 @@ if ($check_hist && $check_hist->num_rows > 0) {
         function mostrarCargando(cargando) {
             const status = document.getElementById('filterStatus');
             if (cargando) {
-                status.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div> Cargando...';
+                teatroSetHtml(status, '<div class="spinner-border spinner-border-sm text-primary"></div> Cargando...');
                 status.style.color = '#6366f1';
             } else {
-                status.innerHTML = '<i class="bi bi-check-circle-fill"></i> Listo';
+                teatroSetHtml(status, '<i class="bi bi-check-circle-fill"></i> Listo');
                 status.style.color = '#10b981';
             }
         }
@@ -797,64 +798,64 @@ if ($check_hist && $check_hist->num_rows > 0) {
         function renderRanking(data) {
             const tbody = document.getElementById('tbodyRanking');
             if (!data.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Sin datos</td></tr>';
+                teatroSetHtml(tbody, '<tr><td colspan="5" class="text-center text-muted py-4">Sin datos</td></tr>');
                 return;
             }
-            tbody.innerHTML = data.slice(0, 10).map(ev => `
+            teatroSetHtml(tbody, data.slice(0, 10).map(ev => `
                 <tr>
-                    <td><span class="rank-badge ${ev.rank <= 3 ? 'rank-' + ev.rank : 'rank-default'}">${ev.rank}</span></td>
-                    <td class="fw-semibold text-white">${ev.titulo}</td>
-                    <td class="text-center"><span class="badge bg-secondary">${ev.boletos}</span></td>
-                    <td class="text-center text-muted">${ev.funciones}</td>
+                    <td><span class="rank-badge ${ev.rank <= 3 ? 'rank-' + ev.rank : 'rank-default'}">${escapeHtml(ev.rank)}</span></td>
+                    <td class="fw-semibold text-white">${escapeHtml(ev.titulo)}</td>
+                    <td class="text-center"><span class="badge bg-secondary">${escapeHtml(ev.boletos)}</span></td>
+                    <td class="text-center text-muted">${escapeHtml(ev.funciones)}</td>
                     <td class="text-end text-success fw-bold">$${parseFloat(ev.ingresos).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                 </tr>
-            `).join('');
+            `).join(''));
         }
 
         function renderVendedores(data) {
             const container = document.getElementById('containerVendedores');
             if (!data.length) {
-                container.innerHTML = '<p class="text-muted text-center small">Sin datos</p>';
+                teatroSetHtml(container, '<p class="text-muted text-center small">Sin datos</p>');
                 return;
             }
-            container.innerHTML = data.slice(0, 5).map((v, i) => `
+            teatroSetHtml(container, data.slice(0, 5).map((v, i) => `
                 <div class="vendedor-row">
                     <div class="vendedor-info">
-                        <div class="vendedor-avatar">${v.vendedor.charAt(0)}</div>
+                        <div class="vendedor-avatar">${escapeHtml((v.vendedor || '?').charAt(0))}</div>
                         <div>
-                            <div class="fw-semibold text-white small">${v.vendedor}</div>
-                            <div class="text-muted" style="font-size: 0.7rem;">${v.boletos} boletos</div>
+                            <div class="fw-semibold text-white small">${escapeHtml(v.vendedor)}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">${escapeHtml(v.boletos)} boletos</div>
                         </div>
                     </div>
                     <div class="text-success fw-bold">$${parseFloat(v.ingresos).toLocaleString('es-MX')}</div>
                 </div>
-            `).join('');
+            `).join(''));
         }
 
         function renderAlertas(data) {
             const container = document.getElementById('containerAlertas');
             if (!data.length) {
-                container.innerHTML = '<p class="text-muted text-center small py-3"><i class="bi bi-check-circle me-2"></i>Todo en orden</p>';
+                teatroSetHtml(container, '<p class="text-muted text-center small py-3"><i class="bi bi-check-circle me-2"></i>Todo en orden</p>');
                 return;
             }
-            container.innerHTML = data.map(a => `
+            teatroSetHtml(container, data.map(a => `
                 <div class="alert-card ${a.porcentaje < 15 ? 'danger' : 'warning'}">
                     <i class="bi bi-exclamation-triangle"></i>
                     <div>
-                        <div class="fw-semibold small">${a.evento}</div>
-                        <div class="text-muted" style="font-size: 0.7rem;">${a.fecha} - Solo ${a.porcentaje}% ocupación</div>
+                        <div class="fw-semibold small">${escapeHtml(a.evento)}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">${escapeHtml(a.fecha)} - Solo ${escapeHtml(a.porcentaje)}% ocupación</div>
                     </div>
                 </div>
-            `).join('');
+            `).join(''));
         }
 
         function renderOcupacion(data) {
             const container = document.getElementById('containerOcupacion');
             if (!data.length) {
-                container.innerHTML = '<p class="text-muted text-center col-12">Sin funciones activas</p>';
+                teatroSetHtml(container, '<p class="text-muted text-center col-12">Sin funciones activas</p>');
                 return;
             }
-            container.innerHTML = data.slice(0, 8).map(f => {
+            teatroSetHtml(container, data.slice(0, 8).map(f => {
                 // Determinar color y valor exacto
                 const pct = parseFloat(f.porcentaje);
                 const color = pct >= 80 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
@@ -863,7 +864,7 @@ if ($check_hist && $check_hist->num_rows > 0) {
                     <div class="col-md-3">
                         <div class="p-3 rounded-3" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-semibold text-white small text-truncate" title="${f.evento}" style="max-width: 70%;">${f.evento}</span>
+                                <span class="fw-semibold text-white small text-truncate" title="${escapeAttr(f.evento)}" style="max-width: 70%;">${escapeHtml(f.evento)}</span>
                                 <span class="badge" style="background-color: ${color}">${pct}%</span>
                             </div>
                             
@@ -874,18 +875,18 @@ if ($check_hist && $check_hist->num_rows > 0) {
                                 </div>
                                 <div class="position-absolute start-0 top-0 w-100 h-100 d-flex align-items-center justify-content-center text-white" 
                                      style="font-size: 0.7rem; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); pointer-events: none;">
-                                     <i class="bi bi-calendar3 me-1" style="font-size: 0.65rem;"></i> ${f.fecha} - ${f.hora}
+                                     <i class="bi bi-calendar3 me-1" style="font-size: 0.65rem;"></i> ${escapeHtml(f.fecha)} - ${escapeHtml(f.hora)}
                                 </div>
                             </div>
                             
                             <div class="d-flex justify-content-between mt-2" style="font-size: 0.7rem;">
-                                <span class="text-muted">${f.vendidos} vendidos</span>
-                                <span class="text-muted">${f.capacidad} total</span>
+                                <span class="text-muted">${escapeHtml(f.vendidos)} vendidos</span>
+                                <span class="text-muted">${escapeHtml(f.capacidad)} total</span>
                             </div>
                         </div>
                     </div>
                 `;
-            }).join('');
+            }).join(''));
         }
 
         function descargarPDF() {

@@ -126,10 +126,10 @@
             error: '❌'
         };
 
-        toast.innerHTML = `
+        teatroSetHtml(toast, `
             <span style="font-size: 18px; margin-right: 8px;">${icons[type] || icons.info}</span>
             <span>${message}</span>
-        `;
+        `);
 
         Object.assign(toast.style, {
             position: 'fixed',

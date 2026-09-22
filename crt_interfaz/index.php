@@ -1523,6 +1523,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         </div>
     </footer>
 
+    <script src="../assets/js/teatro-escape.js"></script>
     <script>
         // DATOS DE PHP A JAVASCRIPT
         const eventosEstaSemana = <?php echo json_encode($eventos_esta_semana, JSON_UNESCAPED_UNICODE); ?>;
@@ -1570,22 +1571,20 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         function escHtml(s) {
-            let t = String(s ?? '');
-            // Deshacer entidades ya guardadas (&quot;) antes de escapar de nuevo
-            for (let i = 0; i < 3; i++) {
-                if (!/&(#\d+|#x[\da-fA-F]+|\w+);/.test(t)) break;
-                const ta = document.createElement('textarea');
-                ta.innerHTML = t;
-                const next = ta.value;
-                if (next === t) break;
-                t = next;
-            }
-            return t
+            const raw = (typeof decodeHtmlEntities === 'function')
+                ? decodeHtmlEntities(s)
+                : String(s ?? '')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&');
+            return (typeof escapeHtml === 'function' ? escapeHtml(raw) : raw
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+                .replace(/'/g, '&#39;'));
         }
 
         function firstImageUrl(evento) {
@@ -1627,13 +1626,13 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         // —— Móvil: grid + detalle ——
         function renderizarMobileGrid() {
             if (!mobileGrid) return;
-            mobileGrid.innerHTML = '';
+            teatroClear(mobileGrid);
             if (!eventosMovil || eventosMovil.length === 0) {
-                mobileGrid.innerHTML = `
+                teatroSetHtml(mobileGrid, `
                     <div class="mobile-empty">
                         <i class="bi bi-calendar-x" style="font-size:2.5rem"></i>
                         <p style="margin-top:12px">No hay eventos próximos</p>
-                    </div>`;
+                    </div>`);
                 return;
             }
             eventosMovil.forEach(evento => {
@@ -1665,16 +1664,16 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             const url = firstImageUrl(evento);
             mobileDetailBg.style.backgroundImage = url ? `url("${url}")` : 'none';
 
-            mobileHorarios.innerHTML = '';
+            teatroClear(mobileHorarios);
             const funciones = Array.isArray(evento.funciones) ? evento.funciones : [];
             if (!funciones.length) {
-                mobileHorarios.innerHTML = '<span style="color:#94a3b8;font-size:0.9rem">No hay horarios disponibles</span>';
+                teatroSetHtml(mobileHorarios, '<span style="color:#94a3b8;font-size:0.9rem">No hay horarios disponibles</span>');
             } else {
                 funciones.forEach(f => {
                     const { dia, hora } = formatearHorarioCorto(f.fecha_hora);
                     const a = document.createElement(f.agotado ? 'span' : 'a');
                     a.className = 'mobile-horario' + (f.agotado ? ' agotado' : '');
-                    a.innerHTML = `<span class="dia">${escHtml(dia)}</span>${escHtml(hora)}${f.agotado ? '<br><small>Agotado</small>' : ''}`;
+                    teatroSetHtml(a, `<span class="dia">${escHtml(dia)}</span>${escHtml(hora)}${f.agotado ? '<br><small>Agotado</small>' : ''}`);
                     if (!f.agotado) {
                         a.href = `comprar.php?id_evento=${encodeURIComponent(evento.id_evento)}&id_funcion=${encodeURIComponent(f.id_funcion)}`;
                     }
@@ -1913,16 +1912,16 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             const indicadores = document.getElementById('hero-indicadores');
             if (!heroCarrusel || !track) return;
 
-            track.innerHTML = '';
-            if (indicadores) indicadores.innerHTML = '';
+            teatroClear(track);
+            if (indicadores) teatroClear(indicadores);
 
             if (!eventosEstaSemana || eventosEstaSemana.length === 0) {
-                track.innerHTML = `
+                teatroSetHtml(track, `
                     <div class="no-eventos-msg" style="flex: 0 0 100%; margin: 40px; text-align: center; box-sizing: border-box;">
                         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
                         <h4 style="margin-top: 15px;">No hay eventos esta semana</h4>
                         <p>Revisa nuestros próximos eventos más abajo</p>
-                    </div>`;
+                    </div>`);
                 heroCarrusel.querySelectorAll('.btn-hero-nav').forEach(b => b.style.display = 'none');
                 return;
             }
@@ -1969,7 +1968,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                     claseDisponibles = 'pocos';
                 }
 
-                contenido.innerHTML = `
+                teatroSetHtml(contenido, `
                     <h2 class="hero-titulo">${tituloEsc}</h2>
                     ${descripcion ? `<p class="hero-descripcion">${descripcion}</p>` : ''}
                     <p class="hero-fecha">
@@ -1989,7 +1988,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                         ? '<i class="bi bi-x-octagon-fill"></i> Agotado'
                         : 'Comprar boletos <i class="bi bi-arrow-right"></i>'}
                     </span>
-                `;
+                `);
 
                 slide.appendChild(imagen);
                 slide.appendChild(contenido);
@@ -2261,7 +2260,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                     claseDisponibles = 'pocos';
                 }
 
-                info.innerHTML = `
+                teatroSetHtml(info, `
                     <h4 class="evento-card-titulo">${escHtml(evento.titulo)}</h4>
                     <p class="evento-card-fecha">
                         <i class="bi bi-calendar-event"></i>
@@ -2275,7 +2274,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                             : `${disponibles} disponible${disponibles !== 1 ? 's' : ''}`}
                     </p>
                     ` : ''}
-                `;
+                `);
 
                 eventoCard.appendChild(imagen);
                 eventoCard.appendChild(info);

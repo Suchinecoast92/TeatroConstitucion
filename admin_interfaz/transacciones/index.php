@@ -459,7 +459,7 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
             <!-- TAB ESTADISTICAS (PREMIUM - IFRAME) -->
             <div class="tab-pane fade" id="pills-stats">
                 <div class="card bg-transparent border-0 p-0" style="margin: -1rem;">
-                    <iframe id="statsIframe" src="estadisticas.php" style="width: 100%; height: calc(100vh - 100px); border: none; border-radius: 8px;"></iframe>
+                    <div data-teatro-frame data-id="statsIframe" data-src="estadisticas.php" data-title="Estadísticas" data-style="width: 100%; height: calc(100vh - 100px); border: none; border-radius: 8px;"></div>
                 </div>
             </div>
 
@@ -486,6 +486,8 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/teatro-escape.js"></script>
+    <script src="../../assets/js/teatro-frames.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let debounceTimer;
@@ -636,7 +638,7 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
             const countLabel = document.getElementById('resultsCount');
             const pagContainer = document.getElementById('paginationContainer');
 
-            if(query === '' && desde === '' && hasta === '' && currentPage === 1) tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2"></div><br>Cargando...</td></tr>';
+            if(query === '' && desde === '' && hasta === '' && currentPage === 1) teatroSetHtml(tbody, '<tr><td colspan="3" class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-2"></div><br>Cargando...</td></tr>');
             
             const params = new URLSearchParams({
                 q: query,
@@ -652,13 +654,13 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
                 if (!data.success) throw new Error(data.error);
 
                 if (data.data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-muted">No se encontraron transacciones.</td></tr>';
+                    teatroSetHtml(tbody, '<tr><td colspan="3" class="text-center py-5 text-muted">No se encontraron transacciones.</td></tr>');
                     countLabel.innerText = '0 resultados';
-                    pagContainer.innerHTML = '';
+                    teatroClear(pagContainer);
                     return;
                 }
 
-                tbody.innerHTML = data.data.map((t, index) => {
+                teatroSetHtml(tbody, data.data.map((t, index) => {
                     const extra = t.extra || {};
                     const dateObj = new Date(t.fecha_hora);
                     const dateStr = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + 
@@ -669,16 +671,31 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
                     if(t.accion === 'login') badgeClass = 'bg-primary';
                     if(t.accion === 'logout') badgeClass = 'bg-danger';
 
+                    const descRaw = t.descripcion || '';
+                    const descShort = descRaw.length > 80 ? descRaw.substring(0,80)+'...' : descRaw;
+                    const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s) => String(s ?? '');
+                    const payload = encodeURIComponent(JSON.stringify(t));
+
                     return `
-                        <tr onclick='openDetail(${JSON.stringify(t)})' class="animate-enter premium-hover" style="animation-delay: ${index * 0.05}s">
-                            <td class="text-white fw-medium">${dateStr}</td>
-                            <td><span class="badge ${badgeClass} bg-opacity-75 text-white shadow-sm" style="font-weight:400; letter-spacing:0.5px;">${t.accion.toUpperCase()}</span></td>
+                        <tr data-detail="${payload}" class="animate-enter premium-hover tx-row" style="animation-delay: ${index * 0.05}s">
+                            <td class="text-white fw-medium">${esc(dateStr)}</td>
+                            <td><span class="badge ${badgeClass} bg-opacity-75 text-white shadow-sm" style="font-weight:400; letter-spacing:0.5px;">${esc((t.accion || '').toUpperCase())}</span></td>
                             <td>
-                                <div class="text-light">${t.descripcion.length > 80 ? t.descripcion.substring(0,80)+'...' : t.descripcion}</div>
+                                <div class="text-light">${esc(descShort)}</div>
                             </td>
                         </tr>
                     `;
-                }).join('');
+                }).join(''));
+
+                tbody.querySelectorAll('tr.tx-row[data-detail]').forEach((row) => {
+                    row.addEventListener('click', () => {
+                        try {
+                            openDetail(JSON.parse(decodeURIComponent(row.getAttribute('data-detail'))));
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    });
+                });
 
                 countLabel.innerText = `Total: ${data.pagination.total} registros | Pág ${data.pagination.page} de ${data.pagination.pages}`;
                 document.getElementById('headerTotalCount').innerText = data.pagination.total + ' registros';
@@ -691,7 +708,7 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
 
             } catch (e) {
                 console.error(e);
-                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger py-5">Error al cargar datos.</td></tr>';
+                teatroSetHtml(tbody, '<tr><td colspan="3" class="text-center text-danger py-5">Error al cargar datos.</td></tr>');
             }
         }
 
@@ -713,30 +730,30 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
                 }
                 if (curr < total) html += `<a href="#" class="pagination-link" onclick="goToPage(${curr+1})">&raquo;</a>`;
             }
-            container.innerHTML = html;
+            teatroSetHtml(container, html);
         }
 
         function openDetail(t) {
-             // ... existing logic ...
             const extra = t.extra || {};
             const modal = new bootstrap.Modal(document.getElementById('modalDetail'));
             const body = document.getElementById('modalDetailBody');
+            const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s) => String(s ?? '');
 
             let contenidoHTML = `
-                <div class="detail-row"><span class="detail-label">ID Transacción</span><span class="detail-val">#${t.id_transaccion}</span></div>
-                <div class="detail-row"><span class="detail-label">Fecha</span><span class="detail-val">${t.fecha_hora}</span></div>
-                <div class="detail-row"><span class="detail-label">Vendedor</span><span class="detail-val">${t.nombre} ${t.apellido}</span></div>
-                <div class="detail-row"><span class="detail-label">Acción</span><span class="detail-val text-uppercase text-primary">${t.accion}</span></div>
+                <div class="detail-row"><span class="detail-label">ID Transacción</span><span class="detail-val">#${esc(t.id_transaccion)}</span></div>
+                <div class="detail-row"><span class="detail-label">Fecha</span><span class="detail-val">${esc(t.fecha_hora)}</span></div>
+                <div class="detail-row"><span class="detail-label">Vendedor</span><span class="detail-val">${esc(t.nombre)} ${esc(t.apellido)}</span></div>
+                <div class="detail-row"><span class="detail-label">Acción</span><span class="detail-val text-uppercase text-primary">${esc(t.accion)}</span></div>
                 <div class="mt-3 mb-2 border-top border-secondary pt-2 text-muted small">DESCRIPCIÓN</div>
-                <p class="text-white small">${t.descripcion}</p>
+                <p class="text-white small">${esc(t.descripcion)}</p>
             `;
 
             if (t.accion === 'venta' && extra.cantidad) {
                 contenidoHTML += `
                     <div class="bg-black bg-opacity-50 p-3 rounded mt-3">
-                        <div class="detail-row"><span class="detail-label">Evento</span><span class="detail-val text-warning">${extra.evento || 'N/A'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Cliente</span><span class="detail-val text-info">${extra.cliente || 'Anónimo'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Boletos</span><span class="detail-val">${extra.cantidad}</span></div>
+                        <div class="detail-row"><span class="detail-label">Evento</span><span class="detail-val text-warning">${esc(extra.evento || 'N/A')}</span></div>
+                        <div class="detail-row"><span class="detail-label">Cliente</span><span class="detail-val text-info">${esc(extra.cliente || 'Anónimo')}</span></div>
+                        <div class="detail-row"><span class="detail-label">Boletos</span><span class="detail-val">${esc(extra.cantidad)}</span></div>
                         <div class="detail-row mt-2 pt-2 border-top border-secondary"><span class="detail-label">TOTAL COBRADO</span><span class="detail-val text-success fs-5">$${parseFloat(extra.total||0).toFixed(2)}</span></div>
                     </div>
                 `;
@@ -744,12 +761,12 @@ while ($r = $res_ev->fetch_assoc()) $eventos_filtro[] = $r;
                 if (extra.boletos_detalle) {
                     contenidoHTML += `<div class="mt-3"><small class="text-muted">Desglose de Asientos:</small><div class="d-flex flex-wrap gap-2 mt-1">`;
                     extra.boletos_detalle.forEach(b => {
-                        contenidoHTML += `<span class="badge bg-secondary border border-secondary">${b.asiento} ($${b.precio})</span>`;
+                        contenidoHTML += `<span class="badge bg-secondary border border-secondary">${esc(b.asiento)} ($${esc(b.precio)})</span>`;
                     });
                     contenidoHTML += `</div></div>`;
                 }
             }
-            body.innerHTML = contenidoHTML;
+            teatroSetHtml(body, contenidoHTML);
             modal.show();
         }
 

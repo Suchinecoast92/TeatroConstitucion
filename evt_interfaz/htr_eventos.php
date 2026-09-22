@@ -504,7 +504,7 @@ $total_eventos = $historial->num_rows;
                 <i class="bi bi-person-badge-fill" style="font-size: 4rem; color: #ff453a; margin-bottom: 20px; display: block;"></i>
                 <p id="mMsg" class="fs-5 mb-3"></p>
                 <p class="text-white small mb-3">Ingresa tu contraseña de administrador para continuar.</p>
-                <input type="password" id="mPin" class="form-control form-control-lg text-center" placeholder="••••••" maxlength="20" style="letter-spacing: 5px;">
+                <input type="password" id="mPin" class="form-control form-control-lg text-center" placeholder="••••••" maxlength="20" autocomplete="off" style="letter-spacing: 5px;">
                 <div id="mError" class="text-danger small mt-2" style="display: none;">
                     <i class="bi bi-exclamation-triangle"></i> <span id="mErrorText">Contraseña incorrecta</span>
                 </div>
@@ -522,6 +522,7 @@ $total_eventos = $historial->num_rows;
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/teatro-escape.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => document.body.classList.add('loaded'));
 
@@ -545,10 +546,11 @@ const els = {
 function conf(act, id, nom) {
     els.pin.value = '';
     els.error.style.display = 'none';
-    els.msg.innerHTML = `¿Eliminar <strong>${nom}</strong> para siempre?`;
+    teatroSetHtml(els.msg, '¿Eliminar <strong></strong> para siempre?');
+    els.msg.querySelector('strong').textContent = nom == null ? '' : String(nom);
     els.txt.textContent = 'Esta acción NO se puede deshacer.';
     els.btn.disabled = false;
-    els.btn.innerHTML = '<i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación';
+    teatroSetHtml(els.btn, '<i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación');
     els.btn.onclick = () => ejecutar(act, id);
     m.show();
     setTimeout(() => els.pin.focus(), 300);
@@ -579,7 +581,7 @@ function ejecutar(act, id) {
     else fd.append('csrf_token', (document.querySelector('meta[name="csrf-token"]') || {}).content || '');
     
     els.btn.disabled = true; 
-    els.btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
+    teatroSetHtml(els.btn, '<span class="spinner-border spinner-border-sm"></span> Procesando...');
     els.error.style.display = 'none';
     
     fetch('', { method: 'POST', body: fd })
@@ -591,7 +593,7 @@ function ejecutar(act, id) {
             els.error.style.display = 'block';
             els.errorText.textContent = d.message || 'Error al procesar';
             els.btn.disabled = false; 
-            els.btn.innerHTML = '<i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación';
+            teatroSetHtml(els.btn, '<i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación');
             els.pin.value = '';
             els.pin.focus();
         }
@@ -600,7 +602,7 @@ function ejecutar(act, id) {
         els.error.style.display = 'block';
         els.errorText.textContent = 'Error de conexión';
         els.btn.disabled = false; 
-        els.btn.innerHTML = '<i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación'; 
+        teatroSetHtml(els.btn, '<i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación'); 
     });
 }
 </script>

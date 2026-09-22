@@ -3,12 +3,7 @@
 
 <IfModule mod_authz_core.c>
   # Secretos y dumps
-  <FilesMatch "(?i)^(\.env|\.env\..*|.*\.sql|.*\.log|composer\.(json|lock)|websec-audit.*)$">
-    Require all denied
-  </FilesMatch>
-
-  # Docs / instrucciones con posibles credenciales de ejemplo
-  <FilesMatch "(?i)^(INSTRUCCIONES_LOGIN|FLUJO_ACCESO_ADMIN)\.md$">
+  <FilesMatch "(?i)^(\.env|\.env\..*|.*\.sql|.*\.log|.*\.md|composer\.(json|lock)|websec-audit.*)$">
     Require all denied
   </FilesMatch>
 </IfModule>

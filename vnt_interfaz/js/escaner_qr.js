@@ -6,12 +6,18 @@ let modoActual = 'verificar'; // 'verificar' o 'cancelar'
 let metodoInput = 'camara'; // 'camara' o 'manual'
 
 function escapeHtml(text) {
+    if (typeof window.escapeHtml === 'function' && window.escapeHtml !== escapeHtml) {
+        return window.escapeHtml(text);
+    }
     if (window.notify && typeof notify.escapeHtml === 'function') {
         return notify.escapeHtml(text == null ? '' : String(text));
     }
-    const div = document.createElement('div');
-    div.textContent = text == null ? '' : String(text);
-    return div.innerHTML;
+    return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function escapeAttr(text) {
@@ -143,7 +149,7 @@ function crearModalGestionBoletos() {
         </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    teatroAppendHtml(document.body, modalHTML);
 }
 
 // Cambiar modo de gestión
@@ -162,13 +168,13 @@ function cambiarModoGestion(nuevoModo) {
         btnCancelar.className = 'btn btn-danger';
         btnBuscar.className = 'btn btn-lg w-100 btn-danger';
         headerModal.className = 'modal-header bg-danger text-white';
-        tituloModal.innerHTML = '<i class="bi bi-x-circle"></i> Cancelar Boleto';
+        teatroSetHtml(tituloModal, '<i class="bi bi-x-circle"></i> Cancelar Boleto');
     } else {
         btnVerificar.className = 'btn btn-primary';
         btnCancelar.className = 'btn btn-outline-danger';
         btnBuscar.className = 'btn btn-lg w-100 btn-primary';
         headerModal.className = 'modal-header bg-primary text-white';
-        tituloModal.innerHTML = '<i class="bi bi-qr-code-scan"></i> Verificar Boleto';
+        teatroSetHtml(tituloModal, '<i class="bi bi-qr-code-scan"></i> Verificar Boleto');
     }
 
     console.log('Modo cambiado a:', nuevoModo);
@@ -238,12 +244,12 @@ async function iniciarEscaner() {
     }
 
     // Mostrar mensaje de carga
-    qrReader.innerHTML = `
+    teatroSetHtml(qrReader, `
         <div class="text-center p-4" style="color: white;">
             <div class="spinner-border text-light mb-3" role="status"></div>
             <p>Buscando cámaras disponibles...</p>
         </div>
-    `;
+    `);
 
     // Detener escáner anterior si existe
     if (html5QrCode) {
@@ -272,12 +278,12 @@ async function iniciarEscaner() {
     // CREAR INSTANCIA Y CONECTAR DIRECTAMENTE
     // (sin enumerar cámaras para evitar parpadeos)
     // ============================================
-    qrReader.innerHTML = `
+    teatroSetHtml(qrReader, `
         <div class="text-center p-4" style="color: white;">
             <div class="spinner-border text-success mb-3" role="status"></div>
             <p>Conectando con la cámara...</p>
         </div>
-    `;
+    `);
 
     html5QrCode = new Html5Qrcode("qr-reader");
 
@@ -341,7 +347,7 @@ async function iniciarEscaner() {
     // ============================================
     // SI TODO FALLA, MOSTRAR ERROR
     // ============================================
-    qrReader.innerHTML = `
+    teatroSetHtml(qrReader, `
         <div class="alert alert-danger text-center m-3">
             <i class="bi bi-camera-video-off fs-1 d-block mb-2"></i>
             <strong>No se pudo acceder a la cámara</strong>
@@ -353,7 +359,7 @@ async function iniciarEscaner() {
                 <i class="bi bi-keyboard"></i> Modo manual
             </button>
         </div>
-    `;
+    `);
 }
 
 // Forzar visibilidad del video
@@ -509,13 +515,13 @@ function mostrarInfoBoleto(boleto, modo) {
     // Configurar header según el modo y estado
     if (modo === 'cancelar') {
         header.className = 'modal-header bg-danger text-white';
-        title.innerHTML = '<i class="bi bi-x-circle"></i> Cancelar Boleto';
+        teatroSetHtml(title, '<i class="bi bi-x-circle"></i> Cancelar Boleto');
     } else if (boleto.estatus == 1) {
         header.className = 'modal-header bg-success text-white';
-        title.innerHTML = '<i class="bi bi-check-circle"></i> Boleto Válido';
+        teatroSetHtml(title, '<i class="bi bi-check-circle"></i> Boleto Válido');
     } else {
         header.className = 'modal-header bg-secondary text-white';
-        title.innerHTML = '<i class="bi bi-x-circle"></i> Boleto Usado/Cancelado';
+        teatroSetHtml(title, '<i class="bi bi-x-circle"></i> Boleto Usado/Cancelado');
     }
 
     // Construir el cuerpo
@@ -529,7 +535,7 @@ function mostrarInfoBoleto(boleto, modo) {
         ? parseFloat(boleto.precio_final).toFixed(2)
         : '0.00';
 
-    body.innerHTML = `
+    teatroSetHtml(body, `
         <div class="text-center mb-3">
             <img src="../boletos_qr/${encodeURIComponent(codigoSafe)}.png" 
                  alt="QR" 
@@ -571,44 +577,44 @@ function mostrarInfoBoleto(boleto, modo) {
                 </td>
             </tr>
         </table>
-    `;
+    `);
 
     // Configurar footer según modo
     if (modo === 'cancelar') {
         if (boleto.estatus == 1) {
-            footer.innerHTML = `
+            teatroSetHtml(footer, `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-danger" data-accion="cancelar" data-codigo="${escapeAttr(codigoSafe)}" data-asiento="${escapeAttr(boleto.codigo_asiento)}">
                     <i class="bi bi-x-circle"></i> Confirmar Cancelación
                 </button>
-            `;
+            `);
             const btnCancel = footer.querySelector('[data-accion="cancelar"]');
             if (btnCancel) {
                 btnCancel.addEventListener('click', () => confirmarCancelacion(btnCancel.dataset.codigo, btnCancel.dataset.asiento));
             }
         } else {
-            footer.innerHTML = `
+            teatroSetHtml(footer, `
                 <div class="alert alert-warning mb-0 w-100">Este boleto ya está cancelado o usado.</div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            `;
+            `);
         }
     } else {
         // Modo verificar
         if (boleto.estatus == 1) {
-            footer.innerHTML = `
+            teatroSetHtml(footer, `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-success" data-accion="entrada" data-codigo="${escapeAttr(codigoSafe)}">
                     <i class="bi bi-check-circle"></i> Confirmar Entrada
                 </button>
-            `;
+            `);
             const btnEntrada = footer.querySelector('[data-accion="entrada"]');
             if (btnEntrada) {
                 btnEntrada.addEventListener('click', () => confirmarEntrada(btnEntrada.dataset.codigo));
             }
         } else {
-            footer.innerHTML = `
+            teatroSetHtml(footer, `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            `;
+            `);
         }
     }
 
@@ -625,21 +631,21 @@ function mostrarError(mensaje) {
     const footer = document.getElementById('boletoInfoFooter');
 
     header.className = 'modal-header bg-danger text-white';
-    title.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error';
+    teatroSetHtml(title, '<i class="bi bi-exclamation-triangle"></i> Error');
 
-    body.innerHTML = `
+    teatroSetHtml(body, `
         <div class="alert alert-danger text-center mb-0">
             <i class="bi bi-x-circle" style="font-size: 3rem;"></i>
             <p class="mt-3 mb-0 fs-5">${escapeHtml(mensaje)}</p>
         </div>
-    `;
+    `);
 
-    footer.innerHTML = `
+    teatroSetHtml(footer, `
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         <button type="button" class="btn btn-primary" data-accion="reintentar">
             <i class="bi bi-arrow-repeat"></i> Intentar de nuevo
         </button>
-    `;
+    `);
     const btnRetry = footer.querySelector('[data-accion="reintentar"]');
     if (btnRetry) {
         btnRetry.addEventListener('click', () => {
@@ -760,7 +766,7 @@ function mostrarConfirmacion(titulo, mensaje, tipo = 'warning') {
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        teatroAppendHtml(document.body, modalHtml);
         const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
 
         document.getElementById('btnConfirmar').addEventListener('click', () => {
@@ -808,11 +814,11 @@ function toggleEfectoEspejo() {
         if (espejoActivo) {
             videoElement.style.transform = 'scaleX(-1)';
             videoElement.style.webkitTransform = 'scaleX(-1)';
-            if (btnEspejo) btnEspejo.innerHTML = '<i class="bi bi-arrow-left-right"></i> Espejo: ON';
+            if (btnEspejo) teatroSetHtml(btnEspejo, '<i class="bi bi-arrow-left-right"></i> Espejo: ON');
         } else {
             videoElement.style.transform = 'scaleX(1)';
             videoElement.style.webkitTransform = 'scaleX(1)';
-            if (btnEspejo) btnEspejo.innerHTML = '<i class="bi bi-arrow-left-right"></i> Espejo: OFF';
+            if (btnEspejo) teatroSetHtml(btnEspejo, '<i class="bi bi-arrow-left-right"></i> Espejo: OFF');
         }
     }
 }
