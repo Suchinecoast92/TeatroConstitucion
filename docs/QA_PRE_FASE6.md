@@ -23,7 +23,7 @@ php sql/reparar_holds_timezone.php # PASS
 | C3 | Crítico | Pago en curso: no liberar holds ni expirar orden con `PENDING` activo (45 min); timer no libera al clic en Pagar |
 | H1 | Alto | Checkout exige `renovados > 0`; si no, re-aparte asientos |
 | H2 | Alto | Webhook `REFUNDED` cancela boletos (`cancelar_boletos_de_orden`) |
-| H3 | Alto | `notification_url` incluye `?secret=` si hay `MP_WEBHOOK_SECRET`; webhook lo exige |
+| H3 | Alto | Webhook exige firma HMAC `x-signature` con `MP_WEBHOOK_SECRET` (sin secretos en la URL) |
 
 ## Checklist manual (navegador)
 
@@ -45,7 +45,7 @@ php sql/reparar_holds_timezone.php # PASS
 ### Seguridad (antes de prod)
 - [ ] Con `MP_ACCESS_TOKEN` real: `webhook_pagos.php?mock=1&codigo=…` debe fallar
 - [ ] `APP_URL` apunta al dominio HTTPS real
-- [ ] Definir `MP_WEBHOOK_SECRET` y verificar que MP llama con `?secret=`
+- [ ] Definir `MP_WEBHOOK_SECRET` (firma del panel MP) y verificar que el webhook rechaza llamadas sin `x-signature` válida
 
 ## Riesgos residuales (aceptables / Fase 6+)
 

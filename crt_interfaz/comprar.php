@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../includes/precio_helper.php';
 require_once __DIR__ . '/../sync/reservas_helper.php';
+require_once __DIR__ . '/../config/ventas.php';
 
 $id_evento = isset($_GET['id_evento']) ? (int) $_GET['id_evento'] : 0;
 $id_funcion = isset($_GET['id_funcion']) ? (int) $_GET['id_funcion'] : 0;
@@ -38,6 +39,11 @@ if ($id_evento <= 0 || $id_funcion <= 0) {
         $stmt->close();
         if (!$funcion) {
             $error = 'Función no válida.';
+        } elseif (!teatro_funcion_venta_abierta($conn, $id_evento, $id_funcion)) {
+            $error = teatro_mensaje_venta_cerrada();
+            $evento = null;
+            $funcion = null;
+            $mapa = [];
         } else {
             foreach (obtener_categorias_evento_completas($conn, $id_evento) as $c) {
                 $colores[$c['id_categoria']] = $c['color'];
@@ -137,6 +143,26 @@ if (!$error && $info_cat) {
 $vendidos = $disp['vendidos'] ?? [];
 $reservados = $disp['reservados'] ?? [];
 $tipo_evento = isset($evento['tipo']) ? (int) $evento['tipo'] : 1;
+
+if ($error) {
+    $esVentaCerrada = ($error === teatro_mensaje_venta_cerrada());
+    $aviso_titulo = $esVentaCerrada ? 'Venta no disponible' : 'No se puede continuar';
+    $aviso_lineas = $esVentaCerrada
+        ? [
+            $error,
+            'Esta función ya concluyó o la venta cerró. Revisa la cartelera para ver funciones activas.',
+        ]
+        : [
+            $error,
+            'Vuelve a la cartelera e intenta de nuevo con una función disponible.',
+        ];
+    $aviso_btn = 'Ir a cartelera';
+    $aviso_href = 'cartelera_cliente.php';
+    $aviso_icon = $esVentaCerrada ? '⊘' : '!';
+    $aviso_doc_title = $aviso_titulo;
+    require __DIR__ . '/_aviso_flujo.php';
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -408,10 +434,6 @@ body {
 </style>
 </head>
 <body>
-<?php if ($error): ?>
-  <div class="p-4"><div class="alert alert-warning"><?= h($error) ?></div>
-  <a class="btn btn-outline-light btn-sm" href="cartelera_cliente.php" id="btnVolverError">Volver</a></div>
-<?php else: ?>
 <div class="header-simple">
   <div class="header-copy">
     <div class="eyebrow">Selecciona tus asientos</div>
@@ -641,6 +663,15 @@ body {
   const carrito = new Map();
   const msg = document.getElementById('msg');
   const chips = document.getElementById('chips');
+
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   const totalEst = document.getElementById('totalEst');
   const countSeats = document.getElementById('countSeats');
   const btnContinuar = document.getElementById('btnContinuar');
@@ -789,8 +820,8 @@ body {
     }
     let html = '';
     carrito.forEach((item, codigo) => {
-      html += `<span class="chip"><strong>${codigo}</strong>
-        <button type="button" data-quitar="${codigo}" title="Quitar">&times;</button></span>`;
+      html += `<span class="chip"><strong>${esc(codigo)}</strong>
+        <button type="button" data-quitar="${esc(codigo)}" title="Quitar">&times;</button></span>`;
     });
     chips.innerHTML = html;
     cotizar();
@@ -999,6 +1030,5 @@ body {
   });
 })();
 </script>
-<?php endif; ?>
 </body>
 </html>

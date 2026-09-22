@@ -1,5 +1,9 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../includes/auth_guard.php';
+require_once __DIR__ . '/../../includes/csrf.php';
+teatro_require_admin(false);
+
 // 1. CONEXIÓN
 // (Ajusta la ruta si es necesario, p.ej., ../../evt_interfaz/conexion.php)
 include "../../evt_interfaz/conexion.php"; 
@@ -8,6 +12,11 @@ require_once __DIR__ . '/../../api/registrar_cambio.php';
 
 $accion = $_POST['accion'] ?? $_GET['accion'] ?? '';
 $id_evento_redirect = $_POST['id_evento'] ?? $_GET['id_evento'] ?? null;
+
+// CSRF en mutaciones (POST o borrados por GET)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || $accion === 'borrar' || $accion === 'eliminar') {
+    teatro_require_csrf(false);
+}
 
 // Construir la URL base para redireccionar
 // (Asumiendo que tu archivo de gestión se llama index.php en esta carpeta)

@@ -1,6 +1,7 @@
 <?php
 // 1. CONEXIÓN y SESIÓN
 session_start();
+require_once __DIR__ . '/../includes/csrf.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -230,6 +231,7 @@ $conn->close();
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<?php echo teatro_csrf_meta(); ?>
 <title>Punto de Venta</title>
 <link rel="icon" href="../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -2930,6 +2932,9 @@ window.addEventListener('beforeunload', detenerActualizacionFunciones);
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <script src="js/notifications.js"></script>
+<script>
+<?php echo teatro_csrf_js_snippet(); ?>
+</script>
 <script src="js/evento-sync.js"></script>
 <script>
 // Precios por tipo de boleto (cargados desde la BD)
@@ -2982,11 +2987,11 @@ window.URL_PANEL = '<?= $url_panel ?>';
     resetInactividad();
 })();
 </script>
-<script src="js/carrito.js?v=27"></script>
+<script src="js/carrito.js?v=29"></script>
 
 <script src="js/carrito-patch.js"></script>
 <script src="js/descuentos-modal.js"></script>
-<script src="js/escaner_qr.js?v=4"></script>
+<script src="js/escaner_qr.js?v=5"></script>
 <script src="js/menu-mejoras.js?v=1"></script>
 <script src="js/seleccion-multiple.js?v=1"></script>
 <script src="js/sync-sender.js?v=2"></script>

@@ -10,6 +10,14 @@ ob_start();
 header('Content-Type: application/json');
 
 try {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    require_once __DIR__ . '/../includes/auth_guard.php';
+    require_once __DIR__ . '/../includes/csrf.php';
+    teatro_require_login(true);
+    teatro_require_csrf(true);
+
     // Incluir conexión
     if (!file_exists("conexion_api.php")) {
         throw new Exception("Archivo de conexión no encontrado");
@@ -21,9 +29,12 @@ try {
         throw new Exception("Error de conexión a la base de datos");
     }
     
-    // Leer datos JSON del request
-    $input = file_get_contents('php://input');
-    $data = json_decode($input, true);
+    // Leer datos JSON del request (CSRF pudo consumir el body)
+    $data = teatro_csrf_consumed_json_body();
+    if ($data === null) {
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+    }
     
     if (!$data || !isset($data['codigo_unico'])) {
         throw new Exception("Código no proporcionado");
@@ -78,4 +89,3 @@ try {
 }
 
 ob_end_flush();
-?>

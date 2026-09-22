@@ -2,12 +2,14 @@
 // 1. CONFIGURACIÓN Y SEGURIDAD
 // Versión limpia - Conflictos de merge resueltos - 2026-01-26
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 date_default_timezone_set('America/Mexico_City');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/../includes/csrf.php';
 
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
@@ -163,6 +165,7 @@ function responder_json_crear_evento(array $payload): void
 // 2. PROCESAR FORMULARIO (POST)
 // ==================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    teatro_require_csrf(!empty($_POST['respuesta_json']));
 
     asegurar_tabla_precios_tipo($conn);
 
@@ -212,17 +215,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $imagen_ruta = "";
     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
-        $ext = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+        require_once __DIR__ . '/../includes/upload_image.php';
+        $valid = teatro_validar_imagen_subida($_FILES['imagen']['tmp_name'], $_FILES['imagen']['name'] ?? '');
+        if (!empty($valid['ok'])) {
             if (!is_dir("imagenes"))
                 mkdir("imagenes", 0755, true);
-            $ruta = "imagenes/evt_" . time() . "." . $ext;
+            $ruta = "imagenes/evt_" . time() . "." . $valid['ext'];
             if (move_uploaded_file($_FILES['imagen']['tmp_name'], $ruta)) {
                 $imagen_ruta = $ruta;
             } else
                 $errores_php[] = "Error al guardar imagen.";
         } else
-            $errores_php[] = "Formato de imagen no válido.";
+            $errores_php[] = $valid['error'] ?? "Formato de imagen no válido.";
     } else {
         $errImg = isset($_FILES['imagen']['error']) ? (int) $_FILES['imagen']['error'] : UPLOAD_ERR_NO_FILE;
         if ($errImg === UPLOAD_ERR_NO_FILE) {
@@ -397,6 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Evento</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -1432,6 +1437,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
             <form id="fCreate" method="POST" enctype="multipart/form-data" novalidate>
+                <?php echo teatro_csrf_field(); ?>
                 <input type="hidden" name="es_gratuito" id="esGratuito" value="0">
                 <input type="hidden" name="precio_general" id="hPrecioGeneral" value="">
                 <input type="hidden" name="precio_nino" id="hPrecioNino" value="">
@@ -2287,6 +2293,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             const form = document.getElementById('fCreate');
             const fd = new FormData(form);
+            if (typeof window.teatroCsrfAppend === 'function') {
+                window.teatroCsrfAppend(fd);
+            }
 
             fd.set('es_gratuito', document.getElementById('esGratuito').value);
             fd.set('precio_general', document.getElementById('hPrecioGeneral').value);
@@ -2430,9 +2439,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     if (text.includes('No se pudo crear el evento:')) {
-                        document.open();
-                        document.write(text);
-                        document.close();
+                        let msg = 'No se pudo crear el evento.';
+                        try {
+                            const tmp = document.createElement('div');
+                            tmp.textContent = text;
+                            const plain = tmp.textContent || '';
+                            const idx = plain.indexOf('No se pudo crear el evento:');
+                            if (idx >= 0) {
+                                msg = plain.slice(idx).replace(/\s+/g, ' ').trim().slice(0, 400);
+                            }
+                        } catch (e) { /* ignore */ }
+                        mostrarErroresCreacionEvento([msg]);
                         return;
                     }
 

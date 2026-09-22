@@ -5,6 +5,23 @@ let modalBoletoInfo = null;
 let modoActual = 'verificar'; // 'verificar' o 'cancelar'
 let metodoInput = 'camara'; // 'camara' o 'manual'
 
+function escapeHtml(text) {
+    if (window.notify && typeof notify.escapeHtml === 'function') {
+        return notify.escapeHtml(text == null ? '' : String(text));
+    }
+    const div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
+function escapeAttr(text) {
+    return escapeHtml(text).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+function safeCodigoUnico(codigo) {
+    return String(codigo == null ? '' : codigo).replace(/[^A-Za-z0-9_\-]/g, '');
+}
+
 // Abrir el modal de gestión de boletos
 function abrirGestionBoletos(modo = 'verificar') {
     modoActual = modo;
@@ -502,9 +519,19 @@ function mostrarInfoBoleto(boleto, modo) {
     }
 
     // Construir el cuerpo
+    const codigoSafe = safeCodigoUnico(boleto.codigo_unico);
+    const codigoHtml = escapeHtml(boleto.codigo_unico);
+    const tituloHtml = escapeHtml(boleto.evento_titulo);
+    const asientoHtml = escapeHtml(boleto.codigo_asiento);
+    const catHtml = escapeHtml(boleto.nombre_categoria || 'General');
+    const fechaHtml = escapeHtml(boleto.fecha_hora ? formatearFecha(boleto.fecha_hora) : 'No especificada');
+    const precioTxt = Number.isFinite(parseFloat(boleto.precio_final))
+        ? parseFloat(boleto.precio_final).toFixed(2)
+        : '0.00';
+
     body.innerHTML = `
         <div class="text-center mb-3">
-            <img src="../boletos_qr/${boleto.codigo_unico}.png" 
+            <img src="../boletos_qr/${encodeURIComponent(codigoSafe)}.png" 
                  alt="QR" 
                  class="img-fluid" 
                  style="max-width: 180px; border: 2px solid #dee2e6; border-radius: 10px;"
@@ -513,27 +540,27 @@ function mostrarInfoBoleto(boleto, modo) {
         <table class="table table-bordered mb-0">
             <tr>
                 <th style="width:35%">Código:</th>
-                <td><strong class="text-primary">${boleto.codigo_unico}</strong></td>
+                <td><strong class="text-primary">${codigoHtml}</strong></td>
             </tr>
             <tr>
                 <th>Evento:</th>
-                <td>${boleto.evento_titulo}</td>
+                <td>${tituloHtml}</td>
             </tr>
             <tr>
                 <th>Función:</th>
-                <td>${boleto.fecha_hora ? formatearFecha(boleto.fecha_hora) : 'No especificada'}</td>
+                <td>${fechaHtml}</td>
             </tr>
             <tr>
                 <th>Asiento:</th>
-                <td><strong>${boleto.codigo_asiento}</strong></td>
+                <td><strong>${asientoHtml}</strong></td>
             </tr>
             <tr>
                 <th>Categoría:</th>
-                <td>${boleto.nombre_categoria || 'General'}</td>
+                <td>${catHtml}</td>
             </tr>
             <tr>
                 <th>Precio:</th>
-                <td>$${parseFloat(boleto.precio_final).toFixed(2)}</td>
+                <td>$${precioTxt}</td>
             </tr>
             <tr>
                 <th>Estado:</th>
@@ -551,10 +578,14 @@ function mostrarInfoBoleto(boleto, modo) {
         if (boleto.estatus == 1) {
             footer.innerHTML = `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-danger" onclick="confirmarCancelacion('${boleto.codigo_unico}', '${boleto.codigo_asiento}')">
+                <button type="button" class="btn btn-danger" data-accion="cancelar" data-codigo="${escapeAttr(codigoSafe)}" data-asiento="${escapeAttr(boleto.codigo_asiento)}">
                     <i class="bi bi-x-circle"></i> Confirmar Cancelación
                 </button>
             `;
+            const btnCancel = footer.querySelector('[data-accion="cancelar"]');
+            if (btnCancel) {
+                btnCancel.addEventListener('click', () => confirmarCancelacion(btnCancel.dataset.codigo, btnCancel.dataset.asiento));
+            }
         } else {
             footer.innerHTML = `
                 <div class="alert alert-warning mb-0 w-100">Este boleto ya está cancelado o usado.</div>
@@ -566,10 +597,14 @@ function mostrarInfoBoleto(boleto, modo) {
         if (boleto.estatus == 1) {
             footer.innerHTML = `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="confirmarEntrada('${boleto.codigo_unico}')">
+                <button type="button" class="btn btn-success" data-accion="entrada" data-codigo="${escapeAttr(codigoSafe)}">
                     <i class="bi bi-check-circle"></i> Confirmar Entrada
                 </button>
             `;
+            const btnEntrada = footer.querySelector('[data-accion="entrada"]');
+            if (btnEntrada) {
+                btnEntrada.addEventListener('click', () => confirmarEntrada(btnEntrada.dataset.codigo));
+            }
         } else {
             footer.innerHTML = `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -595,16 +630,23 @@ function mostrarError(mensaje) {
     body.innerHTML = `
         <div class="alert alert-danger text-center mb-0">
             <i class="bi bi-x-circle" style="font-size: 3rem;"></i>
-            <p class="mt-3 mb-0 fs-5">${mensaje}</p>
+            <p class="mt-3 mb-0 fs-5">${escapeHtml(mensaje)}</p>
         </div>
     `;
 
     footer.innerHTML = `
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" onclick="modalBoletoInfo.hide(); abrirGestionBoletos('${modoActual}')">
+        <button type="button" class="btn btn-primary" data-accion="reintentar">
             <i class="bi bi-arrow-repeat"></i> Intentar de nuevo
         </button>
     `;
+    const btnRetry = footer.querySelector('[data-accion="reintentar"]');
+    if (btnRetry) {
+        btnRetry.addEventListener('click', () => {
+            modalBoletoInfo.hide();
+            abrirGestionBoletos(modoActual);
+        });
+    }
 
     modalBoletoInfo = new bootstrap.Modal(modal);
     modalBoletoInfo.show();
@@ -622,8 +664,13 @@ async function confirmarEntrada(codigoUnico) {
     try {
         const response = await fetch('confirmar_entrada.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ codigo_unico: codigoUnico })
+            headers: (typeof window.teatroCsrfHeaders === 'function')
+                ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                : { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                codigo_unico: codigoUnico,
+                csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+            })
         });
 
         const data = await response.json();
@@ -653,8 +700,13 @@ async function confirmarCancelacion(codigoUnico, codigoAsiento) {
     try {
         const response = await fetch('cancelar_boleto.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ codigo_unico: codigoUnico })
+            headers: (typeof window.teatroCsrfHeaders === 'function')
+                ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                : { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                codigo_unico: codigoUnico,
+                csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+            })
         });
 
         const data = await response.json();

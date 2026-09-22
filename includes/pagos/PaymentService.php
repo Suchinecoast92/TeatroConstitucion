@@ -192,11 +192,8 @@ function payment_crear_para_orden(mysqli $conn, string $codigoPublico): array
     $orden['titulo_evento'] = $evt['titulo'] ?? 'Teatro Constitución';
 
     $base = payment_app_base_url();
+    // notification_url sin secretos en query (la autenticidad va por x-signature HMAC).
     $notif = $base . '/api/online/webhook_pagos.php';
-    $whSecret = (string) teatro_env('MP_WEBHOOK_SECRET', '');
-    if ($whSecret !== '') {
-        $notif .= (strpos($notif, '?') === false ? '?' : '&') . 'secret=' . rawurlencode($whSecret);
-    }
     $urls = [
         'success' => $base . '/crt_interfaz/pago_retorno.php?status=success&codigo=' . rawurlencode($codigoPublico),
         'failure' => $base . '/crt_interfaz/pago_retorno.php?status=failure&codigo=' . rawurlencode($codigoPublico),
@@ -361,6 +358,60 @@ function payment_aplicar_estado(
     }
 
     return ['success' => true, 'changed' => $prev !== $estadoInterno, 'estado' => $estadoInterno];
+}
+
+/**
+ * Verifica la firma HMAC de webhooks de Mercado Pago (header x-signature).
+ * @see https://www.mercadopago.com.mx/developers/es/docs/your-integrations/notifications/webhooks
+ */
+function payment_verificar_firma_mp(string $secret, array $server, array $query): bool
+{
+    if ($secret === '') {
+        return false;
+    }
+
+    $xSignature = (string) ($server['HTTP_X_SIGNATURE'] ?? '');
+    $xRequestId = (string) ($server['HTTP_X_REQUEST_ID'] ?? '');
+    if ($xSignature === '') {
+        return false;
+    }
+
+    $ts = null;
+    $v1 = null;
+    foreach (explode(',', $xSignature) as $part) {
+        $kv = explode('=', trim($part), 2);
+        if (count($kv) !== 2) {
+            continue;
+        }
+        $key = trim($kv[0]);
+        $val = trim($kv[1]);
+        if ($key === 'ts') {
+            $ts = $val;
+        } elseif ($key === 'v1') {
+            $v1 = $val;
+        }
+    }
+    if ($ts === null || $v1 === null || $v1 === '') {
+        return false;
+    }
+
+    // PHP normaliza data.id → data_id en $_GET
+    $dataId = (string) ($query['data.id'] ?? $query['data_id'] ?? '');
+    if ($dataId !== '' && preg_match('/[A-Za-z]/', $dataId)) {
+        $dataId = strtolower($dataId);
+    }
+
+    $manifest = '';
+    if ($dataId !== '') {
+        $manifest .= 'id:' . $dataId . ';';
+    }
+    if ($xRequestId !== '') {
+        $manifest .= 'request-id:' . $xRequestId . ';';
+    }
+    $manifest .= 'ts:' . $ts . ';';
+
+    $computed = hash_hmac('sha256', $manifest, $secret);
+    return hash_equals($computed, $v1);
 }
 
 /**

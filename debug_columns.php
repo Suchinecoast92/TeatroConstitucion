@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/includes/auth_guard.php';
+teatro_require_cli();
+
 include 'conexion.php';
 
 $tables = ['evento', 'funciones', 'categorias', 'promociones', 'boletos'];

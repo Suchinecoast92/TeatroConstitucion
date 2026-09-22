@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/includes/pagos/PaymentService.php';
 require_once dirname(__DIR__) . '/includes/emision_helper.php';
 require_once dirname(__DIR__) . '/sync/reservas_helper.php';
+require_once __DIR__ . '/test_helpers.php';
 
 function fail(string $msg): void
 {
@@ -20,35 +21,13 @@ if (!$conn) {
 }
 asegurarTablaPagos($conn);
 
-$evento = $conn->query('SELECT id_evento FROM evento WHERE finalizado = 0 ORDER BY id_evento DESC LIMIT 1')->fetch_assoc();
-if (!$evento) {
-    fail('sin evento activo');
-}
-$idEvento = (int) $evento['id_evento'];
-$st = $conn->prepare('SELECT id_funcion FROM funciones WHERE id_evento = ? ORDER BY fecha_hora DESC LIMIT 1');
-$st->bind_param('i', $idEvento);
-$st->execute();
-$idFuncion = (int) $st->get_result()->fetch_assoc()['id_funcion'];
-$st->close();
+$ctx = test_contexto_orden($conn, 'D', 'test_emi_');
+$idEvento = $ctx['id_evento'];
+$idFuncion = $ctx['id_funcion'];
+$asiento = $ctx['asiento'];
+$session = $ctx['session'];
+$cliente = $ctx['cliente'];
 
-$disp = obtenerDisponibilidadFuncion($idEvento, $idFuncion, null, $conn);
-$ocupados = array_flip($disp['ocupados']);
-$asiento = null;
-for ($n = 1; $n <= 26; $n++) {
-    $c = 'D' . $n;
-    if (!isset($ocupados[$c])) {
-        $cat = resolver_categoria_asiento($conn, $idEvento, $c);
-        if ($cat && !es_categoria_no_venta($cat['nombre_categoria'])) {
-            $asiento = $c;
-            break;
-        }
-    }
-}
-if (!$asiento) {
-    fail('sin asiento libre en fila D');
-}
-
-$session = 'test_emi_' . bin2hex(random_bytes(3));
 $hold = reservarAsientos($idEvento, $idFuncion, [$asiento], $session, 'online', 'test-emision');
 if (!$hold['success']) {
     fail('hold: ' . json_encode($hold, JSON_UNESCAPED_UNICODE));
@@ -58,8 +37,9 @@ $ord = crearOrdenOnline($conn, [
     'id_evento' => $idEvento,
     'id_funcion' => $idFuncion,
     'session_id' => $session,
-    'email' => 'emision@example.com',
-    'nombre' => 'Test Emision',
+    'email' => $cliente['email'],
+    'nombre' => $cliente['nombre'],
+    'telefono' => $cliente['telefono'],
     'asientos' => [['asiento' => $asiento, 'tipo_boleto' => 'adulto']],
 ]);
 if (!$ord['success']) {

@@ -1,6 +1,8 @@
 <?php
 // 1. CONEXIÓN
+session_start();
 include "../../evt_interfaz/conexion.php";
+require_once __DIR__ . '/../../includes/csrf.php';
 
 $id_evento_seleccionado = $_GET['id_evento'] ?? null;
 $nombre_evento = "";
@@ -65,6 +67,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Descuentos - Teatro</title>
     <link rel="icon" href="../../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
@@ -709,6 +712,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        <?php echo teatro_csrf_js_snippet(); ?>
         const API_URL = 'promos_api.php';
         const PHP_EVENTOS = <?= $EVENTOS_JSON ?>;
         const ALL_CATEGORIAS = <?= $ALL_CATEGORIAS_JSON ?>;
@@ -743,13 +747,19 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
             const config = {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                headers: (typeof window.teatroCsrfHeaders === 'function')
+                    ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json', 'Accept': 'application/json' })
+                    : { 'Content-Type': 'application/json', 'Accept': 'application/json' }
             };
 
-            if (action === 'list' || action === 'delete') {
+            if (action === 'list') {
                 config.method = 'GET';
             } else {
-                config.body = JSON.stringify(payload);
+                const body = Object.assign({}, payload, {
+                    csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+                });
+                if (id) body.id = id;
+                config.body = JSON.stringify(body);
             }
 
             try {

@@ -3,6 +3,9 @@
  * Trunca todas las tablas de trt_25 preservando usuarios con rol = 'admin'.
  * Uso: php sql/truncar_datos.php
  */
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_cli();
+
 require_once __DIR__ . '/../config/database.php';
 
 $conn = getLocalConnection();

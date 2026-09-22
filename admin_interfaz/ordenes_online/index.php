@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../includes/csrf.php';
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: ../../login.php');
     exit;
@@ -12,6 +13,7 @@ if (($_SESSION['usuario_rol'] ?? '') !== 'admin') {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<?php echo teatro_csrf_meta(); ?>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Órdenes online</title>
 <link rel="icon" href="../../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
@@ -90,6 +92,7 @@ body { background: var(--bg-primary, #0f172a); color: var(--text-primary, #e2e8f
 </div>
 
 <script>
+<?php echo teatro_csrf_js_snippet(); ?>
 const API = 'api.php';
 
 function esc(s) {
@@ -194,8 +197,14 @@ async function ver(codigo) {
       const motivo = prompt('Motivo (opcional):', 'Cancelación administrativa') || '';
       const rr = await fetch(API + '?action=reembolsar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo: o.codigo_publico, motivo }),
+        headers: (typeof window.teatroCsrfHeaders === 'function')
+          ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+          : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codigo: o.codigo_publico,
+          motivo,
+          csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+        }),
       }).then(x => x.json());
       msg.textContent = rr.success
         ? ('OK: reembolsado. Boletos cancelados: ' + (rr.boletos_cancelados || 0))
@@ -212,8 +221,13 @@ async function ver(codigo) {
       btnE.disabled = true;
       const rr = await fetch(API + '?action=reemitir', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo: o.codigo_publico }),
+        headers: (typeof window.teatroCsrfHeaders === 'function')
+          ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+          : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codigo: o.codigo_publico,
+          csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+        }),
       }).then(x => x.json());
       msg.textContent = rr.success
         ? ('Emisión OK. Nuevos: ' + (rr.emitidos || 0))

@@ -2,6 +2,9 @@
 /**
  * Webhook / IPN de Mercado Pago.
  * La confirmación real del pago ocurre aquí, no en el return URL del navegador.
+ *
+ * Autenticación: firma HMAC en header x-signature (MP_WEBHOOK_SECRET).
+ * No se aceptan secretos en query string.
  */
 
 require_once __DIR__ . '/_bootstrap.php';
@@ -20,19 +23,28 @@ if (!$conn) {
 
 $secret = (string) teatro_env('MP_WEBHOOK_SECRET', '');
 $env = strtolower((string) teatro_env('APP_ENV', 'local'));
-if ($secret === '' && in_array($env, ['production', 'prod'], true)) {
-    error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío en producción — rechazando');
-    http_response_code(503);
-    echo json_encode(['success' => false, 'error' => 'webhook misconfigured']);
-    exit;
-}
-if ($secret !== '') {
-    $notifSecret = (string) ($_GET['secret'] ?? '');
-    if ($notifSecret === '' || !hash_equals($secret, $notifSecret)) {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'error' => 'unauthorized']);
+$isProd = in_array($env, ['production', 'prod'], true);
+$isMockHttp = !empty($_GET['mock']);
+
+// Mock por HTTP solo en entornos donde el mock está permitido (sin firma MP).
+if ($isMockHttp) {
+    if (!payment_mock_permitido()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'mock disabled']);
         exit;
     }
+} elseif ($secret === '') {
+    if ($isProd) {
+        error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío en producción — rechazando');
+        http_response_code(503);
+        echo json_encode(['success' => false, 'error' => 'webhook misconfigured']);
+        exit;
+    }
+    error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío — aceptando solo en entorno no productivo');
+} elseif (!payment_verificar_firma_mp($secret, $_SERVER, $_GET)) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'unauthorized']);
+    exit;
 }
 
 $raw = file_get_contents('php://input');

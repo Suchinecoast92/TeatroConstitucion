@@ -1,5 +1,8 @@
 <?php
-// debug_schema.php
+// debug_schema.php — solo CLI
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_cli();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 include "../conexion.php";

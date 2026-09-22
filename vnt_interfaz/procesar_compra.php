@@ -10,7 +10,9 @@ register_shutdown_function(function () {
     $error = error_get_last();
     if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
         ob_clean();
-        header('Content-Type: application/json');
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
         echo json_encode([
             'success' => false,
             'message' => 'Error fatal: ' . $error['message'] . ' en ' . $error['file'] . ':' . $error['line']
@@ -22,6 +24,11 @@ header('Content-Type: application/json');
 
 // Iniciar sesión para obtener el usuario que está vendiendo
 session_start();
+require_once __DIR__ . '/../includes/auth_guard.php';
+require_once __DIR__ . '/../includes/csrf.php';
+teatro_require_login(true);
+teatro_require_csrf(true);
+
 require_once __DIR__ . '/../transacciones_helper.php';
 require_once __DIR__ . '/../api/registrar_cambio.php';
 require_once __DIR__ . '/../sync/reservas_helper.php';
@@ -60,16 +67,12 @@ if (!isset($conn) || !$conn) {
     exit;
 }
 
-// Importar clases de Endroid QR Code
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow;
-use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
-
 // Leer datos JSON del request
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
+$data = teatro_csrf_consumed_json_body();
+if ($data === null) {
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+}
 
 if (!$data || !isset($data['id_evento']) || !isset($data['asientos'])) {
     echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
@@ -345,14 +348,14 @@ try {
             
             $qrPath = $qrDir . $codigo_unico . '.png';
             
-            $qrCode = QrCode::create($codigo_unico)
-                ->setEncoding(new Encoding('UTF-8'))
-                ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
+            $qrCode = \Endroid\QrCode\QrCode::create($codigo_unico)
+                ->setEncoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
+                ->setErrorCorrectionLevel(new \Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow())
                 ->setSize(300)
                 ->setMargin(10)
-                ->setRoundBlockSizeMode(new RoundBlockSizeModeMargin());
+                ->setRoundBlockSizeMode(new \Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin());
                 
-            $writer = new PngWriter();
+            $writer = new \Endroid\QrCode\Writer\PngWriter();
             $resultQR = $writer->write($qrCode);
             $resultQR->saveToFile($qrPath);
             
@@ -491,4 +494,3 @@ try {
 
 $conn->close();
 ob_end_flush();
-?>

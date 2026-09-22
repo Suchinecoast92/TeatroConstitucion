@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
+require_once __DIR__ . '/../includes/csrf.php';
 include "../conexion.php";
 
 if(file_exists("../transacciones_helper.php")) {
@@ -22,6 +23,7 @@ if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_rol'] !== 'admin' && 
 // ==================================================================
 if (isset($_POST['accion']) && $_POST['accion'] === 'borrar_permanente') {
     header('Content-Type: application/json');
+    teatro_require_csrf(true);
     $id = (int)$_POST['id_evento'];
     $password = $_POST['password'] ?? '';
     
@@ -131,7 +133,8 @@ $total_eventos = $historial->num_rows;
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -572,6 +575,8 @@ function ejecutar(act, id) {
     fd.append('accion', act); 
     fd.append('id_evento', id);
     fd.append('password', password);
+    if (typeof window.teatroCsrfAppend === 'function') window.teatroCsrfAppend(fd);
+    else fd.append('csrf_token', (document.querySelector('meta[name="csrf-token"]') || {}).content || '');
     
     els.btn.disabled = true; 
     els.btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';

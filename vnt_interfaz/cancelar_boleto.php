@@ -4,6 +4,10 @@ header('Content-Type: application/json');
 
 include "../conexion.php";
 session_start();
+require_once __DIR__ . '/../includes/auth_guard.php';
+require_once __DIR__ . '/../includes/csrf.php';
+teatro_require_login(true);
+teatro_require_csrf(true);
 
 // Verificar si existen los helpers
 if (file_exists("../transacciones_helper.php")) {
@@ -18,8 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Obtener datos del body JSON
-$input = json_decode(file_get_contents('php://input'), true);
+// Obtener datos del body JSON (CSRF pudo haberlo consumido)
+$input = teatro_csrf_consumed_json_body();
+if ($input === null) {
+    $input = json_decode(file_get_contents('php://input'), true);
+}
+if (!is_array($input)) {
+    $input = [];
+}
 
 // Aceptar tanto id_boleto como codigo_unico
 $id_boleto = $input['id_boleto'] ?? $_POST['id_boleto'] ?? 0;

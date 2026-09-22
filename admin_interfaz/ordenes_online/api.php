@@ -12,6 +12,7 @@ if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_rol'] ?? '') !== 'adm
     exit;
 }
 
+require_once dirname(__DIR__, 2) . '/includes/csrf.php';
 require_once dirname(__DIR__, 2) . '/config/database.php';
 require_once dirname(__DIR__, 2) . '/includes/reembolso_helper.php';
 
@@ -26,6 +27,15 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $input = json_decode(file_get_contents('php://input') ?: '[]', true);
 if (!is_array($input)) {
     $input = [];
+}
+
+if (in_array($action, ['reembolsar', 'reemitir'], true)) {
+    $tok = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($input['csrf_token'] ?? '');
+    if (!teatro_csrf_validate(is_string($tok) ? $tok : '')) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'CSRF inválido']);
+        exit;
+    }
 }
 
 try {

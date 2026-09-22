@@ -381,18 +381,8 @@ function crearOrdenOnline(mysqli $conn, array $payload): array
     $email = $cli['email'];
     $telefono = $cli['telefono'];
 
-    // Ventana de venta abierta
-    $horas = (int) HORAS_CIERRE_VENTAS_POST_FUNCION;
-    $stmt = $conn->prepare("
-        SELECT (fecha_hora > (NOW() - INTERVAL {$horas} HOUR)) AS abierta
-        FROM funciones WHERE id_funcion = ? AND id_evento = ?
-    ");
-    $stmt->bind_param('ii', $idFuncion, $idEvento);
-    $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-    if (!$row || (int) $row['abierta'] === 0) {
-        return ['success' => false, 'error' => 'La venta para esta función ya no está disponible'];
+    if (!teatro_funcion_venta_abierta($conn, $idEvento, $idFuncion)) {
+        return ['success' => false, 'error' => teatro_mensaje_venta_cerrada()];
     }
 
     $cotizacion = calcular_cotizacion_online($conn, $idEvento, $asientos);

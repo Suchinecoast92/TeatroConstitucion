@@ -3,6 +3,10 @@ header('Content-Type: application/json; charset=utf-8');
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 session_start();
+require_once __DIR__ . '/../../includes/auth_guard.php';
+require_once __DIR__ . '/../../includes/csrf.php';
+teatro_require_admin(true);
+
 require_once __DIR__ . '/../../transacciones_helper.php';
 require_once __DIR__ . '/../../api/registrar_cambio.php';
 
@@ -44,6 +48,15 @@ $body = json_decode($raw,true);
 if(!is_array($body)) $body=[];
 
 $action = $_GET['action'] ?? 'list';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || $action === 'delete') {
+    $tok = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($body['csrf_token'] ?? ($_POST['csrf_token'] ?? ''));
+    if (!teatro_csrf_validate(is_string($tok) ? $tok : '')) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'CSRF inválido'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
 
 // Normalizadores de fecha =================================
 function dt_start($d){
@@ -500,7 +513,7 @@ if ($action === 'export') {
 
 // ================= DELETE =================
 if($action==='delete'){
-    $id = (int)($_GET['id'] ?? 0);
+    $id = (int)($_GET['id'] ?? ($body['id'] ?? 0));
     if($id<=0) respond(false,['error'=>'Id inválido']);
 
     $id_evento_promo = null;

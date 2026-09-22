@@ -1,5 +1,11 @@
 <?php
 // Acción para manejar precios por tipo de boleto
+session_start();
+require_once __DIR__ . '/../../includes/auth_guard.php';
+require_once __DIR__ . '/../../includes/csrf.php';
+teatro_require_admin(false);
+teatro_require_csrf(false);
+
 include "../../evt_interfaz/conexion.php";
 require_once __DIR__ . '/../../api/registrar_cambio.php';
 

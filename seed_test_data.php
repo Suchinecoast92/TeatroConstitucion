@@ -4,7 +4,11 @@
  * - 3 a 5 eventos aleatorios
  * - Entre 100 y 300 boletos por evento
  * - Máximo 3 categorías por evento
+ * Uso: php seed_test_data.php
  */
+
+require_once __DIR__ . '/includes/auth_guard.php';
+teatro_require_cli();
 
 require_once 'evt_interfaz/conexion.php';
 

@@ -8,6 +8,7 @@ date_default_timezone_set('America/Mexico_City');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/../includes/csrf.php';
 
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
@@ -119,6 +120,9 @@ function archivar_evento_completo($id, $conn)
 // ==================================================================
 if (isset($_POST['accion'])) {
     header('Content-Type: application/json');
+    if ($_POST['accion'] !== 'consultar_boletos') {
+        teatro_require_csrf(true);
+    }
     $id = (int) ($_POST['id_evento'] ?? 0);
 
     if ($_POST['accion'] === 'consultar_boletos') {
@@ -189,6 +193,7 @@ $activos = $conn->query("
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/teatro-style.css">
@@ -1096,6 +1101,8 @@ $activos = $conn->query("
             fd.append('accion', 'finalizar');
             fd.append('id_evento', eventoIdSeleccionado);
             fd.append('password', password);
+            if (typeof window.teatroCsrfAppend === 'function') window.teatroCsrfAppend(fd);
+            else fd.append('csrf_token', (document.querySelector('meta[name="csrf-token"]') || {}).content || '');
 
             fetch('', { method: 'POST', body: fd })
                 .then(r => r.json())

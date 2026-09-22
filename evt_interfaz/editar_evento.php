@@ -8,6 +8,7 @@ date_default_timezone_set('America/Mexico_City');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/../includes/csrf.php';
 
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
@@ -29,6 +30,7 @@ $id_evento = $_GET['id'] ?? 0;
 // 2. PROCESADOR (POST)
 // ==================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    teatro_require_csrf(false);
     if (isset($_POST['accion']) && $_POST['accion'] == 'actualizar') {
         $titulo = trim($_POST['titulo']);
         $desc = trim($_POST['descripcion']);
@@ -65,16 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->begin_transaction();
             try {
                 if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
-                    $ext = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-                    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+                    require_once __DIR__ . '/../includes/upload_image.php';
+                    $valid = teatro_validar_imagen_subida($_FILES['imagen']['tmp_name'], $_FILES['imagen']['name'] ?? '');
+                    if (!empty($valid['ok'])) {
                         if (!is_dir("imagenes"))
                             mkdir("imagenes", 0755, true);
-                        $ruta = "imagenes/evt_" . time() . "." . $ext;
+                        $ruta = "imagenes/evt_" . time() . "." . $valid['ext'];
                         if (move_uploaded_file($_FILES['imagen']['tmp_name'], $ruta)) {
                             $img = $ruta;
                             if ($_POST['imagen_actual'] && file_exists($_POST['imagen_actual']))
                                 unlink($_POST['imagen_actual']);
                         }
+                    } else {
+                        throw new Exception($valid['error'] ?? 'Imagen inválida.');
                     }
                 }
 
@@ -345,6 +350,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $modo_reactivacion ? 'Reactivar' : 'Editar' ?> Evento</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -819,6 +825,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
             <?php endif; ?>
 
             <form id="fEdit" method="POST" enctype="multipart/form-data">
+                <?php echo teatro_csrf_field(); ?>
                 <input type="hidden" name="accion" value="actualizar">
                 <input type="hidden" name="id_evento" value="<?= $id_evento ?>">
                 <input type="hidden" name="imagen_actual" value="<?= htmlspecialchars($evento['imagen']) ?>">

@@ -50,6 +50,10 @@ try {
         if (!hash_equals((string) $orden['session_id'], $sessionId)) {
             api_online_respond(['success' => false, 'error' => 'No autorizado'], 403);
         }
+        require_once dirname(__DIR__, 2) . '/config/ventas.php';
+        if (!teatro_funcion_venta_abierta($conn, (int) $orden['id_evento'], (int) $orden['id_funcion'])) {
+            api_online_respond(['success' => false, 'error' => teatro_mensaje_venta_cerrada()], 403);
+        }
         $r = payment_crear_para_orden($conn, $codigo);
         api_online_respond($r, $r['success'] ? 200 : 400);
     }

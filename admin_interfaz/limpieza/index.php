@@ -1,6 +1,7 @@
 <?php
 session_start();
 include "../../conexion.php";
+require_once __DIR__ . '/../../includes/csrf.php';
 
 // Verificar acceso admin
 if (!isset($_SESSION['usuario_id'])) {
@@ -21,66 +22,70 @@ $mensaje = null;
 $tipo_mensaje = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
-    $password = $_POST['password'] ?? '';
-
-    // Verificar contraseña del admin
-    $stmt = $conn->prepare("SELECT password FROM usuarios WHERE id_usuario = ? AND rol = 'admin'");
-    $stmt->bind_param("i", $_SESSION['usuario_id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 0) {
-        $mensaje = "Error de autenticación";
-        $tipo_mensaje = "error";
+    if (!teatro_csrf_validate()) {
+        $mensaje = 'Solicitud rechazada (CSRF). Recarga la página.';
+        $tipo_mensaje = 'error';
     } else {
-        $admin = $result->fetch_assoc();
+        $password = $_POST['password'] ?? '';
 
-        // Verificar contraseña (usando password_verify ya que están hasheadas)
-        if (!password_verify($password, $admin['password'])) {
-            $mensaje = "Contraseña incorrecta";
+        // Verificar contraseña del admin
+        $stmt = $conn->prepare("SELECT password FROM usuarios WHERE id_usuario = ? AND rol = 'admin'");
+        $stmt->bind_param("i", $_SESSION['usuario_id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            $mensaje = "Error de autenticación";
             $tipo_mensaje = "error";
         } else {
-            // Contraseña correcta, proceder con la limpieza
-            try {
-                $conn->query("SET FOREIGN_KEY_CHECKS = 0");
+            $admin = $result->fetch_assoc();
 
-                // Obtener todas las tablas de la BD
-                $result = $conn->query("SHOW TABLES");
-                $tablas_limpiadas = [];
-
-                while ($row = $result->fetch_row()) {
-                    $tabla = $row[0];
-
-                    // Verificar si está protegida
-                    if (in_array($tabla, $tablas_protegidas)) {
-                        continue;
-                    }
-
-                    // Truncar la tabla
-                    if ($conn->query("TRUNCATE TABLE `$tabla`")) {
-                        $tablas_limpiadas[] = $tabla;
-                    }
-                }
-
-                $conn->query("SET FOREIGN_KEY_CHECKS = 1");
-
-                // Registrar la acción
-                if (function_exists('registrar_transaccion')) {
-                    require_once '../../transacciones_helper.php';
-                    registrar_transaccion('limpieza_bd', 'Limpieza completa de BD: ' . implode(', ', $tablas_limpiadas));
-                }
-
-                $mensaje = "Limpieza completada. Se limpiaron " . count($tablas_limpiadas) . " tablas";
-                $tipo_mensaje = "success";
-
-            } catch (Exception $e) {
-                $conn->query("SET FOREIGN_KEY_CHECKS = 1");
-                $mensaje = "Error durante la limpieza: " . $e->getMessage();
+            // Verificar contraseña (usando password_verify ya que están hasheadas)
+            if (!password_verify($password, $admin['password'])) {
+                $mensaje = "Contraseña incorrecta";
                 $tipo_mensaje = "error";
+            } else {
+                // Contraseña correcta, proceder con la limpieza
+                try {
+                    $conn->query("SET FOREIGN_KEY_CHECKS = 0");
+
+                    // Obtener todas las tablas de la BD
+                    $result = $conn->query("SHOW TABLES");
+                    $tablas_limpiadas = [];
+
+                    while ($row = $result->fetch_row()) {
+                        $tabla = $row[0];
+
+                        // Verificar si está protegida
+                        if (in_array($tabla, $tablas_protegidas)) {
+                            continue;
+                        }
+
+                        // Truncar la tabla
+                        if ($conn->query("TRUNCATE TABLE `$tabla`")) {
+                            $tablas_limpiadas[] = $tabla;
+                        }
+                    }
+
+                    $conn->query("SET FOREIGN_KEY_CHECKS = 1");
+
+                    // Registrar la acción
+                    if (function_exists('registrar_transaccion')) {
+                        require_once '../../transacciones_helper.php';
+                        registrar_transaccion('limpieza_bd', 'Limpieza completa de BD: ' . implode(', ', $tablas_limpiadas));
+                    }
+
+                    $mensaje = "Limpieza completada. Se limpiaron " . count($tablas_limpiadas) . " tablas";
+                    $tipo_mensaje = "success";
+                } catch (Exception $e) {
+                    $conn->query("SET FOREIGN_KEY_CHECKS = 1");
+                    $mensaje = "Error durante la limpieza: " . $e->getMessage();
+                    $tipo_mensaje = "error";
+                }
             }
         }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 // Obtener información de las tablas
@@ -105,6 +110,7 @@ $conn->close();
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Limpieza de Base de Datos</title>
     <link rel="icon" href="../../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
@@ -463,6 +469,7 @@ $conn->close();
             <h3><i class="bi bi-trash3"></i> Ejecutar Limpieza Completa</h3>
 
             <form method="POST" id="formLimpieza" onsubmit="return validarFormulario()">
+                <?php echo teatro_csrf_field(); ?>
                 <input type="hidden" name="accion" value="limpiar">
 
                 <div class="checkbox-group">

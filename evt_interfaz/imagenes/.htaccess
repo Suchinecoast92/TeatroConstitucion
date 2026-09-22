@@ -1,0 +1,11 @@
+# No ejecutar scripts en carpeta de imágenes subidas
+Options -ExecCGI -Indexes
+<IfModule mod_authz_core.c>
+  <FilesMatch "(?i)\.(php|phtml|php3|php4|php5|phar|cgi|pl)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule mod_mime.c>
+  RemoveHandler .php .phtml .php3 .php4 .php5 .phar
+  RemoveType .php .phtml .php3 .php4 .php5 .phar
+</IfModule>

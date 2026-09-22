@@ -21,9 +21,9 @@ ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1 AFTER rol;
 ALTER TABLE usuarios 
 ADD COLUMN fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER activo;
 
--- Crear usuario administrador por defecto
-INSERT INTO usuarios (nombre, apellido, password, rol, activo) 
-VALUES ('Administrador', 'Sistema', '123456', 'admin', 1);
+-- Crear usuario administrador (usa un hash generado con password_hash en PHP; no uses contraseñas de ejemplo en producción)
+-- INSERT INTO usuarios (nombre, apellido, password, rol, activo)
+-- VALUES ('Administrador', 'Sistema', '<hash_password_hash>', 'admin', 1);
 ```
 
 **Nota:** También puedes ejecutar el archivo: `sql_updates/agregar_rol_usuarios.sql`
@@ -45,13 +45,9 @@ teatro/
     └── agregar_rol_usuarios.sql      # Script SQL de instalación
 ```
 
-## 👤 Credenciales por Defecto
+## Credenciales iniciales
 
-Después de ejecutar el script SQL, se crea un usuario administrador:
-
-- **Usuario:** Administrador
-- **Contraseña:** 123456
-- **Rol:** admin
+No uses contraseñas de ejemplo en producción. Crea el admin con `password_hash()` (ver sección de seguridad) o con el flujo de registro existente, y cámbiala en el primer acceso.
 
 ## 🔐 Funcionalidades
 
@@ -115,9 +111,7 @@ Después de ejecutar el script SQL, se crea un usuario administrador:
 
 1. Abre el navegador y accede a: `http://localhost/teatro/`
 2. Serás redirigido automáticamente a `login.php`
-3. Ingresa las credenciales del admin:
-   - Usuario: `Administrador`
-   - Contraseña: `123456`
+3. Ingresa las credenciales del administrador que hayas creado (nunca uses ejemplos de documentación en producción).
 4. Click en "Iniciar Sesión"
 
 ### Registrar Nuevos Empleados (Solo Admin)
@@ -178,10 +172,10 @@ Para producción, debes:
 
 ### Personalización
 
-**Cambiar contraseña del admin:**
+**Cambiar contraseña del admin (genera el hash en PHP con password_hash y luego):**
 ```sql
 UPDATE usuarios 
-SET password = 'nueva_password' 
+SET password = '<hash_generado>' 
 WHERE rol = 'admin' AND id_usuario = 1;
 ```
 

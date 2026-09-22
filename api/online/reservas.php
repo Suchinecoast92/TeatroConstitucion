@@ -57,6 +57,14 @@ try {
         if (count($asientos) > 20) {
             api_online_respond(['success' => false, 'error' => 'Máximo 20 asientos por solicitud'], 400);
         }
+        if ($idFuncion === null || $idFuncion <= 0) {
+            api_online_respond(['success' => false, 'error' => 'id_funcion requerido'], 400);
+        }
+        require_once dirname(__DIR__, 2) . '/config/ventas.php';
+        $connVenta = getReservasConnection();
+        if (!$connVenta || !teatro_funcion_venta_abierta($connVenta, $idEvento, $idFuncion)) {
+            api_online_respond(['success' => false, 'error' => teatro_mensaje_venta_cerrada()], 403);
+        }
 
         $ttl = isset($data['ttl']) ? (int) $data['ttl'] : RESERVA_TTL_SEG;
         if ($ttl < 60) {
@@ -122,6 +130,14 @@ try {
         }
         if ($idEvento <= 0 || $sessionId === '') {
             api_online_respond(['success' => false, 'error' => 'Faltan parámetros'], 400);
+        }
+        if ($idFuncion === null || $idFuncion <= 0) {
+            api_online_respond(['success' => false, 'error' => 'id_funcion requerido'], 400);
+        }
+        require_once dirname(__DIR__, 2) . '/config/ventas.php';
+        $connVenta = getReservasConnection();
+        if (!$connVenta || !teatro_funcion_venta_abierta($connVenta, $idEvento, $idFuncion)) {
+            api_online_respond(['success' => false, 'error' => teatro_mensaje_venta_cerrada()], 403);
         }
         $ttl = isset($data['ttl']) ? (int) $data['ttl'] : RESERVA_TTL_SEG;
         if ($ttl < 60) {

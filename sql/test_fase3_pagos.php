@@ -6,6 +6,7 @@
 require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/includes/pagos/PaymentService.php';
 require_once dirname(__DIR__) . '/sync/reservas_helper.php';
+require_once __DIR__ . '/test_helpers.php';
 
 $conn = getLocalConnection();
 if (!$conn) {
@@ -14,33 +15,13 @@ if (!$conn) {
 }
 asegurarTablaPagos($conn);
 
-$evento = $conn->query("SELECT id_evento FROM evento WHERE finalizado = 0 ORDER BY id_evento DESC LIMIT 1")->fetch_assoc();
-$idEvento = (int) $evento['id_evento'];
-$st = $conn->prepare('SELECT id_funcion FROM funciones WHERE id_evento = ? ORDER BY fecha_hora DESC LIMIT 1');
-$st->bind_param('i', $idEvento);
-$st->execute();
-$idFuncion = (int) $st->get_result()->fetch_assoc()['id_funcion'];
-$st->close();
+$ctx = test_contexto_orden($conn, 'C', 'test_pay_');
+$idEvento = $ctx['id_evento'];
+$idFuncion = $ctx['id_funcion'];
+$asiento = $ctx['asiento'];
+$session = $ctx['session'];
+$cliente = $ctx['cliente'];
 
-$disp = obtenerDisponibilidadFuncion($idEvento, $idFuncion, null, $conn);
-$ocupados = array_flip($disp['ocupados']);
-$asiento = null;
-for ($n = 1; $n <= 26; $n++) {
-    $c = 'C' . $n;
-    if (!isset($ocupados[$c])) {
-        $cat = resolver_categoria_asiento($conn, $idEvento, $c);
-        if ($cat && !es_categoria_no_venta($cat['nombre_categoria'])) {
-            $asiento = $c;
-            break;
-        }
-    }
-}
-if (!$asiento) {
-    fwrite(STDERR, "FAIL sin asiento\n");
-    exit(1);
-}
-
-$session = 'test_pay_' . bin2hex(random_bytes(3));
 $hold = reservarAsientos($idEvento, $idFuncion, [$asiento], $session, 'online', 'test');
 if (!$hold['success']) {
     fwrite(STDERR, 'FAIL hold ' . json_encode($hold) . "\n");
@@ -51,8 +32,9 @@ $ord = crearOrdenOnline($conn, [
     'id_evento' => $idEvento,
     'id_funcion' => $idFuncion,
     'session_id' => $session,
-    'email' => 'pago@example.com',
-    'nombre' => 'Test Pago',
+    'email' => $cliente['email'],
+    'nombre' => $cliente['nombre'],
+    'telefono' => $cliente['telefono'],
     'asientos' => [['asiento' => $asiento, 'tipo_boleto' => 'adulto']],
 ]);
 if (!$ord['success']) {
@@ -89,7 +71,6 @@ if (($got['estado'] ?? '') !== 'pagada') {
     exit(1);
 }
 
-// cleanup: reembolso mock (evita basura PAID + orden cancelada)
 require_once dirname(__DIR__) . '/includes/reembolso_helper.php';
 $ref = reembolsar_orden_online($conn, $ord['codigo_publico'], 'cleanup test_fase3');
 if (!$ref['success']) {
@@ -98,22 +79,9 @@ if (!$ref['success']) {
 }
 liberarReservasSesion($session);
 
-// --- Protección: no expirar/liberar con pago PENDING activo ---
 echo "--- pago_en_curso ---\n";
 $session2 = 'test_paycurso_' . bin2hex(random_bytes(3));
-$disp2 = obtenerDisponibilidadFuncion($idEvento, $idFuncion, null, $conn);
-$ocupados2 = array_flip($disp2['ocupados']);
-$asiento2 = null;
-for ($n = 1; $n <= 26; $n++) {
-    $c = 'D' . $n;
-    if (!isset($ocupados2[$c])) {
-        $cat = resolver_categoria_asiento($conn, $idEvento, $c);
-        if ($cat && !es_categoria_no_venta($cat['nombre_categoria'])) {
-            $asiento2 = $c;
-            break;
-        }
-    }
-}
+$asiento2 = test_pick_asiento_libre($conn, $idEvento, $idFuncion, 'D');
 if (!$asiento2) {
     fwrite(STDERR, "FAIL sin asiento2\n");
     exit(1);
@@ -123,12 +91,14 @@ if (!$hold2['success']) {
     fwrite(STDERR, 'FAIL hold2 ' . json_encode($hold2) . "\n");
     exit(1);
 }
+$cli2 = test_cliente_valido('pagocurso');
 $ord2 = crearOrdenOnline($conn, [
     'id_evento' => $idEvento,
     'id_funcion' => $idFuncion,
     'session_id' => $session2,
-    'email' => 'pagocurso@example.com',
-    'nombre' => 'Test Curso',
+    'email' => $cli2['email'],
+    'nombre' => $cli2['nombre'],
+    'telefono' => $cli2['telefono'],
     'asientos' => [['asiento' => $asiento2, 'tipo_boleto' => 'adulto']],
 ]);
 if (!$ord2['success']) {

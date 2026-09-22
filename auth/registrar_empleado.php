@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/csrf.php';
 require_once '../conexion.php';
 require_once '../transacciones_helper.php';
 
@@ -33,6 +34,7 @@ function esAdminPrincipal($conn, $id)
 // API PARA AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
     header('Content-Type: application/json');
+    teatro_require_csrf(true);
 
     // VERIFICAR CONTRASEÑA ADMIN
     if ($_POST['ajax'] === 'verificar_password') {
@@ -223,6 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
 
 // PROCESAR REGISTRO NUEVO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_nuevo'])) {
+    teatro_require_csrf(false);
     $nombre = trim($_POST['nombre'] ?? '');
     $apellido = trim($_POST['apellido'] ?? '');
     $password = trim($_POST['password'] ?? '');
@@ -293,6 +296,7 @@ if ($res_admin->num_rows > 0) {
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -888,6 +892,7 @@ if ($res_admin->num_rows > 0) {
 
                 <form method="POST" id="formRegistro" onsubmit="return solicitarRegistro(event)">
                     <input type="hidden" name="registrar_nuevo" value="1">
+                    <?php echo teatro_csrf_field(); ?>
 
                     <div class="form-group">
                         <label>Nombre de usuario</label>
@@ -1113,6 +1118,13 @@ if ($res_admin->num_rows > 0) {
         }
 
         // Mostrar notificación flotante
+        function teatroFormData() {
+            const fd = new FormData();
+            const m = document.querySelector('meta[name="csrf-token"]');
+            if (m) fd.append('csrf_token', m.getAttribute('content') || '');
+            return fd;
+        }
+
         function mostrarNotificacion(mensaje, tipo) {
             const notif = document.createElement('div');
             notif.style.cssText = `
@@ -1165,7 +1177,7 @@ if ($res_admin->num_rows > 0) {
                 return;
             }
 
-            const formData = new FormData();
+            const formData = teatroFormData();
             formData.append('ajax', 'verificar_password');
             formData.append('password', password);
 
@@ -1199,7 +1211,7 @@ if ($res_admin->num_rows > 0) {
              const slider = checkbox.parentElement.querySelector('.toggle-slider');
              const wasChecked = !checkbox.checked;
              
-             const formData = new FormData();
+             const formData = teatroFormData();
              formData.append('ajax', 'toggle_estado');
              formData.append('id', id);
              const response = await fetch('', { method: 'POST', body: formData });
@@ -1226,7 +1238,7 @@ if ($res_admin->num_rows > 0) {
         }
 
         async function realizarEliminacion(id) {
-            const formData = new FormData();
+            const formData = teatroFormData();
             formData.append('ajax', 'eliminar_usuario');
             formData.append('id', id);
             const response = await fetch('', { method: 'POST', body: formData });
@@ -1240,7 +1252,7 @@ if ($res_admin->num_rows > 0) {
 
         // Abrir modal de edición
         async function abrirModalEditar(id) {
-            const formData = new FormData();
+            const formData = teatroFormData();
             formData.append('ajax', 'obtener_usuario');
             formData.append('id', id);
 
@@ -1284,7 +1296,7 @@ if ($res_admin->num_rows > 0) {
             // Ocultar error previo
             document.getElementById('errorEditar').style.display = 'none';
 
-            const formData = new FormData();
+            const formData = teatroFormData();
             formData.append('ajax', 'guardar_usuario');
             formData.append('id', document.getElementById('editar_id').value);
             formData.append('nombre', document.getElementById('editar_nombre').value);

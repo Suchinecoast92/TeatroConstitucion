@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/../includes/csrf.php';
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
 if(file_exists("../transacciones_helper.php")) { require_once "../transacciones_helper.php"; }
@@ -19,6 +20,7 @@ $errores_php = [];
 // 2. PROCESAR FORMULARIO (POST)
 // ==================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    teatro_require_csrf(false);
     
     $titulo = trim($_POST['titulo']);
     $desc = trim($_POST['descripcion']);
@@ -34,14 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Imagen (Obligatoria al crear)
     $imagen_ruta = "";
     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
-         $ext = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+         require_once __DIR__ . '/../includes/upload_image.php';
+         $valid = teatro_validar_imagen_subida($_FILES['imagen']['tmp_name'], $_FILES['imagen']['name'] ?? '');
+         if (!empty($valid['ok'])) {
              if (!is_dir("imagenes")) mkdir("imagenes", 0755, true);
-             $ruta = "imagenes/evt_" . time() . "." . $ext;
+             $ruta = "imagenes/evt_" . time() . "." . $valid['ext'];
              if (move_uploaded_file($_FILES['imagen']['tmp_name'], $ruta)) {
                  $imagen_ruta = $ruta;
              } else $errores_php[] = "Error al guardar imagen.";
-         } else $errores_php[] = "Formato de imagen no válido.";
+         } else $errores_php[] = $valid['error'] ?? "Formato de imagen no válido.";
     } else {
         $errores_php[] = "La imagen es obligatoria.";
     }
@@ -148,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<?php echo teatro_csrf_meta(); ?>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Crear Evento</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -202,6 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form id="fCreate" method="POST" enctype="multipart/form-data">
+            <?php echo teatro_csrf_field(); ?>
             <div class="row g-4">
                 <div class="col-12">
                     <label class="form-label fw-bold">Título del Evento</label>

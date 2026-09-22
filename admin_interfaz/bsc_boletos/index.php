@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../includes/csrf.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: ../../login.php');
@@ -19,6 +20,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador de Boletos</title>
     <link rel="icon" href="../../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
@@ -817,6 +819,9 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
     </div>
 
     <script>
+    <?php echo teatro_csrf_js_snippet(); ?>
+    </script>
+    <script>
         let allTickets = [];
         let filteredTickets = [];
         let currentCancelId = null;
@@ -1130,8 +1135,13 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
 
             fetch('../../vnt_interfaz/cancelar_boleto.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ codigo_unico: currentCancelId })
+                headers: (typeof window.teatroCsrfHeaders === 'function')
+                    ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                    : { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    codigo_unico: currentCancelId,
+                    csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+                })
             })
                 .then(r => r.json())
                 .then(data => {

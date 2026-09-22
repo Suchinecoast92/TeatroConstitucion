@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/includes/csrf.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -27,6 +28,7 @@ $nombre_completo = $usuario_nombre . ' ' . $usuario_apellido;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo teatro_csrf_meta(); ?>
     <title>Teatro - Panel de Control</title>
     <link rel="icon" href="crt_interfaz/imagenes_teatro/nat.png" type="image/png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -917,8 +919,13 @@ return;
 try {
 const response = await fetch('auth/verificar_admin.php', {
 method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ password })
+headers: (typeof window.teatroCsrfHeaders === 'function')
+  ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+  : { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+  password,
+  csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+})
 });
 
 const data = await response.json();
@@ -937,6 +944,10 @@ errorDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error de conexi
 errorDiv.style.display = 'block';
 }
 }
+</script>
+
+<script>
+<?php echo teatro_csrf_js_snippet(); ?>
 </script>
 
 <script>

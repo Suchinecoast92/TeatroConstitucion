@@ -1,4 +1,4 @@
-x<?php
+<?php
 /**
  * Control de Entrada - Escáner de Boletos
  * Página compacta para validar y marcar boletos como usados
@@ -503,6 +503,18 @@ x<?php
         let resultModal = null;
         let lastScannedCode = null;
         let lastScanTime = 0;
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+        function escapeAttr(text) {
+            return escapeHtml(text).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+        }
+        function safeCodigoBoleto(codigo) {
+            return String(codigo == null ? '' : codigo).replace(/[^A-Za-z0-9_\-]/g, '');
+        }
         
         document.addEventListener('DOMContentLoaded', async () => {
             resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
@@ -549,8 +561,9 @@ x<?php
                 }
                 
                 cameraSelect.innerHTML = videoDevices.map((device, index) => {
-                    const label = device.label || `Cámara ${index + 1}`;
-                    return `<option value="${device.deviceId}">${label}</option>`;
+                    const label = escapeHtml(device.label || `Cámara ${index + 1}`);
+                    const id = escapeAttr(device.deviceId);
+                    return `<option value="${id}">${label}</option>`;
                 }).join('');
                 
                 await startCamera(videoDevices[0].deviceId);
@@ -623,11 +636,12 @@ x<?php
         function showCameraError(message) {
             document.getElementById('cameraLoading').innerHTML = `
                 <i class="bi bi-camera-video-off" style="font-size: 2.5rem; color: #f5576c;"></i>
-                <p class="mt-2 mb-0">${message}</p>
+                <p class="mt-2 mb-0"></p>
                 <button class="btn-icon mt-2" onclick="initializeCameras()">
                     <i class="bi bi-arrow-clockwise"></i> Reintentar
                 </button>
             `;
+            document.querySelector('#cameraLoading p').textContent = message == null ? '' : String(message);
         }
         
         function toggleMirror() {
@@ -721,37 +735,43 @@ x<?php
             ticketInfo.innerHTML = `
                 <div class="ticket-item full">
                     <label>Código</label>
-                    <span style="color: #667eea; letter-spacing: 1px;">${ticket.codigo_unico}</span>
+                    <span style="color: #667eea; letter-spacing: 1px;">${escapeHtml(ticket.codigo_unico)}</span>
                 </div>
                 <div class="ticket-item full">
                     <label>Evento</label>
-                    <span>${ticket.evento_titulo}</span>
+                    <span>${escapeHtml(ticket.evento_titulo)}</span>
                 </div>
                 <div class="ticket-item">
                     <label>Asiento</label>
-                    <span>${ticket.codigo_asiento}</span>
+                    <span>${escapeHtml(ticket.codigo_asiento)}</span>
                 </div>
                 <div class="ticket-item">
                     <label>Categoría</label>
-                    <span>${ticket.nombre_categoria || 'General'}</span>
+                    <span>${escapeHtml(ticket.nombre_categoria || 'General')}</span>
                 </div>
             `;
             
             if (isValid) {
+                const codigoSafe = safeCodigoBoleto(ticket.codigo_unico);
                 resultActions.innerHTML = `
-                    <button class="btn-secondary-custom" onclick="hideResult()">
+                    <button class="btn-secondary-custom" type="button" data-accion="cancelar">
                         <i class="bi bi-x-lg"></i> Cancelar
                     </button>
-                    <button class="btn-confirm" onclick="confirmEntry('${ticket.codigo_unico}')">
+                    <button class="btn-confirm" type="button" data-accion="confirmar" data-codigo="${escapeAttr(codigoSafe)}">
                         <i class="bi bi-check2-circle"></i> Confirmar Entrada
                     </button>
                 `;
+                resultActions.querySelector('[data-accion="cancelar"]')?.addEventListener('click', hideResult);
+                resultActions.querySelector('[data-accion="confirmar"]')?.addEventListener('click', (e) => {
+                    confirmEntry(e.currentTarget.getAttribute('data-codigo'));
+                });
             } else {
                 resultActions.innerHTML = `
-                    <button class="btn-confirm" style="background: var(--primary-gradient); max-width: 100%;" onclick="hideResult()">
+                    <button class="btn-confirm" type="button" style="background: var(--primary-gradient); max-width: 100%;" data-accion="siguiente">
                         <i class="bi bi-qr-code-scan"></i> Escanear Siguiente
                     </button>
                 `;
+                resultActions.querySelector('[data-accion="siguiente"]')?.addEventListener('click', hideResult);
             }
             
             resultModal.show();
@@ -768,19 +788,20 @@ x<?php
             ticketInfo.innerHTML = `
                 <div class="ticket-item full" style="text-align: center;">
                     <label>Código</label>
-                    <span style="color: #f5576c;">${code}</span>
+                    <span style="color: #f5576c;">${escapeHtml(code)}</span>
                 </div>
                 <div class="ticket-item full" style="text-align: center;">
                     <label>Motivo</label>
-                    <span>${message}</span>
+                    <span>${escapeHtml(message)}</span>
                 </div>
             `;
             
             resultActions.innerHTML = `
-                <button class="btn-confirm" style="background: var(--danger-gradient); max-width: 100%;" onclick="hideResult()">
+                <button class="btn-confirm" type="button" style="background: var(--danger-gradient); max-width: 100%;" data-accion="siguiente">
                     <i class="bi bi-qr-code-scan"></i> Escanear Siguiente
                 </button>
             `;
+            resultActions.querySelector('[data-accion="siguiente"]')?.addEventListener('click', hideResult);
             
             resultModal.show();
             showToast('Boleto no encontrado', 'error');
@@ -846,7 +867,8 @@ x<?php
             
             const toast = document.createElement('div');
             toast.className = `custom-toast ${type}`;
-            toast.innerHTML = `<i class="bi ${icons[type]}"></i><span>${message}</span>`;
+            toast.innerHTML = `<i class="bi ${icons[type] || icons.success}"></i><span></span>`;
+            toast.querySelector('span').textContent = message == null ? '' : String(message);
             
             container.appendChild(toast);
             

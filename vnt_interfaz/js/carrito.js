@@ -28,6 +28,19 @@ let asientosVendidos = new Set();
 let descuentos = [];
 let descuentoSeleccionado = null;
 
+function escapeHtml(text) {
+    if (window.notify && typeof notify.escapeHtml === 'function') {
+        return notify.escapeHtml(text == null ? '' : String(text));
+    }
+    const div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
+function escapeAttr(text) {
+    return escapeHtml(text).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
 function getConfigTiposBoleto() {
     return (typeof window.CONFIG_TIPOS_BOLETO !== 'undefined' && window.CONFIG_TIPOS_BOLETO)
         ? window.CONFIG_TIPOS_BOLETO
@@ -492,13 +505,13 @@ function actualizarCarrito() {
         html += `
             <div class="carrito-item">
                 <div class="asiento-info">
-                    <strong>${item.asiento}</strong>
-                    <small style="display: block;">${item.categoria}</small>
+                    <strong>${escapeHtml(item.asiento)}</strong>
+                    <small style="display: block;">${escapeHtml(item.categoria)}</small>
                     <span class="text-success" style="font-size: 0.9rem;">$${item.precio.toFixed(2)}</span>
                     ${descuentoItem > 0 ? `<small class="text-danger" style="display: block;">-$${descuentoItem.toFixed(2)}</small>` : ''}
                     ${descuentoItem > 0 ? `<strong class="text-primary" style="font-size: 0.9rem;">$${precioFinal.toFixed(2)}</strong>` : ''}
                 </div>
-                <button class="btn-remove" onclick="removerDelCarrito('${item.asiento}')">
+                <button class="btn-remove" type="button" data-asiento="${escapeAttr(item.asiento)}">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
@@ -524,6 +537,9 @@ function actualizarCarrito() {
     }
 
     carritoContainer.innerHTML = html;
+    carritoContainer.querySelectorAll('.btn-remove[data-asiento]').forEach((btn) => {
+        btn.addEventListener('click', () => removerDelCarrito(btn.getAttribute('data-asiento')));
+    });
     totalElement.textContent = `$${total.toFixed(2)}`;
     btnPagar.disabled = false;
 
@@ -659,24 +675,24 @@ function generarBotonesDescuento() {
 
             // IMPORTANTE: Si no puede aplicar, el onclick no debe hacer nada
             const onClickAction = puedeAplicar
-                ? `toggleDescuento(${d.id_promocion})`
-                : `event.preventDefault(); event.stopPropagation(); notify.error('Este descuento requiere mínimo ${cantidadMinima} boleto(s). Tienes ${carrito.length}.'); return false;`;
+                ? `toggleDescuento(${parseInt(d.id_promocion, 10) || 0})`
+                : `event.preventDefault(); event.stopPropagation(); notify.error(${JSON.stringify('Este descuento requiere mínimo ' + cantidadMinima + ' boleto(s). Tienes ' + carrito.length + '.')}); return false;`;
 
             botonesDescuento += `
                 <button type="button" 
                         class="btn ${claseBoton} descuento-btn" 
-                        data-id="${d.id_promocion}"
+                        data-id="${parseInt(d.id_promocion, 10) || 0}"
                         data-min-cantidad="${cantidadMinima}"
                         onclick="${onClickAction}"
                         ${!puedeAplicar ? 'disabled aria-disabled="true"' : ''}
                         style="${estiloDisabled}"
-                        title="${puedeAplicar ? `${tipoDescuentoLabel} - Aplica a: ${tipoTexto}` : `❌ ${razonNoAplicable}`}">
-                    <span class="d-block">${tipoIcono} ${valorTexto}</span>
-                    <small class="d-block">${d.nombre}</small>
+                        title="${escapeAttr(puedeAplicar ? `${tipoDescuentoLabel} - Aplica a: ${tipoTexto}` : `❌ ${razonNoAplicable}`)}">
+                    <span class="d-block">${tipoIcono} ${escapeHtml(valorTexto)}</span>
+                    <small class="d-block">${escapeHtml(d.nombre)}</small>
                     <div class="d-flex gap-1 justify-content-center flex-wrap" style="font-size: 0.55rem;">
-                        ${!puedeAplicar ? `<span class="badge bg-danger">❌ ${razonNoAplicable}</span>` : ''}
-                        ${puedeAplicar && d.tipo_boleto_aplicable ? `<span class="badge bg-info">${tipoTexto}</span>` : ''}
-                        ${puedeAplicar ? `<span class="badge ${esGlobal ? 'bg-secondary' : 'bg-primary'}">${tipoDescuentoIcono} ${tipoDescuentoLabel}</span>` : ''}
+                        ${!puedeAplicar ? `<span class="badge bg-danger">❌ ${escapeHtml(razonNoAplicable)}</span>` : ''}
+                        ${puedeAplicar && d.tipo_boleto_aplicable ? `<span class="badge bg-info">${escapeHtml(tipoTexto)}</span>` : ''}
+                        ${puedeAplicar ? `<span class="badge ${esGlobal ? 'bg-secondary' : 'bg-primary'}">${tipoDescuentoIcono} ${escapeHtml(tipoDescuentoLabel)}</span>` : ''}
                     </div>
                 </button>
             `;
@@ -1014,8 +1030,8 @@ function llenarListaBoletosTipo() {
             <div class="boleto-tipo-item p-2 border-bottom d-flex align-items-center justify-content-between" data-index="${index}">
                 <div class="d-flex align-items-center gap-2">
                     <div>
-                        <span class="fw-bold">${item.asiento}</span>
-                        <small class="text-muted d-block">${item.categoria}</small>
+                        <span class="fw-bold">${escapeHtml(item.asiento)}</span>
+                        <small class="text-muted d-block">${escapeHtml(item.categoria)}</small>
                     </div>
                     <span class="precio-display text-success fw-bold" data-precio-base="${precioTipo.toFixed(2)}">$${precioFinal.toFixed(2)}</span>
                     ${descuentoItem > 0 ? `<small class="text-danger">(-$${descuentoItem.toFixed(2)})</small>` : ''}
@@ -1354,9 +1370,9 @@ async function confirmarYProcesarPago() {
     try {
         const response = await fetch('procesar_compra.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: (typeof window.teatroCsrfHeaders === 'function')
+                ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                : { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 id_evento: idEvento,
                 id_funcion: idFuncion,
@@ -1364,6 +1380,7 @@ async function confirmarYProcesarPago() {
                 session_id: (window.TeatroReservas && window.TeatroReservas.sessionId)
                     ? window.TeatroReservas.sessionId
                     : null,
+                csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
             })
         });
 
@@ -1605,11 +1622,11 @@ function mostrarBoletosGenerados(boletos) {
                                 ${boletos.map((b, i) => `
                                 <div class="col-md-6">
                                     <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light fw-bold" style="width: 50px; justify-content: center;">${b.asiento}</span>
+                                        <span class="input-group-text bg-light fw-bold" style="width: 50px; justify-content: center;">${escapeHtml(b.asiento)}</span>
                                         <input type="text" class="form-control input-nombre-individual" 
                                             data-index="${i}" 
-                                            data-codigo="${b.codigo_unico}"
-                                            placeholder="Nombre para ${b.asiento}">
+                                            data-codigo="${escapeAttr(b.codigo_unico)}"
+                                            placeholder="Nombre para ${escapeAttr(b.asiento)}">
                                     </div>
                                 </div>
                                 `).join('')}

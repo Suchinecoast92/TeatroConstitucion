@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../includes/csrf.php';
 require_once '../conexion.php';
 require_once '../transacciones_helper.php';
 
@@ -11,8 +12,16 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-// Obtener datos del POST
-$data = json_decode(file_get_contents('php://input'), true);
+teatro_require_csrf(true);
+
+// Obtener datos del POST (puede haber sido leído por el helper CSRF)
+$data = teatro_csrf_consumed_json_body();
+if ($data === null) {
+    $data = json_decode(file_get_contents('php://input'), true);
+}
+if (!is_array($data)) {
+    $data = [];
+}
 $password = $data['password'] ?? '';
 
 if (empty($password)) {
@@ -46,4 +55,3 @@ if ($result->num_rows === 1) {
 
 $stmt->close();
 $conn->close();
-?>

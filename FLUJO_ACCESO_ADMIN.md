@@ -97,7 +97,7 @@
 
 ### Escenario 1: Admin accede a Administración
 ```
-1. Login como admin → Usuario: Administrador, Password: 123456
+1. Login como admin con tus credenciales reales
 2. Click en "Administración"
 3. ✅ Acceso inmediato sin modal
 4. Se muestra el panel de administración
@@ -105,10 +105,10 @@
 
 ### Escenario 2: Empleado accede a Administración (Primera vez)
 ```
-1. Login como empleado → Usuario: juan, Password: 654321
+1. Login como empleado con tus credenciales reales
 2. Click en "Administración"
 3. 🔒 Aparece modal pidiendo contraseña del admin
-4. Ingresa: 123456 (contraseña del admin)
+4. Ingresa la contraseña del administrador (no la del empleado)
 5. Click en "Verificar"
 6. ✅ Acceso concedido
 7. Se marca como verificado en la sesión

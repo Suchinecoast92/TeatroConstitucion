@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/includes/csrf.php';
+require_once __DIR__ . '/includes/login_rate_limit.php';
+
+teatro_harden_session_cookie();
 session_start();
 
 // Evitar que el navegador muestre login/panel en caché al usar "atrás" tras cerrar sesión
@@ -19,45 +23,59 @@ require_once 'conexion.php';
 require_once 'transacciones_helper.php';
 
 $error = '';
+$rlStatus = teatro_login_rl_status();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nombre = trim($_POST['nombre'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-    
-    if (empty($nombre) || empty($password)) {
-        $error = 'Por favor, ingrese nombre y contraseña';
-    } elseif (!preg_match('/^[A-Za-z0-9]+$/', $password)) {
-        $error = 'La contraseña solo puede contener letras y números, sin espacios ni símbolos';
+    if (!teatro_csrf_validate()) {
+        $error = 'Solicitud inválida. Recarga la página e intenta de nuevo.';
+    } elseif (!empty($rlStatus['blocked'])) {
+        $mins = max(1, (int) ceil(($rlStatus['retry_after'] ?? 900) / 60));
+        $error = "Demasiados intentos fallidos. Espera {$mins} minuto(s) e intenta de nuevo.";
     } else {
-        $stmt = $conn->prepare("SELECT id_usuario, nombre, apellido, password, rol, activo FROM usuarios WHERE nombre = ? AND activo = 1");
-        $stmt->bind_param("s", $nombre);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows === 1) {
-            $usuario = $result->fetch_assoc();
-            
-            if (password_verify($password, $usuario['password'])) {
-                $_SESSION['usuario_id'] = $usuario['id_usuario'];
-                $_SESSION['usuario_nombre'] = $usuario['nombre'];
-                $_SESSION['usuario_apellido'] = $usuario['apellido'];
-                $_SESSION['usuario_rol'] = $usuario['rol'];
-                $_SESSION['login_time'] = time();
-                registrar_transaccion('login', 'Inicio de sesión');
+        $nombre = trim($_POST['nombre'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
-                if ($usuario['rol'] === 'admin') {
-                    header("Location: index.php");
-                } else {
-                    header("Location: index_empleado.php");
-                }
-                exit();
-            } else {
-                $error = 'Contraseña incorrecta';
-            }
+        if (empty($nombre) || empty($password)) {
+            $error = 'Por favor, ingrese nombre y contraseña';
+        } elseif (!preg_match('/^[A-Za-z0-9]+$/', $password)) {
+            $error = 'La contraseña solo puede contener letras y números, sin espacios ni símbolos';
         } else {
-            $error = 'Usuario no encontrado o inactivo';
+            $stmt = $conn->prepare("SELECT id_usuario, nombre, apellido, password, rol, activo FROM usuarios WHERE nombre = ? AND activo = 1");
+            $stmt->bind_param("s", $nombre);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 1) {
+                $usuario = $result->fetch_assoc();
+
+                if (password_verify($password, $usuario['password'])) {
+                    teatro_login_rl_clear();
+                    $_SESSION['usuario_id'] = $usuario['id_usuario'];
+                    $_SESSION['usuario_nombre'] = $usuario['nombre'];
+                    $_SESSION['usuario_apellido'] = $usuario['apellido'];
+                    $_SESSION['usuario_rol'] = $usuario['rol'];
+                    $_SESSION['login_time'] = time();
+                    registrar_transaccion('login', 'Inicio de sesión');
+
+                    if ($usuario['rol'] === 'admin') {
+                        header("Location: index.php");
+                    } else {
+                        header("Location: index_empleado.php");
+                    }
+                    exit();
+                }
+            }
+
+            teatro_login_rl_register_failure();
+            $rlStatus = teatro_login_rl_status();
+            if (!empty($rlStatus['blocked'])) {
+                $mins = max(1, (int) ceil(($rlStatus['retry_after'] ?? 900) / 60));
+                $error = "Demasiados intentos fallidos. Espera {$mins} minuto(s) e intenta de nuevo.";
+            } else {
+                $error = 'Usuario o contraseña incorrectos';
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
 ?>
@@ -67,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistema de Teatro</title>
+    <?php echo teatro_csrf_meta(); ?>
     <link rel="icon" href="crt_interfaz/imagenes_teatro/nat.png" type="image/png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="assets/css/teatro-style.css">
@@ -242,6 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         
         <form method="POST" action="" class="login-body" autocomplete="off">
+            <?php echo teatro_csrf_field(); ?>
             <?php if ($error): ?>
                 <div class="error-message">
                     <i class="bi bi-exclamation-triangle-fill"></i>
@@ -284,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const form = document.querySelector('.login-body');
             const passwordInput = document.getElementById('password');
 
-            <?php if ($error === 'Contraseña incorrecta'): ?>
+            <?php if ($error !== '' && strpos($error, 'contraseña') !== false): ?>
             if (passwordInput) {
                 passwordInput.focus();
             }
@@ -298,23 +318,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 });
             }
-
-            // Código secreto: Arriba, Derecha, Abajo, Izquierda
-            const secretCode = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
-            let currentIndex = 0;
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === secretCode[currentIndex]) {
-                    currentIndex++;
-                    if (currentIndex === secretCode.length) {
-                        // Código completado - login automático como admin
-                        e.preventDefault();
-                        window.location.href = 'auth/secret_login.php';
-                    }
-                } else {
-                    currentIndex = 0;
-                }
-            });
         })();
     </script>
     <script>

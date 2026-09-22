@@ -6,6 +6,7 @@
 require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/includes/reembolso_helper.php';
 require_once dirname(__DIR__) . '/sync/reservas_helper.php';
+require_once __DIR__ . '/test_helpers.php';
 
 function fail(string $m): void
 {
@@ -20,32 +21,13 @@ if (!$conn) {
 asegurarTablaPagos($conn);
 asegurar_origen_boletos($conn);
 
-$evento = $conn->query('SELECT id_evento FROM evento WHERE finalizado = 0 ORDER BY id_evento DESC LIMIT 1')->fetch_assoc();
-$idEvento = (int) $evento['id_evento'];
-$st = $conn->prepare('SELECT id_funcion FROM funciones WHERE id_evento = ? ORDER BY fecha_hora DESC LIMIT 1');
-$st->bind_param('i', $idEvento);
-$st->execute();
-$idFuncion = (int) $st->get_result()->fetch_assoc()['id_funcion'];
-$st->close();
+$ctx = test_contexto_orden($conn, 'E', 'test_f5_');
+$idEvento = $ctx['id_evento'];
+$idFuncion = $ctx['id_funcion'];
+$asiento = $ctx['asiento'];
+$session = $ctx['session'];
+$cliente = $ctx['cliente'];
 
-$disp = obtenerDisponibilidadFuncion($idEvento, $idFuncion, null, $conn);
-$ocupados = array_flip($disp['ocupados']);
-$asiento = null;
-for ($n = 1; $n <= 26; $n++) {
-    $c = 'E' . $n;
-    if (!isset($ocupados[$c])) {
-        $cat = resolver_categoria_asiento($conn, $idEvento, $c);
-        if ($cat && !es_categoria_no_venta($cat['nombre_categoria'])) {
-            $asiento = $c;
-            break;
-        }
-    }
-}
-if (!$asiento) {
-    fail('sin asiento libre fila E');
-}
-
-$session = 'test_f5_' . bin2hex(random_bytes(3));
 $hold = reservarAsientos($idEvento, $idFuncion, [$asiento], $session, 'online', 'fase5');
 if (!$hold['success']) {
     fail('hold');
@@ -55,8 +37,9 @@ $ord = crearOrdenOnline($conn, [
     'id_evento' => $idEvento,
     'id_funcion' => $idFuncion,
     'session_id' => $session,
-    'email' => 'fase5@example.com',
-    'nombre' => 'Test Fase5',
+    'email' => $cliente['email'],
+    'nombre' => $cliente['nombre'],
+    'telefono' => $cliente['telefono'],
     'asientos' => [['asiento' => $asiento, 'tipo_boleto' => 'adulto']],
 ]);
 if (!$ord['success']) {

@@ -1,5 +1,7 @@
 <?php
 // 1. CONEXIÓN
+session_start();
+require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../conexion.php';
 require_once __DIR__ . '/../../includes/catalogo_boletos_helper.php';
 
@@ -171,6 +173,7 @@ $conn->close();
 
 <head>
     <meta charset="UTF-8">
+    <?php echo teatro_csrf_meta(); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Precios y Categorías</title>
     <link rel="icon" href="../../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
@@ -638,6 +641,7 @@ $conn->close();
 
         <?php if ($mostrar_seccion_precios_std): ?>
         <form id="form-precios-tipo" method="POST" action="action_precios_tipo.php">
+            <?php echo teatro_csrf_field(); ?>
             <input type="hidden" name="id_evento" value="<?= $id_evento_seleccionado ?? '' ?>">
 
             <?php if ($mostrar_precio_general): ?>
@@ -791,6 +795,7 @@ $conn->close();
                         <p class="text-muted small mb-3">Añade zonas especiales como VIP, Palco, Preferencial, etc.</p>
 
                         <form id="formCRUD" action="action.php" method="POST">
+                            <?php echo teatro_csrf_field(); ?>
                             <input type="hidden" name="id_categoria" id="id_categoria" value="">
                             <input type="hidden" name="id_evento" value="<?= $id_evento_seleccionado ?>">
                             <input type="hidden" name="accion" id="accion" value="crear">
@@ -891,6 +896,9 @@ $conn->close();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    <?php echo teatro_csrf_js_snippet(); ?>
+    </script>
+    <script>
         // Toggle precios diferenciados
         document.getElementById('switchDiferenciados').addEventListener('change', function() {
             const container = document.getElementById('tiposContainer');
@@ -935,7 +943,7 @@ $conn->close();
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = `action.php?accion=borrar&id_categoria=${id}&id_evento=<?= $id_evento_seleccionado ?>`;
+                    window.location.href = `action.php?accion=borrar&id_categoria=${id}&id_evento=<?= $id_evento_seleccionado ?>&csrf_token=${encodeURIComponent((typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : '')}`;
                 }
             });
         }

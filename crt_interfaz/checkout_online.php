@@ -28,6 +28,10 @@ if ($id_evento <= 0 || $id_funcion <= 0) {
     $stmt->close();
     if (!$evento || !$funcion) {
         $error = 'Evento o función no disponibles.';
+    } elseif (!teatro_funcion_venta_abierta($conn, $id_evento, $id_funcion)) {
+        $error = teatro_mensaje_venta_cerrada();
+        $evento = null;
+        $funcion = null;
     }
 }
 
@@ -60,6 +64,26 @@ if ($evento && !empty($evento['imagen'])) {
     } else {
         $imgEvento = '../evt_interfaz/' . ltrim(str_replace('\\', '/', $rawImg), '/');
     }
+}
+
+if ($error) {
+    $esVentaCerrada = ($error === teatro_mensaje_venta_cerrada());
+    $aviso_titulo = $esVentaCerrada ? 'Venta no disponible' : 'No se puede continuar';
+    $aviso_lineas = $esVentaCerrada
+        ? [
+            $error,
+            'Esta función ya concluyó o la venta cerró. Revisa la cartelera para ver funciones activas.',
+        ]
+        : [
+            $error,
+            'Vuelve a la cartelera e intenta de nuevo con una función disponible.',
+        ];
+    $aviso_btn = 'Ir a cartelera';
+    $aviso_href = 'cartelera_cliente.php';
+    $aviso_icon = $esVentaCerrada ? '⊘' : '!';
+    $aviso_doc_title = $aviso_titulo;
+    require __DIR__ . '/_aviso_flujo.php';
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -377,9 +401,6 @@ body {
   </div>
 </div>
 
-<?php if ($error): ?>
-  <div class="container py-4"><div class="alert alert-warning"><?= h($error) ?></div></div>
-<?php else: ?>
 <div class="layout">
   <aside class="cardx" id="pedidoCard">
     <div class="pedido-head">
@@ -977,6 +998,5 @@ body {
   });
 })();
 </script>
-<?php endif; ?>
 </body>
 </html>

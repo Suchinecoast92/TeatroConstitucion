@@ -6,6 +6,7 @@
 require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/sync/reservas_helper.php';
 require_once dirname(__DIR__) . '/includes/ordenes_helper.php';
+require_once __DIR__ . '/test_helpers.php';
 
 $conn = getLocalConnection();
 if (!$conn) {
@@ -13,33 +14,13 @@ if (!$conn) {
     exit(1);
 }
 
-$evento = $conn->query("SELECT id_evento FROM evento WHERE finalizado = 0 ORDER BY id_evento DESC LIMIT 1")->fetch_assoc();
-$idEvento = (int) $evento['id_evento'];
-$st = $conn->prepare('SELECT id_funcion FROM funciones WHERE id_evento = ? ORDER BY fecha_hora DESC LIMIT 1');
-$st->bind_param('i', $idEvento);
-$st->execute();
-$idFuncion = (int) $st->get_result()->fetch_assoc()['id_funcion'];
-$st->close();
+$ctx = test_contexto_orden($conn, 'E', 'test_gracia_');
+$idEvento = $ctx['id_evento'];
+$idFuncion = $ctx['id_funcion'];
+$asiento = $ctx['asiento'];
+$session = $ctx['session'];
+$cliente = $ctx['cliente'];
 
-$disp = obtenerDisponibilidadFuncion($idEvento, $idFuncion, null, $conn);
-$ocupados = array_flip($disp['ocupados']);
-$asiento = null;
-for ($n = 1; $n <= 26; $n++) {
-    $c = 'E' . $n;
-    if (!isset($ocupados[$c])) {
-        $cat = resolver_categoria_asiento($conn, $idEvento, $c);
-        if ($cat && !es_categoria_no_venta($cat['nombre_categoria'])) {
-            $asiento = $c;
-            break;
-        }
-    }
-}
-if (!$asiento) {
-    fwrite(STDERR, "FAIL sin asiento\n");
-    exit(1);
-}
-
-$session = 'test_gracia_' . bin2hex(random_bytes(3));
 $hold = reservarAsientos($idEvento, $idFuncion, [$asiento], $session, 'online', 'test');
 if (!$hold['success']) {
     fwrite(STDERR, 'FAIL hold ' . json_encode($hold) . "\n");
@@ -61,8 +42,9 @@ $ord = crearOrdenOnline($conn, [
     'id_evento' => $idEvento,
     'id_funcion' => $idFuncion,
     'session_id' => $session,
-    'email' => 'gracia@example.com',
-    'nombre' => 'Test Gracia',
+    'email' => $cliente['email'],
+    'nombre' => $cliente['nombre'],
+    'telefono' => $cliente['telefono'],
     'asientos' => [['asiento' => $asiento, 'tipo_boleto' => 'adulto']],
 ]);
 echo 'crear=' . json_encode($ord, JSON_UNESCAPED_UNICODE) . "\n";
