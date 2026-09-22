@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../includes/csrf.php';
+require_once __DIR__ . '/../includes/texto_encoding_helper.php';
 
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
@@ -32,8 +33,8 @@ $id_evento = $_GET['id'] ?? 0;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     teatro_require_csrf(false);
     if (isset($_POST['accion']) && $_POST['accion'] == 'actualizar') {
-        $titulo = trim($_POST['titulo']);
-        $desc = trim($_POST['descripcion']);
+        $titulo = teatro_texto_plano(trim($_POST['titulo'] ?? ''));
+        $desc = teatro_texto_plano(trim($_POST['descripcion'] ?? ''));
         $tipo = $_POST['tipo'];
         $ini = $_POST['inicio_venta'];
         $fin = $_POST['cierre_venta'];
@@ -835,7 +836,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
                         <label class="form-label">Título del Evento</label>
                         <input type="text" id="tit" name="titulo" class="form-control"
                             style="font-size: 1.1rem; font-weight: 600;"
-                            value="<?= htmlspecialchars($evento['titulo']) ?>" required>
+                            value="<?= teatro_h($evento['titulo']) ?>" required>
                     </div>
                     <div class="col-12">
                         <div class="funciones-section">
@@ -880,7 +881,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
                     <div class="col-12">
                         <label class="form-label">Descripción</label>
                         <textarea id="desc" name="descripcion" class="form-control" rows="4"
-                            required><?= htmlspecialchars($evento['descripcion']) ?></textarea>
+                            required><?= teatro_h($evento['descripcion']) ?></textarea>
                         <div id="ttDesc" class="tooltip-error"></div>
                     </div>
                     <div class="col-md-7">

@@ -21,6 +21,7 @@ $nombre_completo = $usuario_nombre . ' ' . $usuario_apellido;
 
 include "conexion.php";
 require_once __DIR__ . '/config/ventas.php';
+require_once __DIR__ . '/includes/texto_encoding_helper.php';
 $horasVentaAbierta = (int) HORAS_CIERRE_VENTAS_POST_FUNCION;
 
 // El evento cierra las ventas 24 horas después de su última función.
@@ -36,6 +37,8 @@ $resultado = $conn->query($query);
 $eventos = [];
 if ($resultado) {
     while ($row = $resultado->fetch_assoc()) {
+        $row['titulo'] = teatro_texto_plano($row['titulo'] ?? '');
+        $row['descripcion'] = teatro_texto_plano($row['descripcion'] ?? '');
         $eventos[] = $row;
     }
 }
@@ -418,17 +421,17 @@ $conn->close();
             <a href="vnt_interfaz/index.php?id_evento=<?php echo $evento['id_evento']; ?>" class="evento-card">
                 <div class="evento-imagen">
                     <img src="<?php echo htmlspecialchars($imagen_src); ?>" 
-                         alt="<?php echo htmlspecialchars($evento['titulo']); ?>"
+                         alt="<?php echo teatro_h($evento['titulo']); ?>"
                          onerror="this.src='evt_interfaz/imagenes/default.jpg'">
                     <?php if ($badge): ?>
                     <div class="evento-badge"><i class="bi bi-lightning-fill"></i> <?php echo $badge; ?></div>
                     <?php endif; ?>
                 </div>
                 <div class="evento-info">
-                    <h3 class="evento-titulo"><?php echo htmlspecialchars($evento['titulo']); ?></h3>
+                    <h3 class="evento-titulo"><?php echo teatro_h($evento['titulo']); ?></h3>
                     <div class="evento-fecha"><i class="bi bi-calendar-event"></i> <?php echo $fecha_texto; ?></div>
                     <?php if (!empty($evento['descripcion'])): ?>
-                    <p class="evento-descripcion"><?php echo htmlspecialchars(substr($evento['descripcion'], 0, 80)); ?>...</p>
+                    <p class="evento-descripcion"><?php echo teatro_h(substr($evento['descripcion'], 0, 80)); ?>...</p>
                     <?php endif; ?>
                     <div class="btn-vender"><i class="bi bi-cart-plus-fill"></i> Vender Boletos</div>
                 </div>

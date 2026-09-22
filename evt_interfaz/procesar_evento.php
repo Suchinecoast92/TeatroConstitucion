@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once __DIR__ . '/../includes/csrf.php';
+require_once __DIR__ . '/../includes/texto_encoding_helper.php';
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
 if(file_exists("../transacciones_helper.php")) { require_once "../transacciones_helper.php"; }
@@ -22,8 +23,8 @@ $errores_php = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     teatro_require_csrf(false);
     
-    $titulo = trim($_POST['titulo']);
-    $desc = trim($_POST['descripcion']);
+    $titulo = teatro_texto_plano(trim($_POST['titulo'] ?? ''));
+    $desc = teatro_texto_plano(trim($_POST['descripcion'] ?? ''));
     $tipo = $_POST['tipo'];
     $ini = $_POST['inicio_venta'];
     $fin = $_POST['cierre_venta']; // Recibido del cálculo automático del front

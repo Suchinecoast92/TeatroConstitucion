@@ -60,3 +60,37 @@ function convertirTexto(?string $texto): string
 {
     return texto_pdf_latin1($texto);
 }
+
+/**
+ * Texto plano: deshace entidades HTML si el dato se guardó escapado (p. ej. &quot;).
+ * No aplica htmlspecialchars; usar teatro_h() al imprimir en HTML.
+ */
+function teatro_texto_plano(?string $texto): string
+{
+    if ($texto === null || $texto === '') {
+        return '';
+    }
+    $cur = (string) $texto;
+    $flags = ENT_QUOTES;
+    if (defined('ENT_HTML5')) {
+        $flags |= ENT_HTML5;
+    }
+    // Hasta 3 pasadas por si quedó doble-escapado (&amp;quot;)
+    for ($i = 0; $i < 3; $i++) {
+        $decoded = html_entity_decode($cur, $flags, 'UTF-8');
+        if ($decoded === $cur) {
+            break;
+        }
+        $cur = $decoded;
+    }
+    return $cur;
+}
+
+/**
+ * Escape HTML seguro tras normalizar entidades previas.
+ */
+function teatro_h(?string $texto): string
+{
+    return htmlspecialchars(teatro_texto_plano($texto), ENT_QUOTES, 'UTF-8');
+}
+

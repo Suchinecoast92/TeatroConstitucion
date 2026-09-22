@@ -2,6 +2,7 @@
 // CONEXIÓN A LA BD (UTF-8)
 header('Content-Type: text/html; charset=UTF-8');
 include "../conexion.php";
+require_once __DIR__ . '/../includes/texto_encoding_helper.php';
 
 // OBTENER EVENTOS ACTIVOS CON SUS PRÓXIMAS FUNCIONES
 $query = "
@@ -60,8 +61,8 @@ if ($resultado && $resultado->num_rows > 0) {
 
             $eventos[$id_evento] = [
                 'id_evento' => $id_evento,
-                'titulo' => $row['titulo'],
-                'descripcion' => $row['descripcion'],
+                'titulo' => teatro_texto_plano($row['titulo'] ?? ''),
+                'descripcion' => teatro_texto_plano($row['descripcion'] ?? ''),
                 'imagen' => $row['imagen'],
                 'total_asientos' => $total_asientos,
                 'funciones' => []
@@ -829,16 +830,16 @@ if ($resultado && $resultado->num_rows > 0) {
                             <!-- Imagen del evento -->
                             <div class="evento-imagen">
                                 <img src="../evt_interfaz/<?php echo htmlspecialchars($evento['imagen']); ?>" 
-                                     alt="<?php echo htmlspecialchars($evento['titulo']); ?>"
+                                     alt="<?php echo teatro_h($evento['titulo']); ?>"
                                      onerror="this.src='imagenes_teatro/nat.png'">
                             </div>
                             
                             <!-- Información del evento -->
                             <div class="evento-info">
                                 <div class="evento-header">
-                                    <h2><?php echo htmlspecialchars($evento['titulo']); ?></h2>
+                                    <h2><?php echo teatro_h($evento['titulo']); ?></h2>
                                     <?php if (!empty($evento['descripcion'])): ?>
-                                        <p class="evento-descripcion"><?php echo nl2br(htmlspecialchars($evento['descripcion'])); ?></p>
+                                        <p class="evento-descripcion"><?php echo nl2br(teatro_h($evento['descripcion']), false); ?></p>
                                     <?php endif; ?>
                                 </div>
                                 

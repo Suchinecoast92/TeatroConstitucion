@@ -1,6 +1,7 @@
 <?php
 // 1. CONEXIÓN A LA BD
 include "../conexion.php"; // Ajusta la ruta si es necesario
+require_once __DIR__ . '/../includes/texto_encoding_helper.php';
 
 // 2. OBTENER EVENTOS ACTIVOS CON SU PRÓXIMA FUNCIÓN (Y SU ID DE FUNCIÓN)
 $query = "
@@ -52,6 +53,8 @@ if ($resultado && $resultado->num_rows > 0) {
     $fin_semana->setTime(23, 59, 59);
 
     while ($evento = $resultado->fetch_assoc()) {
+        $evento['titulo'] = teatro_texto_plano($evento['titulo'] ?? '');
+        $evento['descripcion'] = teatro_texto_plano($evento['descripcion'] ?? '');
         $fecha_funcion = new DateTime($evento['proxima_funcion_fecha']);
 
         // Calcular total de asientos del evento a partir de mapa_json
@@ -1567,7 +1570,17 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         }
 
         function escHtml(s) {
-            return String(s ?? '')
+            let t = String(s ?? '');
+            // Deshacer entidades ya guardadas (&quot;) antes de escapar de nuevo
+            for (let i = 0; i < 3; i++) {
+                if (!/&(#\d+|#x[\da-fA-F]+|\w+);/.test(t)) break;
+                const ta = document.createElement('textarea');
+                ta.innerHTML = t;
+                const next = ta.value;
+                if (next === t) break;
+                t = next;
+            }
+            return t
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')

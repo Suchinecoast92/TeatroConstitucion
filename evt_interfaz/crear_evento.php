@@ -169,8 +169,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     asegurar_tabla_precios_tipo($conn);
 
-    $titulo = htmlspecialchars(trim($_POST['titulo'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $desc = htmlspecialchars(trim($_POST['descripcion'] ?? ''), ENT_QUOTES, 'UTF-8');
+    require_once __DIR__ . '/../includes/texto_encoding_helper.php';
+    // Guardar texto plano (sin htmlspecialchars): el escape va al mostrar
+    $titulo = teatro_texto_plano(trim($_POST['titulo'] ?? ''));
+    $desc = teatro_texto_plano(trim($_POST['descripcion'] ?? ''));
     $tipo = (int) ($_POST['tipo'] ?? 0);
     $ini = trim((string) ($_POST['inicio_venta'] ?? ''));
     $fin = trim((string) ($_POST['cierre_venta'] ?? ''));
