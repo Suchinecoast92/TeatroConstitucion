@@ -539,6 +539,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
                         <?php endif; ?>
 
                         <form id="form-promocion" class="form-grid">
+                            <?php echo teatro_csrf_field(); ?>
                             <input type="hidden" id="id_promocion" value="">
                             <input type="hidden" id="nombre_fijo" value="">
                             <input type="hidden" id="tipo_boleto_hidden" value="">

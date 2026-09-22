@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/includes/csrf.php';
 
 // --- 🎲 DICCIONARIO DE TEMAS Y PALABRAS ---
 $palabras = [
@@ -19,6 +20,11 @@ $palabras = [
 "Mariachi", "Mazapán", "La Llorona", "El Fua",
 "Niño del Oxxo", "La Rosa de Guadalupe"
 ];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !teatro_csrf_validate()) {
+    http_response_code(403);
+    die('Solicitud rechazada. Recarga la página.');
+}
 
 // --- 1. CONFIGURACIÓN INICIAL (Crear Partida) ---
 if (isset($_POST["iniciar_juego"])) {
@@ -140,6 +146,7 @@ $todosPasaron = ($datos && $_SESSION["ronda"]["turno_actual"] > $datos["total"])
         <h1>⚙️ Nuevo Juego</h1>
         <p>¿Cuántas personas van a jugar?</p>
         <form method="POST">
+            <?php echo teatro_csrf_field(); ?>
             <input type="number" name="num_jugadores" value="6" min="3" max="50" required>
             <br>
             <button type="submit" name="iniciar_juego" class="btn btn-start">✅ Comenzar</button>
@@ -150,6 +157,7 @@ $todosPasaron = ($datos && $_SESSION["ronda"]["turno_actual"] > $datos["total"])
         <span class="instruccion">Toma la computadora</span>
         
         <form method="POST">
+            <?php echo teatro_csrf_field(); ?>
             <button type="submit" name="ver_palabra" class="btn btn-ver">👁️ Ver mi palabra secreta</button>
         </form>
         
@@ -166,6 +174,7 @@ $todosPasaron = ($datos && $_SESSION["ronda"]["turno_actual"] > $datos["total"])
         </div>
         <br>
         <form method="POST">
+            <?php echo teatro_csrf_field(); ?>
             <button type="submit" name="revelar_verdad" class="btn btn-revelar">🔓 REVELAR LA VERDAD</button>
         </form>
 
@@ -179,6 +188,7 @@ $todosPasaron = ($datos && $_SESSION["ronda"]["turno_actual"] > $datos["total"])
             <h2 style="color:#c0392b; font-size: 40px;">JUGADOR <?= $datos["impostor"] ?> 😈</h2>
         </div>
         <form method="POST">
+            <?php echo teatro_csrf_field(); ?>
             <button type="submit" name="reset" class="btn btn-reset-final">🔄 Iniciar Nueva Partida</button>
         </form>
     <?php endif; ?>
@@ -186,6 +196,7 @@ $todosPasaron = ($datos && $_SESSION["ronda"]["turno_actual"] > $datos["total"])
     <?php if ($datos): ?>
         <hr style="margin-top: 40px; opacity: 0.2;">
         <form method="POST">
+            <?php echo teatro_csrf_field(); ?>
             <button type="submit" name="reset" class="btn-abort" onclick="return confirm('¿Seguro que quieres cancelar la partida actual y volver al inicio?');">⚠️ Cancelar y Reiniciar a 0</button>
         </form>
     <?php endif; ?>

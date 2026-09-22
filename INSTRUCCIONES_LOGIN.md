@@ -23,7 +23,7 @@ ADD COLUMN fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER acti
 
 -- Crear usuario administrador (usa un hash generado con password_hash en PHP; no uses contraseñas de ejemplo en producción)
 -- INSERT INTO usuarios (nombre, apellido, password, rol, activo)
--- VALUES ('Administrador', 'Sistema', '<hash_password_hash>', 'admin', 1);
+-- VALUES ('Administrador', 'Sistema', HASH_GENERADO_CON_PHP, 'admin', 1);
 ```
 
 **Nota:** También puedes ejecutar el archivo: `sql_updates/agregar_rol_usuarios.sql`
@@ -172,10 +172,10 @@ Para producción, debes:
 
 ### Personalización
 
-**Cambiar contraseña del admin (genera el hash en PHP con password_hash y luego):**
+**Cambiar contraseña del admin (genera el hash en PHP con password_hash y luego ejecuta el UPDATE pegando el hash):**
 ```sql
-UPDATE usuarios 
-SET password = '<hash_generado>' 
+UPDATE usuarios
+SET /* columna de acceso */ `password` = HASH_GENERADO_CON_PHP
 WHERE rol = 'admin' AND id_usuario = 1;
 ```
 

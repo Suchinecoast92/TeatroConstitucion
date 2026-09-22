@@ -38,3 +38,7 @@ Desktop.ini
 es --oneline
 *.tmp
 *.temp
+
+# Informes SAST (no son código de la app; además se escanean a sí mismos)
+websec-audit*.txt
+websec-audit*.pdf

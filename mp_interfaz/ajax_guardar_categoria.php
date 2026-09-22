@@ -1,16 +1,18 @@
 <?php
 // ajax_guardar_categoria.php
 
-// 1. CONEXIÓN (Asegúrate que la ruta sea correcta)
-// Usamos la conexión de la BD trt_25 como solicitaste.
+session_start();
+require_once __DIR__ . '/../includes/auth_guard.php';
+require_once __DIR__ . '/../includes/csrf.php';
+teatro_require_admin(true);
+teatro_require_csrf(true);
+
 include "../evt_interfaz/conexion.php";
 require_once __DIR__ . '/../api/registrar_cambio.php';
 
-// Preparamos una respuesta JSON
 header('Content-Type: application/json');
 $response = ['status' => 'error', 'message' => 'Datos incompletos.'];
 
-// 2. VERIFICAR DATOS POST
 if (isset($_POST['id_evento']) && isset($_POST['nombre']) && isset($_POST['precio']) && isset($_POST['color'])) {
     
     $id_evento = (int)$_POST['id_evento'];
@@ -22,10 +24,8 @@ if (isset($_POST['id_evento']) && isset($_POST['nombre']) && isset($_POST['preci
         $response['message'] = 'Datos no validos. El precio no puede ser negativo.';
     } else {
         
-        // 3. INSERTAR EN LA BASE DE DATOS (Tabla 'categorias')
         try {
             $stmt = $conn->prepare("INSERT INTO categorias (id_evento, nombre_categoria, precio, color) VALUES (?, ?, ?, ?)");
-            // 'isds' = integer, string, double, string
             $stmt->bind_param("isds", $id_evento, $nombre, $precio, $color);
             
             if ($stmt->execute()) {
@@ -39,15 +39,11 @@ if (isset($_POST['id_evento']) && isset($_POST['nombre']) && isset($_POST['preci
                 $response['message'] = 'Error al ejecutar la consulta: ' . $stmt->error;
             }
             $stmt->close();
-            
-        } catch (Exception $e) {
-            $response['message'] = 'Error de base de datos: ' . $e->getMessage();
+        } catch (Throwable $e) {
+            $response['message'] = 'Error de base de datos.';
+            error_log('[ajax_guardar_categoria] ' . $e->getMessage());
         }
     }
 }
 
-$conn->close();
-
-// 4. DEVOLVER RESPUESTA JSON
 echo json_encode($response);
-?>

@@ -15,6 +15,7 @@ $es_admin = ($_SESSION['usuario_rol'] === 'admin' || (isset($_SESSION['admin_ver
 
 require_once '../../transacciones_helper.php';
 require_once '../../evt_interfaz/conexion.php'; // Aseguramos conexión para todos los tabs
+require_once __DIR__ . '/../../includes/csrf.php';
 
 // --- LOGICA DEL HISTORIAL (Original de Transacciones) ---
 $fecha_desde = $_GET['fecha_desde'] ?? '';
@@ -190,6 +191,7 @@ if ($res_eventos) {
                  </div>
                  
                  <form method="GET" class="row g-3 mb-4">
+                    <?php echo teatro_csrf_field(); ?>
                     <div class="col-md-4">
                         <input type="date" name="fecha_desde" class="form-control" value="<?php echo htmlspecialchars($fecha_desde); ?>" placeholder="Desde">
                     </div>

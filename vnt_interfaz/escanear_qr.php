@@ -1,4 +1,9 @@
 <?php
+session_start();
+require_once __DIR__ . '/../includes/auth_guard.php';
+require_once __DIR__ . '/../includes/csrf.php';
+teatro_require_login(false);
+
 include "../conexion.php";
 
 $mensaje = '';
@@ -7,19 +12,24 @@ $boleto_info = null;
 
 // Procesar confirmación de entrada
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_entrada'])) {
-    $codigo_unico = $_POST['codigo_unico'];
-    
-    $stmt = $conn->prepare("UPDATE boletos SET estatus = 0 WHERE codigo_unico = ? AND estatus = 1");
-    $stmt->bind_param("s", $codigo_unico);
-    
-    if ($stmt->execute() && $stmt->affected_rows > 0) {
-        $mensaje = "Entrada confirmada exitosamente. El boleto ha sido marcado como usado.";
-        $tipo_mensaje = "success";
-    } else {
-        $mensaje = "Error: El boleto ya fue usado o no existe.";
+    if (!teatro_csrf_validate()) {
+        $mensaje = "Solicitud inválida. Recarga la página e intenta de nuevo.";
         $tipo_mensaje = "danger";
+    } else {
+        $codigo_unico = trim((string) ($_POST['codigo_unico'] ?? ''));
+
+        $stmt = $conn->prepare("UPDATE boletos SET estatus = 0 WHERE codigo_unico = ? AND estatus = 1");
+        $stmt->bind_param("s", $codigo_unico);
+
+        if ($stmt->execute() && $stmt->affected_rows > 0) {
+            $mensaje = "Entrada confirmada exitosamente. El boleto ha sido marcado como usado.";
+            $tipo_mensaje = "success";
+        } else {
+            $mensaje = "Error: El boleto ya fue usado o no existe.";
+            $tipo_mensaje = "danger";
+        }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 // Buscar boleto por código
@@ -202,6 +212,7 @@ $conn->close();
                 <!-- Botón de confirmación -->
                 <?php if ($boleto_info['estatus'] == 1): ?>
                 <form method="POST" onsubmit="return confirm('¿Confirmar entrada? Esta acción no se puede deshacer.');">
+                    <?php echo teatro_csrf_field(); ?>
                     <input type="hidden" name="codigo_unico" value="<?= htmlspecialchars($boleto_info['codigo_unico']) ?>">
                     <button type="submit" name="confirmar_entrada" class="btn btn-success btn-lg w-100">
                         <i class="bi bi-check-circle"></i> Confirmar Entrada

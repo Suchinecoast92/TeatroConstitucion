@@ -10,6 +10,7 @@
 
 session_start();
 require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../includes/csrf.php';
 
 if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_rol'] ?? '') !== 'admin') {
     header('Location: ../login.php');
@@ -233,6 +234,7 @@ $tabActiva = $_GET['tab'] ?? 'ventas';
                 <i class="bi bi-funnel"></i> Filtros
             </h6>
             <form method="GET" class="row g-3">
+                <?php echo teatro_csrf_field(); ?>
                 <input type="hidden" name="tab" value="ventas">
                 <div class="col-md-3">
                     <label>Método</label>

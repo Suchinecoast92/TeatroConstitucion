@@ -1,6 +1,7 @@
 <?php
 // 0. VERIFICACIÓN DE SEGURIDAD
 session_start();
+require_once __DIR__ . '/../includes/csrf.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     die('<html><head><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></head><body style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial; background: #f4f7f6; color: #e74c3c; font-size: 1.2em;"><div style="text-align: center;"><i class="bi bi-lock-fill" style="font-size: 3em;"></i><p>Acceso denegado. Debe iniciar sesión.</p></div></body></html>');
@@ -77,6 +78,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistema de mapeado de asientos por categorías para eventos del teatro">
     <title>Mapeador de Asientos - Teatro</title>
+    <?php echo teatro_csrf_meta(); ?>
     <link rel="icon" href="../crt_interfaz/imagenes_teatro/nat.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -881,6 +883,7 @@ $conn->close();
                 </div>
                 <div class="modal-body pt-4">
                     <form id="formNuevaCategoria">
+                        <?php echo teatro_csrf_field(); ?>
                         <input type="hidden" name="id_evento" value="<?= $id_evento_seleccionado ?>">
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="catNombre" name="nombre" required
@@ -915,6 +918,9 @@ $conn->close();
 
     <input type="hidden" id="current_event_id" value="<?= $id_evento_seleccionado ?>">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    <?php echo teatro_csrf_js_snippet(); ?>
+    </script>
     <script src="../vnt_interfaz/js/teatro-sync.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1185,8 +1191,14 @@ $conn->close();
                     try {
                         const res = await fetch('ajax_guardar_mapa.php', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id_evento: eventId, mapa: mapaArray })
+                            headers: (typeof window.teatroCsrfHeaders === 'function')
+                                ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                                : { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id_evento: eventId,
+                                mapa: mapaArray,
+                                csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+                            })
                         });
                         const data = await res.json();
 
@@ -1222,8 +1234,14 @@ $conn->close();
                 try {
                     const res = await fetch('ajax_guardar_mapa.php', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id_evento: eventId, mapa: mapaArray })
+                        headers: (typeof window.teatroCsrfHeaders === 'function')
+                            ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                            : { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id_evento: eventId,
+                            mapa: mapaArray,
+                            csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+                        })
                     });
                     return await res.json();
                 } catch (e) {
@@ -1247,7 +1265,11 @@ $conn->close();
                         }
 
                         // 2. LUEGO crear la nueva categoría
-                        const res = await fetch('ajax_guardar_categoria.php', { method: 'POST', body: new FormData(formCat) });
+                        const fd = new FormData(formCat);
+                        if (typeof window.teatroCsrfAppend === 'function') {
+                            window.teatroCsrfAppend(fd);
+                        }
+                        const res = await fetch('ajax_guardar_categoria.php', { method: 'POST', body: fd });
                         const data = await res.json();
 
                         if (data.status === 'success') {

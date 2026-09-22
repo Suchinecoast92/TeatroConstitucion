@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../includes/precio_helper.php';
 require_once __DIR__ . '/../includes/ordenes_helper.php';
+require_once __DIR__ . '/../includes/csrf.php';
 
 $id_evento = isset($_GET['id_evento']) ? (int) $_GET['id_evento'] : 0;
 $id_funcion = isset($_GET['id_funcion']) ? (int) $_GET['id_funcion'] : 0;
@@ -438,6 +439,7 @@ body {
     <div class="section">
       <h2>Datos personales</h2>
       <form id="formPago" novalidate>
+        <?php echo teatro_csrf_field(); ?>
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label class="form-label" for="inpNombre">Nombre(s)</label>
