@@ -2987,7 +2987,7 @@ window.URL_PANEL = '<?= $url_panel ?>';
     resetInactividad();
 })();
 </script>
-<script src="../assets/js/teatro-escape.js"></script>
+<script src="../assets/js/teatro-escape.js?v=4"></script>
 <script src="js/carrito.js?v=29"></script>
 
 <script src="js/carrito-patch.js"></script>

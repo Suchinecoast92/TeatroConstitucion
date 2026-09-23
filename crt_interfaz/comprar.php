@@ -545,7 +545,7 @@ body {
   </div>
 </div>
 
-<script src="assets/js/teatro-escape.js"></script>
+<script src="../assets/js/teatro-escape.js?v=4"></script>
 <script src="js/compra-timer.js"></script>
 <script>
 (() => {
@@ -989,6 +989,9 @@ body {
   // Cookie de sesión lo antes posible
   sessionId();
 
+  // Un solo ajuste al cargar — antes de UI que pueda fallar
+  requestAnimationFrame(() => ajustarMapa());
+
   // Entrada normal (cartelera, etc.): limpiar selección vieja y liberar holds
   // Solo ?editar=1 (desde checkout) restaura la selección
   if (!EDITAR) {
@@ -1001,7 +1004,7 @@ body {
   } else if (restaurarSeleccionDesdeStorage()) {
     renovarHolds().catch(() => {});
   }
-  renderMini();
+  try { renderMini(); } catch (e) { console.error(e); }
 
   // Al salir del mapa (Cerrar / otra página), liberar asientos
   document.getElementById('btnCerrarMapa')?.addEventListener('click', (e) => {
@@ -1019,9 +1022,6 @@ body {
       window.location.reload();
     }
   });
-
-  // Un solo ajuste al cargar (sin transición / sin “crecer”)
-  requestAnimationFrame(() => ajustarMapa());
 
   // Mantener mapa al día con holds/ventas de otros (taquilla u online)
   syncDisponibilidad();

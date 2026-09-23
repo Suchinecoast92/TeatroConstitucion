@@ -938,7 +938,7 @@ $defaultCierre = $modo_reactivacion ? '' : date('Y-m-d H:i', strtotime($evento['
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    <script src="../assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-escape.js?v=4"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('loaded');

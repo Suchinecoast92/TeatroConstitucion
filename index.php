@@ -697,8 +697,8 @@ $nombre_completo = $usuario_nombre . ' ' . $usuario_apellido;
             </div>
         </aside>
 
-        <script src="assets/js/teatro-escape.js"></script>
-        <script src="assets/js/teatro-frames.js"></script>
+        <script src="assets/js/teatro-escape.js?v=4"></script>
+        <script src="assets/js/teatro-frames.js?v=4"></script>
 <script>
             function abrirVisorCliente() {
                 window.open('vnt_interfaz/visor_cliente.php', 'VisorCliente', 'width=1200,height=800,menubar=no,toolbar=no');

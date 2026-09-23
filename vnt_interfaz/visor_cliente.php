@@ -2568,7 +2568,7 @@ foreach ($categorias_evento as $cat) {
         };
         window.onresize = ajustarMapa;
     </script>
-    <script src="../assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-escape.js?v=4"></script>
     <script src="js/teatro-sync.js"></script>
     <script>
         // El visor cliente NO debe auto-recargar ni mostrar notificaciones

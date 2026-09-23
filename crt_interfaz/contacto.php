@@ -7,6 +7,9 @@
     <link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -198,38 +201,117 @@
                 z-index: 1101;
             }
             .nav-backdrop.show { display: block; }
-            .main-content { padding: 24px 14px 40px; }
+            .main-content { padding: 24px 16px 40px; }
         }
 
         /* Contenido principal */
         .main-content {
-            max-width: 720px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 40px 20px 56px;
+            padding: 44px 28px 64px;
+        }
+
+        .contacto-display {
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
         }
 
         .hero-section {
             text-align: center;
-            margin-bottom: 28px;
-            animation: fadeInUp 0.8s ease;
+            margin-bottom: 32px;
+            /* Solo mover: animar opacity en el padre rompe backdrop-filter del glass card */
+            animation: fadeInUpSoft 0.8s ease;
+        }
+
+        .hero-panel {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 18px;
+            padding: 44px 42px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .hero-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
         }
 
         .hero-section h1 {
-            font-size: 2.25rem;
-            font-weight: 700;
-            margin-bottom: 12px;
+            font-size: clamp(2.35rem, 4.8vw, 3.4rem);
+            font-weight: 600;
+            margin-bottom: 20px;
             color: #ffffff;
-            text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-            letter-spacing: -0.03em;
+            text-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
         }
 
         .hero-section p {
-            font-size: 1.02rem;
-            line-height: 1.65;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 560px;
-            margin: 0 auto;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-size: clamp(1.05rem, 1.7vw, 1.18rem);
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 820px;
+            margin: 0 auto 22px;
+            text-shadow: none;
+        }
+
+        .contacto-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .contacto-cta-row--card {
+            justify-content: flex-start;
+            margin-top: 14px;
+        }
+
+        .contacto-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+        }
+
+        .contacto-btn--primary {
+            background: linear-gradient(160deg, rgba(255,255,255,.92), rgba(220,220,224,.88));
+            color: #0a0a0a;
+            box-shadow: 0 10px 28px rgba(0,0,0,.35);
+            padding: 14px 24px;
+            font-size: 1.05rem;
+            border-radius: 14px;
+        }
+
+        .contacto-btn--ghost {
+            background: rgba(0,0,0,.35);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.28);
+        }
+
+        .contacto-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            color: inherit;
         }
 
         /* Sección de ubicación */
@@ -237,9 +319,9 @@
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 16px;
-            padding: 26px 24px;
-            margin-bottom: 28px;
+            border-radius: 18px;
+            padding: 40px 42px;
+            margin-bottom: 32px;
             border: 1px solid rgba(255, 255, 255, 0.25);
             box-shadow: 
                 0 12px 40px rgba(0, 0, 0, 0.12),
@@ -247,7 +329,6 @@
                 inset 0 -1px 1px rgba(0, 0, 0, 0.05);
             position: relative;
             overflow: hidden;
-            /* Misma entrada que las tarjetas de Acerca, sin opacity (rompe backdrop-filter) */
             animation: fadeInUpSoft 0.8s ease 0.12s both;
         }
 
@@ -262,9 +343,9 @@
         }
 
         .location-section h2 {
-            font-size: 1.35rem;
+            font-size: clamp(1.75rem, 3.2vw, 2.35rem);
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 28px;
             color: #ffffff;
             text-align: center;
             letter-spacing: -0.02em;
@@ -274,17 +355,20 @@
         .location-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 20px;
             margin-top: 8px;
         }
 
         .location-info {
             color: rgba(255, 255, 255, 0.9);
-            max-width: 480px;
+            max-width: 100%;
             margin: 0 auto;
             width: 100%;
-            font-size: 0.92rem;
-            line-height: 1.6;
+            font-size: 1.02rem;
+            line-height: 1.65;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 28px;
         }
 
         .location-info h3 {
@@ -300,29 +384,130 @@
         .location-item {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            gap: 14px;
+            margin-bottom: 0;
+            padding: 20px 18px;
+            border-bottom: none;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            transition: transform .2s ease, border-color .2s ease, background .2s ease;
+        }
+
+        .location-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.28);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .location-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
-            padding-bottom: 0;
+            padding-bottom: 20px;
         }
 
         .location-item i {
             color: #ffffff;
-            font-size: 1.1rem;
-            margin-top: 3px;
-            opacity: 0.9;
+            font-size: 1.35rem;
+            margin-top: 2px;
+            opacity: 0.95;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .location-item strong {
             color: #ffffff;
+            font-weight: 650;
+            font-size: 1.05rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .location-item a {
+            color: #fff;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .reservas-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 18px;
+            padding: 40px 42px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUpSoft 0.8s ease 0.2s both;
+        }
+
+        .reservas-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+        }
+
+        .reservas-section h2 {
+            font-size: clamp(1.75rem, 3.2vw, 2.35rem);
             font-weight: 600;
+            margin: 0 0 14px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .reservas-section > p {
+            text-align: center;
+            max-width: 780px;
+            margin: 0 auto 22px;
+            color: #cfd3d7;
+            font-size: 1.02rem;
+            line-height: 1.7;
+        }
+
+        .reservas-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .reservas-steps li {
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 14px;
+            padding: 20px 18px;
+            color: #e8e8e8;
+            font-size: 0.98rem;
+            line-height: 1.55;
+        }
+
+        .reservas-steps strong {
+            display: block;
+            color: #fff;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .reservas-steps .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.16);
+            margin-right: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
         }
 
         /* Animaciones */
@@ -346,22 +531,37 @@
             }
         }
 
+        @media (max-width: 900px) {
+            .location-info,
+            .reservas-steps {
+                grid-template-columns: 1fr;
+            }
+            .hero-panel,
+            .location-section,
+            .reservas-section {
+                padding: 28px 20px;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-section {
                 margin-bottom: 20px;
             }
             .hero-section h1 {
-                font-size: 1.55rem;
+                font-size: 1.85rem;
             }
             .hero-section p {
-                font-size: 0.95rem;
+                font-size: 0.98rem;
             }
-            .location-section {
-                padding: 20px 16px;
+            .location-section,
+            .reservas-section,
+            .hero-panel {
+                padding: 24px 18px;
             }
-            .location-section h2 {
-                font-size: 1.2rem;
+            .location-section h2,
+            .reservas-section h2 {
+                font-size: 1.45rem;
             }
             .site-footer {
                 margin-top: 40px;
@@ -376,7 +576,7 @@
             margin-top: 80px;
         }
         .footer-inner {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 28px 20px;
             display: grid;
@@ -401,7 +601,7 @@
         .social a { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #e8e8e8; text-decoration: none; transition: all .2s ease; }
         .social a:hover { color: #fff; border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
         .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding: 14px 20px; color: #aeb4ba; font-size: 0.9rem; }
-        .footer-bottom-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .footer-bottom-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .muted { color: #aeb4ba; }
 
         /* (Tema único) Se mantienen colores neutros/grises, sin cambio de fondo */
@@ -454,38 +654,47 @@
     </header>
 
     <main class="main-content">
-        <!-- Hero Section -->
         <section class="hero-section">
-            <h1>Contacto y Reservaciones</h1>
-            <p>Estamos aquí para atenderte. Contáctanos para más información sobre eventos, reservaciones o cualquier consulta que tengas.</p>
+            <div class="hero-panel">
+                <h1 class="contacto-display">Contacto y Reservaciones</h1>
+                <p>Estamos aquí para atenderte. Contáctanos para más información sobre eventos, reservaciones o cualquier consulta que tengas.</p>
+                <div class="contacto-cta-row">
+                    <a class="contacto-btn contacto-btn--primary" href="cartelera_cliente.php"><i class="bi bi-ticket-perforated"></i> Ver cartelera</a>
+                </div>
+            </div>
         </section>
 
-        <!-- Ubicación y Contacto -->
-        <div class="location-section">
-            <h2>Información de Contacto</h2>
+        <section class="location-section">
+            <h2 class="contacto-display">Información de Contacto</h2>
             <div class="location-grid">
                 <div class="location-info">
                     <div class="location-item">
                         <i class="bi bi-telephone-fill"></i>
                         <div>
-                            <strong>Teléfono</strong><br>
-                            +52 (453) 534 5751<br>
+                            <strong>Teléfono</strong>
+                            <a href="tel:+524535345751">+52 (453) 534 5751</a><br>
                             Lunes a Viernes: 09:00 am – 08:00 pm
+                            <div class="contacto-cta-row contacto-cta-row--card">
+                                <a class="contacto-btn contacto-btn--ghost" href="tel:+524535345751"><i class="bi bi-telephone-fill"></i> Llamar ahora</a>
+                            </div>
                         </div>
                     </div>
 
                     <div class="location-item">
                         <i class="bi bi-envelope-fill"></i>
                         <div>
-                            <strong>Correo Electrónico</strong><br>
-                            teatroconstitucion@outlook.es
+                            <strong>Correo Electrónico</strong>
+                            <a href="mailto:teatroconstitucion@outlook.es">teatroconstitucion@outlook.es</a>
+                            <div class="contacto-cta-row contacto-cta-row--card">
+                                <a class="contacto-btn contacto-btn--ghost" href="mailto:teatroconstitucion@outlook.es"><i class="bi bi-envelope-fill"></i> Escribir correo</a>
+                            </div>
                         </div>
                     </div>
 
                     <div class="location-item">
                         <i class="bi bi-clock-fill"></i>
                         <div>
-                            <strong>Horario de Taquilla</strong><br>
+                            <strong>Horario de Taquilla</strong>
                             Lunes a Viernes: 09:00 am – 08:00 pm<br>
                             Funciones: Según cartelera
                         </div>
@@ -494,15 +703,33 @@
                     <div class="location-item">
                         <i class="bi bi-geo-alt-fill"></i>
                         <div>
-                            <strong>Dirección</strong><br>
+                            <strong>Dirección</strong>
                             C. José Sotero de Castañeda 724, Ferrocarril,<br>
                             60690 Apatzingán de la Constitución, Mich.
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
+        <section class="reservas-section">
+            <h2 class="contacto-display">Cómo reservar</h2>
+            <p>Puedes comprar en taquilla o consultar disponibilidad por teléfono y correo. Para funciones con preventa online, usa la cartelera.</p>
+            <ol class="reservas-steps">
+                <li>
+                    <strong><span class="num">1</span> Elige la función</strong>
+                    Revisa horarios y disponibilidad en cartelera o llámanos a taquilla.
+                </li>
+                <li>
+                    <strong><span class="num">2</span> Confirma tus lugares</strong>
+                    Indica cantidad de boletos y preferencia de zona. Te orientamos según aforo.
+                </li>
+                <li>
+                    <strong><span class="num">3</span> Paga y listo</strong>
+                    Completa el pago en taquilla o por el canal indicado. Conserva tu comprobante o QR.
+                </li>
+            </ol>
+        </section>
     </main>
 
     <footer class="site-footer">

@@ -91,7 +91,7 @@ body { background: var(--bg-primary, #0f172a); color: var(--text-primary, #e2e8f
   <div class="card-panel" id="detalle" style="display:none"></div>
 </div>
 
-<script src="../assets/js/teatro-escape.js"></script>
+<script src="../../assets/js/teatro-escape.js?v=4"></script>
 <script>
 <?php echo teatro_csrf_js_snippet(); ?>
 const API = 'api.php';

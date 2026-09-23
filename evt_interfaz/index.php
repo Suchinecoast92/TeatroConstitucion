@@ -160,7 +160,7 @@ if ($tab === 'historial') {
         <div data-teatro-frame data-id="contentFrame" data-name="contentFrame" data-src="<?php echo htmlspecialchars($src_inicial, ENT_QUOTES, 'UTF-8'); ?>" data-class="event-frame" data-title="Contenido eventos"></div>
     </main>
 
-    <script src="../assets/js/teatro-frames.js"></script>
+    <script src="../assets/js/teatro-frames.js?v=4"></script>
     <script>
         const iframe = document.getElementById('contentFrame');
         const menuItems = document.querySelectorAll('.event-menu-item');

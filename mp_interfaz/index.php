@@ -917,7 +917,7 @@ $conn->close();
     </div>
 
     <input type="hidden" id="current_event_id" value="<?= $id_evento_seleccionado ?>">
-    <script src="assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-escape.js?v=4"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     <?php echo teatro_csrf_js_snippet(); ?>

@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="progress-track"><div class="progress-fill" id="pBar"></div></div>
                     <p class="text-muted mt-2" style="font-size: 0.75rem; font-weight: 600;">VOLVIENDO A ACTIVOS...</p>
                 </div>
-                <script src="assets/js/teatro-escape.js"></script>
+                <script src="../assets/js/teatro-escape.js?v=4"></script>
 <script>
                     setTimeout(() => document.getElementById('pBar').style.width = '100%', 100);
                     localStorage.setItem("evt_upd", Date.now());

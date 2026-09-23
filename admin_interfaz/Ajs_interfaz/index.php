@@ -468,8 +468,8 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
         <div data-teatro-frame data-id="contentFrame" data-name="contentFrame" data-class="settings-frame" data-title="Contenido ajustes" data-style="display: none;"></div>
     </main>
 
-    <script src="../assets/js/teatro-escape.js"></script>
-    <script src="../assets/js/teatro-frames.js"></script>
+    <script src="../../assets/js/teatro-escape.js?v=4"></script>
+    <script src="../../assets/js/teatro-frames.js?v=4"></script>
 <script>
         document.addEventListener('DOMContentLoaded', () => {
             const menuItems = document.querySelectorAll('.settings-menu-item');
@@ -504,6 +504,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
             menuItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
+                    if (!contentFrame) return;
                     
                     // Update active state
                     menuItems.forEach(mi => mi.classList.remove('active'));
@@ -513,12 +514,19 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
                     const title = this.dataset.title;
                     const desc = this.dataset.desc;
                     const iconColor = this.dataset.icon;
-                    const iconEl = this.querySelector('.menu-icon i').className;
+                    const iconEl = this.querySelector('.menu-icon i')?.className || 'bi bi-sliders';
                     
                     headerTitle.textContent = title;
                     headerDesc.textContent = desc;
                     headerIcon.className = 'settings-header-icon ' + iconColor;
-                    teatroSetHtml(headerIcon, '<i class="' + iconEl + '"></i>');
+                    if (typeof teatroSetHtml === 'function') {
+                        teatroSetHtml(headerIcon, '<i class="' + iconEl + '"></i>');
+                    } else {
+                        headerIcon.replaceChildren();
+                        const i = document.createElement('i');
+                        i.className = iconEl;
+                        headerIcon.appendChild(i);
+                    }
                     
                     // Show content
                     welcomeContent.style.display = 'none';

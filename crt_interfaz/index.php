@@ -1523,7 +1523,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         </div>
     </footer>
 
-    <script src="../assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-escape.js?v=4"></script>
     <script>
         // DATOS DE PHP A JAVASCRIPT
         const eventosEstaSemana = <?php echo json_encode($eventos_esta_semana, JSON_UNESCAPED_UNICODE); ?>;

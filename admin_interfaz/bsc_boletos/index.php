@@ -818,7 +818,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
         </div>
     </div>
 
-    <script src="../../assets/js/teatro-escape.js"></script>
+    <script src="../../assets/js/teatro-escape.js?v=4"></script>
     <script>
     <?php echo teatro_csrf_js_snippet(); ?>
     </script>

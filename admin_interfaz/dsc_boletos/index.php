@@ -712,7 +712,7 @@ $CATEGORIAS_BASE_JSON = json_encode($categorias_base, JSON_UNESCAPED_UNICODE);
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../assets/js/teatro-escape.js"></script>
+    <script src="../../assets/js/teatro-escape.js?v=4"></script>
     <script>
         <?php echo teatro_csrf_js_snippet(); ?>
         const API_URL = 'promos_api.php';

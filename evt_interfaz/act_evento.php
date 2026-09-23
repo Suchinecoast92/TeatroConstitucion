@@ -1051,7 +1051,7 @@ $activos = $conn->query("
         </div>
     </div>
 
-    <script src="assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-escape.js?v=4"></script>
 <script>
         document.addEventListener('DOMContentLoaded', () => document.body.classList.add('loaded'));
 

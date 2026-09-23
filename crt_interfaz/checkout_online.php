@@ -523,7 +523,7 @@ body {
   </div>
 </div>
 
-<script src="assets/js/teatro-escape.js"></script>
+<script src="../assets/js/teatro-escape.js?v=4"></script>
 <script src="js/compra-timer.js"></script>
 <script src="js/orden-aviso.js"></script>
 <script>

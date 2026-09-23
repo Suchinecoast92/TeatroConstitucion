@@ -280,7 +280,7 @@ if ($_SESSION['usuario_rol'] !== 'admin') {
         <div data-teatro-frame data-id="contentFrame" data-name="contentFrame" data-src="rpt_reportes/index.php" data-class="admin-frame" data-title="Contenido administración"></div>
     </main>
 
-    <script src="../assets/js/teatro-frames.js"></script>
+    <script src="../assets/js/teatro-frames.js?v=4"></script>
     <script>
         let dbActual = sessionStorage.getItem('admin_db') || 'ambas';
 

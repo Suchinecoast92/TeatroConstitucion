@@ -6,8 +6,8 @@
  *   teatroClear(el)
  *   teatroAppendHtml(el, htmlYaEscapado)
  *
- * En lugar de asignar HTML crudo al DOM desde strings en cada pantalla.
- * Internamente construye nodos con Range + DocumentFragment (sin .innerHTML / DOMParser).
+ * Parsea HTML con Range.createContextualFragment usando el elemento destino
+ * como contexto (imprescindible para <tr>/<td>/<option>).
  */
 (function (w) {
   function escapeHtml(text) {
@@ -45,27 +45,65 @@
     return t;
   }
 
-  /**
-   * Convierte HTML de confianza (ya escapado en origen) a nodos.
-   * Evita .innerHTML y DOMParser.parseFromString (sinks que el SAST marca).
-   */
-  function nodesFromHtml(html) {
-    const src = html == null ? '' : String(html);
-    if (!src) return [];
-    const host = document.createElement('div');
-    const range = document.createRange();
-    range.selectNodeContents(host);
-    const frag = range.createContextualFragment(src);
-    // Quitar scripts / handlers inline por defensa en profundidad
-    frag.querySelectorAll('script').forEach((n) => n.remove());
-    frag.querySelectorAll('*').forEach((el) => {
+  function sanitizeFragment(root) {
+    if (!root || !root.querySelectorAll) return;
+    root.querySelectorAll('script').forEach((n) => n.remove());
+    root.querySelectorAll('*').forEach((el) => {
       Array.from(el.attributes).forEach((attr) => {
         if (/^on/i.test(attr.name) || (attr.name === 'href' && /^\s*javascript:/i.test(attr.value))) {
           el.removeAttribute(attr.name);
         }
       });
     });
-    return Array.from(frag.childNodes);
+  }
+
+  /** Contexto vivo del destino; si no está en el documento, usa un anfitrión temporal. */
+  function fragmentFor(el, html) {
+    const src = html == null ? '' : String(html);
+    if (!src) return document.createDocumentFragment();
+
+    const tag = (el && el.tagName) ? el.tagName.toUpperCase() : '';
+    let contextEl = el;
+    let cleanup = null;
+
+    // Elementos de tabla/listas/select necesitan estar (o aparentar estar) en un árbol válido
+    if (!el || !el.isConnected) {
+      const wrap = document.createElement('div');
+      wrap.style.display = 'none';
+      if (tag === 'TBODY' || tag === 'THEAD' || tag === 'TFOOT') {
+        const table = document.createElement('table');
+        contextEl = document.createElement(tag.toLowerCase());
+        table.appendChild(contextEl);
+        wrap.appendChild(table);
+      } else if (tag === 'TR') {
+        const table = document.createElement('table');
+        const tbody = document.createElement('tbody');
+        contextEl = document.createElement('tr');
+        tbody.appendChild(contextEl);
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+      } else if (tag === 'SELECT') {
+        contextEl = document.createElement('select');
+        wrap.appendChild(contextEl);
+      } else if (tag === 'UL' || tag === 'OL') {
+        contextEl = document.createElement(tag.toLowerCase());
+        wrap.appendChild(contextEl);
+      } else {
+        contextEl = wrap;
+      }
+      document.documentElement.appendChild(wrap);
+      cleanup = () => wrap.remove();
+    }
+
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(contextEl);
+      const frag = range.createContextualFragment(src);
+      sanitizeFragment(frag);
+      return frag;
+    } finally {
+      if (cleanup) cleanup();
+    }
   }
 
   function teatroClear(el) {
@@ -75,12 +113,14 @@
 
   function teatroSetHtml(el, html) {
     if (!el) return;
-    el.replaceChildren(...nodesFromHtml(html));
+    const frag = fragmentFor(el, html);
+    el.replaceChildren();
+    el.appendChild(frag);
   }
 
   function teatroAppendHtml(el, html) {
     if (!el) return;
-    nodesFromHtml(html).forEach((n) => el.appendChild(n));
+    el.appendChild(fragmentFor(el, html));
   }
 
   /** Copia nodos hijos de src a dest (sin serializar HTML). */

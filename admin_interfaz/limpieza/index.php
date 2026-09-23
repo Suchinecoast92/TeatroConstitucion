@@ -504,7 +504,7 @@ $conn->close();
         </div>
     </div>
 
-    <script src="../assets/js/teatro-escape.js"></script>
+    <script src="../../assets/js/teatro-escape.js?v=4"></script>
 <script>
         const checkbox1 = document.getElementById('confirmacion1');
         const checkbox2 = document.getElementById('confirmacion2');

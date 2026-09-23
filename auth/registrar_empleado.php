@@ -1088,7 +1088,7 @@ if ($res_admin->num_rows > 0) {
         </div>
     </div>
 
-    <script src="assets/js/teatro-escape.js"></script>
+    <script src="../assets/js/teatro-escape.js?v=4"></script>
 <script>
         let accionPendiente = null;
 
