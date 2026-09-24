@@ -92,7 +92,7 @@ if ($resultado && $resultado->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartelera Completa · Teatro Constitución</title>
+    <title>Cartelera · Teatro Constitución</title>
     <link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -332,32 +332,69 @@ if ($resultado && $resultado->num_rows > 0) {
 
         /* Contenido principal */
         .main-content {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 60px 20px;
+            padding: 44px 28px 64px;
+        }
+
+        .cartelera-display {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
         }
 
         .hero-section {
             text-align: center;
-            margin-bottom: 50px;
-            animation: fadeInUp 0.8s ease;
+            margin-bottom: 36px;
+            animation: fadeInUpSoft 0.8s ease;
+        }
+
+        .hero-panel {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 18px;
+            padding: 40px 42px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .hero-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
         }
 
         .hero-section h1 {
-            font-size: 3rem;
+            font-size: clamp(2.45rem, 4.2vw, 3.15rem);
             font-weight: 700;
-            margin-bottom: 15px;
+            margin: 0 0 14px;
             color: #ffffff;
-            text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
             letter-spacing: -0.03em;
         }
 
         .hero-section p {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 700px;
+            font-size: clamp(1.02rem, 1.6vw, 1.12rem);
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 720px;
             margin: 0 auto;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            line-height: 1.65;
+        }
+
+        @keyframes fadeInUpSoft {
+            from { transform: translateY(18px); }
+            to { transform: translateY(0); }
         }
 
         /* Lista de eventos */
@@ -370,13 +407,14 @@ if ($resultado && $resultado->num_rows > 0) {
 
         .evento-item {
             background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 45%, rgba(0, 0, 0, 0.28));
-            backdrop-filter: blur(22px) saturate(115%);
-            -webkit-backdrop-filter: blur(22px) saturate(115%);
+            backdrop-filter: blur(25px) saturate(160%);
+            -webkit-backdrop-filter: blur(25px) saturate(160%);
             border-radius: 20px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow:
                 0 24px 64px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.35);
                 inset 0 1px 0 rgba(255, 255, 255, 0.14);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             animation: fadeInUp 0.6s ease;
@@ -423,7 +461,7 @@ if ($resultado && $resultado->num_rows > 0) {
         }
 
         .evento-header h2 {
-            font-size: 2rem;
+            font-size: clamp(1.75rem, 3vw, 2.35rem);
             font-weight: 700;
             color: #ffffff;
             margin-bottom: 10px;
@@ -432,9 +470,9 @@ if ($resultado && $resultado->num_rows > 0) {
         }
 
         .evento-descripcion {
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.6;
-            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.88);
+            line-height: 1.7;
+            font-size: 1.02rem;
             margin-bottom: 10px;
             overflow-wrap: break-word;
             word-wrap: break-word;
@@ -442,7 +480,7 @@ if ($resultado && $resultado->num_rows > 0) {
         }
 
         .funciones-titulo {
-            font-size: 1.3rem;
+            font-size: clamp(1.25rem, 2.2vw, 1.55rem);
             font-weight: 600;
             color: #ffffff;
             margin-bottom: 15px;
@@ -568,30 +606,69 @@ if ($resultado && $resultado->num_rows > 0) {
 
         .no-eventos {
             text-align: center;
-            padding: 80px 20px;
-            background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.35));
-            backdrop-filter: blur(22px) saturate(115%);
-            -webkit-backdrop-filter: blur(22px) saturate(115%);
+            padding: 64px 28px;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.3));
+            backdrop-filter: blur(25px) saturate(160%);
+            -webkit-backdrop-filter: blur(25px) saturate(160%);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .no-eventos i {
-            font-size: 4rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 20px;
+            font-size: 3.5rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 18px;
         }
 
         .no-eventos h3 {
             color: #ffffff;
-            font-size: 1.8rem;
+            font-size: clamp(1.75rem, 3vw, 2.2rem);
+            font-weight: 700;
             margin-bottom: 10px;
         }
 
         .no-eventos p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 1.05rem;
+            max-width: 520px;
+            margin: 0 auto 22px;
+            line-height: 1.6;
+        }
+
+        .no-eventos-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .no-eventos-actions a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform .2s ease, filter .2s ease;
+        }
+
+        .no-eventos-actions a:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .no-eventos-actions .btn-primary-glass {
+            background: linear-gradient(160deg, rgba(255,255,255,.92), rgba(220,220,224,.88));
+            color: #0a0a0a;
+            box-shadow: 0 10px 28px rgba(0,0,0,.35);
+        }
+
+        .no-eventos-actions .btn-ghost-glass {
+            background: rgba(0,0,0,.35);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.28);
         }
 
         /* Animaciones */
@@ -624,11 +701,14 @@ if ($resultado && $resultado->num_rows > 0) {
             .hero-section {
                 margin-bottom: 24px;
             }
+            .hero-panel {
+                padding: 28px 20px;
+            }
             .hero-section h1 {
-                font-size: 1.75rem;
+                font-size: clamp(2.1rem, 6.5vw, 2.7rem);
             }
             .hero-section p {
-                font-size: 0.95rem;
+                font-size: 0.98rem;
             }
             .eventos-lista {
                 gap: 20px;
@@ -644,28 +724,56 @@ if ($resultado && $resultado->num_rows > 0) {
                 max-height: 420px;
             }
             .evento-header h2 {
-                font-size: 1.35rem;
+                font-size: 1.45rem;
             }
             .evento-descripcion {
-                font-size: 0.9rem;
-                max-height: 8.5em;
+                font-size: 0.95rem;
+                max-height: 6.8em;
                 overflow: hidden;
             }
             .funciones-titulo {
-                font-size: 1.05rem;
+                font-size: 1.2rem;
             }
             .funcion-item {
+                display: flex;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 10px;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+            .funcion-item:hover {
+                transform: none;
+            }
+            .funcion-fecha {
+                justify-content: center;
+                text-align: center;
+                flex-wrap: wrap;
             }
             .funcion-acciones {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-            .funcion-acciones .btn {
-                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 justify-content: center;
+                text-align: center;
+                gap: 10px;
+                margin-top: 0;
+            }
+            .boletos-disponibles-badge,
+            .badge-agotado {
+                margin-right: 0;
+            }
+            .funcion-acciones .btn,
+            .funcion-acciones .btn-comprar-glass {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: min(100%, 340px);
+                font-size: 1.05rem;
+                font-weight: 700;
+                padding: 14px 22px;
+                border-radius: 12px;
+                box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.65);
             }
             .site-footer {
                 margin-top: 40px;
@@ -680,7 +788,7 @@ if ($resultado && $resultado->num_rows > 0) {
             margin-top: 80px;
         }
         .footer-inner {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 28px 20px;
             display: grid;
@@ -705,7 +813,7 @@ if ($resultado && $resultado->num_rows > 0) {
         .social a { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #e8e8e8; text-decoration: none; transition: all .2s ease; }
         .social a:hover { color: #fff; border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
         .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding: 14px 20px; color: #aeb4ba; font-size: 0.9rem; }
-        .footer-bottom-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .footer-bottom-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .muted { color: #aeb4ba; }
 
         /* (Tema único) Se mantienen colores neutros/grises, sin cambio de fondo */
@@ -794,7 +902,7 @@ if ($resultado && $resultado->num_rows > 0) {
         <a href="index.php">Inicio</a>
         <a href="acerca.php">Acerca del teatro</a>
         <a href="contacto.php">Contacto / Reservaciones</a>
-        <a href="cartelera_cliente.php" class="cta active">Ver cartelera completa <i class="bi bi-arrow-right"></i></a>
+        <a href="cartelera_cliente.php" class="cta active">Ver cartelera <i class="bi bi-arrow-right"></i></a>
     </nav>
     <header class="site-header">
         <div class="header-inner">
@@ -809,10 +917,11 @@ if ($resultado && $resultado->num_rows > 0) {
     </header>
 
     <main class="main-content">
-        <!-- Hero Section -->
         <section class="hero-section">
-            <h1>Cartelera Completa</h1>
-            <p>Todos los eventos y funciones próximas del Teatro Constitución</p>
+            <div class="hero-panel">
+                <h1 class="cartelera-display">Cartelera</h1>
+                <p>Todos los eventos y funciones próximas del Teatro Constitución</p>
+            </div>
         </section>
 
         <!-- Lista de Eventos -->
@@ -822,6 +931,10 @@ if ($resultado && $resultado->num_rows > 0) {
                     <i class="bi bi-calendar-x"></i>
                     <h3>No hay eventos programados</h3>
                     <p>En este momento no hay funciones disponibles. Vuelve pronto para ver nuestra nueva cartelera.</p>
+                    <div class="no-eventos-actions">
+                        <a class="btn-primary-glass" href="index.php"><i class="bi bi-house"></i> Ir al inicio</a>
+                        <a class="btn-ghost-glass" href="contacto.php"><i class="bi bi-envelope"></i> Contacto</a>
+                    </div>
                 </div>
             <?php else: ?>
                 <?php foreach ($eventos as $evento): ?>

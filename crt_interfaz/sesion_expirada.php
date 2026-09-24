@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Pantalla de sesión / tiempo de compra expirado (flujo online).
  */
@@ -9,8 +9,9 @@ $inicio = 'cartelera_cliente.php';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tu sesión expiró</title>
+<title>Sesión expirada · Teatro Constitución</title>
 <link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
   :root {
     --text: #e8e8ea;
@@ -32,19 +33,28 @@ $inicio = 'cartelera_cliente.php';
       url('imagenes_teatro/TeatroNoche1.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    background-attachment: scroll;
   }
   .box {
     width: 100%;
-    max-width: 440px;
+    max-width: 460px;
     text-align: center;
     padding: 32px 28px 28px;
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.35));
-    backdrop-filter: blur(22px) saturate(115%);
-    -webkit-backdrop-filter: blur(22px) saturate(115%);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
     border-radius: 20px;
     border: 1px solid var(--stroke);
     box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent);
   }
   .icon {
     width: 56px;
@@ -70,12 +80,13 @@ $inicio = 'cartelera_cliente.php';
     margin: 0 0 8px;
     color: var(--muted);
     font-size: 1.02rem;
-    line-height: 1.5;
+    line-height: 1.55;
   }
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     margin-top: 26px;
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(220, 220, 224, 0.88));
     color: #0a0a0a !important;
@@ -97,11 +108,10 @@ $inicio = 'cartelera_cliente.php';
 </head>
 <body>
   <div class="box">
-    <div class="icon" aria-hidden="true">⏱</div>
-    <h1>Tu sesión expiró</h1>
-    <p>Lo sentimos, pero tu sesión ha terminado.</p>
-    <p>Puedes comenzar nuevamente dando clic en el siguiente botón.</p>
-    <a class="btn" href="<?= htmlspecialchars($inicio, ENT_QUOTES, 'UTF-8') ?>">Ir al Inicio</a>
+    <div class="icon" aria-hidden="true"><i class="bi bi-clock-history"></i></div>
+    <h1>Se agotó el tiempo</h1>
+    <p>Puedes volver a la cartelera y elegir de nuevo.</p>
+    <a class="btn" href="<?= htmlspecialchars($inicio, ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-calendar-event"></i> Volver a cartelera</a>
   </div>
   <script>
     try {

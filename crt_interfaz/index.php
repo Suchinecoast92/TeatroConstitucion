@@ -1195,6 +1195,47 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             text-align: center;
         }
 
+        .hero-proximos-hint {
+            margin: 14px 0 0;
+            font-size: 1.08rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .hero-scroll-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            margin-top: 16px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            background: linear-gradient(160deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+            box-shadow:
+                0 10px 28px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.35);
+            color: #fff;
+            animation: heroArrowBounce 1.6s ease-in-out infinite;
+        }
+
+        .hero-scroll-arrow i {
+            font-size: 1.55rem;
+            line-height: 1;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+        }
+
+        @keyframes heroArrowBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-scroll-arrow { animation: none; }
+        }
+
         /* Footer */
         .site-footer {
             background: rgba(10, 10, 12, 0.95);
@@ -1408,7 +1449,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
         <a href="#inicio" class="active" data-nav-home>Inicio</a>
         <a href="acerca.php">Acerca del teatro</a>
         <a href="contacto.php">Contacto / Reservaciones</a>
-        <a href="cartelera_cliente.php" class="cta">Ver cartelera completa <i class="bi bi-arrow-right"></i></a>
+        <a href="cartelera_cliente.php" class="cta">Ver cartelera <i class="bi bi-arrow-right"></i></a>
     </nav>
     <header class="site-header">
         <div class="header-inner">
@@ -1920,7 +1961,10 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                     <div class="no-eventos-msg" style="flex: 0 0 100%; margin: 40px; text-align: center; box-sizing: border-box;">
                         <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
                         <h4 style="margin-top: 15px;">No hay eventos esta semana</h4>
-                        <p>Revisa nuestros próximos eventos más abajo</p>
+                        <p class="hero-proximos-hint">Próximos eventos</p>
+                        <span class="hero-scroll-arrow" aria-hidden="true">
+                            <i class="bi bi-chevron-down"></i>
+                        </span>
                     </div>`);
                 heroCarrusel.querySelectorAll('.btn-hero-nav').forEach(b => b.style.display = 'none');
                 return;

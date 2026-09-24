@@ -7,9 +7,6 @@
     <link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -212,8 +209,7 @@
         }
 
         .contacto-display {
-            font-family: "Cormorant Garamond", Georgia, serif;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.02em;
             line-height: 1.15;
         }
@@ -253,7 +249,7 @@
 
         .hero-section h1 {
             font-size: clamp(2.35rem, 4.8vw, 3.4rem);
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 20px;
             color: #ffffff;
             text-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
@@ -639,7 +635,7 @@
         <a href="index.php">Inicio</a>
         <a href="acerca.php">Acerca del teatro</a>
         <a href="contacto.php" class="active">Contacto / Reservaciones</a>
-        <a href="cartelera_cliente.php" class="cta">Ver cartelera completa <i class="bi bi-arrow-right"></i></a>
+        <a href="cartelera_cliente.php" class="cta">Ver cartelera <i class="bi bi-arrow-right"></i></a>
     </nav>
     <header class="site-header">
         <div class="header-inner">

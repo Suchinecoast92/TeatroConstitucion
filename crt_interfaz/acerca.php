@@ -7,9 +7,6 @@
     <link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -332,10 +329,16 @@
             max-width: 100%;
         }
 
-        .hero-section .featured-section h1 {
-            font-size: 1.85rem;
+        .hero-section .featured-section h1,
+        .hero-section .acerca-lead h1 {
+            font-size: clamp(2.45rem, 4.2vw, 3.15rem);
+            font-weight: 700;
+            font-style: normal;
+            letter-spacing: -0.02em;
             text-align: center;
-            margin-bottom: 14px;
+            margin: 0 0 24px;
+            color: #fff;
+            text-shadow: 0 6px 28px rgba(0,0,0,.5);
         }
 
         .hero-section .featured-section p {
@@ -454,9 +457,8 @@
         }
 
         .valor-slide h3 {
-            font-family: "Cormorant Garamond", Georgia, serif;
             font-size: clamp(1.45rem, 2.8vw, 1.85rem);
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 12px;
         }
 
@@ -537,8 +539,7 @@
 
         /* —— Rediseño visual Acerca (fotos reales) —— */
         .acerca-display {
-            font-family: "Cormorant Garamond", Georgia, serif;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.02em;
             line-height: 1.15;
         }
@@ -552,15 +553,18 @@
         }
 
         .acerca-lead h1 {
-            font-size: clamp(2.35rem, 4.8vw, 3.4rem);
-            margin: 0 0 26px;
+            font-size: clamp(2.45rem, 4.2vw, 3.15rem);
+            font-weight: 700;
+            font-style: normal;
+            letter-spacing: -0.02em;
+            margin: 0 0 24px;
             color: #fff;
             text-shadow: 0 6px 28px rgba(0,0,0,.5);
         }
 
         .acerca-lead p {
             color: #e4e7eb;
-            font-size: clamp(1.05rem, 1.7vw, 1.18rem);
+            font-size: clamp(1.12rem, 2vw, 1.32rem);
             line-height: 1.85;
             margin: 0 0 18px;
             text-align: left;
@@ -711,10 +715,10 @@
                 min-height: 200px;
             }
             .acerca-lead h1 {
-                font-size: 1.85rem;
+                font-size: clamp(2.1rem, 6.5vw, 2.7rem);
             }
             .acerca-lead p {
-                font-size: 0.95rem;
+                font-size: 1.05rem;
             }
         }
 
@@ -897,8 +901,9 @@
             .hero-section h1 {
                 font-size: 1.55rem;
             }
-            .hero-section .featured-section h1 {
-                font-size: 1.45rem;
+            .hero-section .featured-section h1,
+            .hero-section .acerca-lead h1 {
+                font-size: clamp(2.1rem, 6.5vw, 2.7rem);
             }
             .featured-section,
             .location-section {
@@ -975,7 +980,8 @@
             .hero-section { margin-bottom: 12px; }
             .hero-section h1 { font-size: 1.3rem; margin-bottom: 6px; }
             .hero-section p { font-size: 0.85rem; line-height: 1.4; }
-            .hero-section .featured-section h1 { font-size: 1.25rem; }
+            .hero-section .featured-section h1,
+            .hero-section .acerca-lead h1 { font-size: clamp(2rem, 4.5vw, 2.55rem); }
             .featured-section,
             .location-section,
             .info-card { padding: 14px 16px; }
@@ -993,7 +999,7 @@
         <a href="index.php">Inicio</a>
         <a href="acerca.php" class="active">Acerca del teatro</a>
         <a href="contacto.php">Contacto / Reservaciones</a>
-        <a href="cartelera_cliente.php" class="cta">Ver cartelera completa <i class="bi bi-arrow-right"></i></a>
+        <a href="cartelera_cliente.php" class="cta">Ver cartelera <i class="bi bi-arrow-right"></i></a>
     </nav>
     <header class="site-header">
         <div class="header-inner">

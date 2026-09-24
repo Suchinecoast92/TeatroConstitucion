@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Consulta de orden online por código público + boletos/QR si ya se emitieron.
  */
@@ -18,6 +18,17 @@ if ($appRoot === '/' || $appRoot === '\\') {
 
 function h($s) {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
+}
+
+function estado_orden_label($estado) {
+    $map = [
+        'pendiente' => 'En confirmación',
+        'pagada' => 'Pago confirmado',
+        'fallida' => 'Pago no completado',
+        'reembolsada' => 'Reembolsada',
+    ];
+    $e = (string) $estado;
+    return $map[$e] ?? 'En proceso';
 }
 
 $boletos = [];
@@ -363,7 +374,11 @@ button.codigo-mono {
   </div>
 
   <?php if (!$orden): ?>
-    <div class="alert alert-warning mb-0">Orden no encontrada.</div>
+    <div class="card-dark" style="text-align:center;padding:28px 22px">
+      <h1 style="font-size:1.35rem;margin:0 0 10px">Orden no encontrada</h1>
+      <p style="color:#a1a1aa;margin:0 0 18px;line-height:1.5">Revisa el número de orden o vuelve a la cartelera para comprar de nuevo.</p>
+      <a href="cartelera_cliente.php" class="btn-back-cartelera" style="display:inline-flex">← Cartelera</a>
+    </div>
   <?php else: ?>
 
     <?php if ($pagadaConBoletos): ?>
@@ -398,7 +413,7 @@ button.codigo-mono {
           <h1>Orden <?= h($orden['codigo_publico']) ?></h1>
           <p class="evt"><?= h($tituloEvt) ?></p>
           <div class="orden-meta">
-            <span>Estado: <strong><?= h($orden['estado']) ?></strong></span>
+            <span>Estado: <strong><?= h(estado_orden_label($orden['estado'])) ?></strong></span>
             <span>Total: <strong>$<?= number_format((float) $orden['total'], 2) ?></strong></span>
             <span>Cliente: <?= h($orden['nombre']) ?> · <?= h($orden['email']) ?></span>
           </div>
@@ -458,7 +473,7 @@ button.codigo-mono {
           <h1>Orden <?= h($orden['codigo_publico']) ?></h1>
           <p class="evt"><?= h($tituloEvt) ?></p>
           <div class="orden-meta">
-            <span>Estado: <strong><?= h($orden['estado']) ?></strong></span>
+            <span>Estado: <strong><?= h(estado_orden_label($orden['estado'])) ?></strong></span>
             <span>Total: <strong>$<?= number_format((float) $orden['total'], 2) ?></strong></span>
             <span>Cliente: <?= h($orden['nombre']) ?> · <?= h($orden['email']) ?></span>
           </div>
@@ -487,7 +502,7 @@ button.codigo-mono {
           <?php if ($esperaPago): ?>
             <div class="alert-glass warn soft">Si ya iniciaste el pago en Mercado Pago, no cierres esa ventana. Tus asientos se mantienen mientras el cobro está en curso.</div>
           <?php endif; ?>
-          <div class="alert-glass soft">Pago pendiente. Si ya pagaste, espera la confirmación del servidor o vuelve desde Mercado Pago. Conserva tu número de orden por si necesitas aclaración en taquilla.</div>
+          <div class="alert-glass soft">Tu pago está en confirmación. Si ya pagaste, espera un momento o vuelve desde Mercado Pago. Conserva tu número de orden por si necesitas aclaración en taquilla.</div>
         <?php elseif ($orden['estado'] === 'pagada'): ?>
           <div class="alert-glass warn soft">Pago confirmado. Los boletos se están generando; recarga en unos segundos. Si no aparecen, presenta tu número de orden en taquilla.</div>
         <?php elseif ($orden['estado'] === 'fallida'): ?>
