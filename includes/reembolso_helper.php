@@ -117,11 +117,21 @@ function admin_detalle_orden(mysqli $conn, string $codigo): ?array
     $itemsTotal = count($orden['items']);
     $conBol = count(array_filter($orden['items'], static fn($i) => !empty($i['id_boleto'])));
 
+    $correo = null;
+    try {
+        require_once __DIR__ . '/correo/CorreoService.php';
+        $correo = correo_estado_notificacion($conn, $idOrden);
+    } catch (Throwable $e) {
+        error_log('[reembolso_helper] estado de correo: ' . $e->getMessage());
+    }
+
     return [
         'orden' => $orden,
         'titulo_evento' => $evt['titulo'] ?? '',
         'pagos' => $pagos,
         'boletos' => $boletos,
+        'correo' => $correo,
+        'correo_modo' => function_exists('correo_modo') ? correo_modo() : 'off',
         'alerta_sin_boletos' => ($orden['estado'] === 'pagada' && $itemsTotal > 0 && $conBol < $itemsTotal),
         'puede_reembolsar' => $orden['estado'] === 'pagada',
     ];

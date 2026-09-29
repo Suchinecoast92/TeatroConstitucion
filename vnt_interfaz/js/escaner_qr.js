@@ -512,10 +512,16 @@ function mostrarInfoBoleto(boleto, modo) {
     const body = document.getElementById('boletoInfoBody');
     const footer = document.getElementById('boletoInfoFooter');
 
+    const fueraDeHorario = modo !== 'cancelar' && boleto.estatus == 1
+        && boleto.entrada && boleto.entrada.permitida === false;
+
     // Configurar header según el modo y estado
     if (modo === 'cancelar') {
         header.className = 'modal-header bg-danger text-white';
         teatroSetHtml(title, '<i class="bi bi-x-circle"></i> Cancelar Boleto');
+    } else if (fueraDeHorario) {
+        header.className = 'modal-header bg-warning text-dark';
+        teatroSetHtml(title, '<i class="bi bi-exclamation-triangle"></i> Boleto de otra función');
     } else if (boleto.estatus == 1) {
         header.className = 'modal-header bg-success text-white';
         teatroSetHtml(title, '<i class="bi bi-check-circle"></i> Boleto Válido');
@@ -535,7 +541,12 @@ function mostrarInfoBoleto(boleto, modo) {
         ? parseFloat(boleto.precio_final).toFixed(2)
         : '0.00';
 
+    const avisoHtml = fueraDeHorario
+        ? `<div class="alert alert-warning fw-semibold"><i class="bi bi-exclamation-triangle"></i> ${escapeHtml(boleto.entrada.mensaje)}</div>`
+        : '';
+
     teatroSetHtml(body, `
+        ${avisoHtml}
         <div class="text-center mb-3">
             <img src="../boletos_qr/${encodeURIComponent(codigoSafe)}.png" 
                  alt="QR" 
@@ -601,7 +612,12 @@ function mostrarInfoBoleto(boleto, modo) {
     } else {
         // Modo verificar
         if (boleto.estatus == 1) {
-            teatroSetHtml(footer, `
+            teatroSetHtml(footer, fueraDeHorario ? `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No dejar pasar</button>
+                <button type="button" class="btn btn-outline-warning" data-accion="entrada" data-codigo="${escapeAttr(codigoSafe)}">
+                    <i class="bi bi-exclamation-triangle"></i> Dejar pasar de todos modos
+                </button>
+            ` : `
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-success" data-accion="entrada" data-codigo="${escapeAttr(codigoSafe)}">
                     <i class="bi bi-check-circle"></i> Confirmar Entrada
@@ -609,7 +625,7 @@ function mostrarInfoBoleto(boleto, modo) {
             `);
             const btnEntrada = footer.querySelector('[data-accion="entrada"]');
             if (btnEntrada) {
-                btnEntrada.addEventListener('click', () => confirmarEntrada(btnEntrada.dataset.codigo));
+                btnEntrada.addEventListener('click', () => confirmarEntrada(btnEntrada.dataset.codigo, fueraDeHorario));
             }
         } else {
             teatroSetHtml(footer, `
@@ -659,10 +675,12 @@ function mostrarError(mensaje) {
 }
 
 // Confirmar entrada
-async function confirmarEntrada(codigoUnico) {
+async function confirmarEntrada(codigoUnico, forzar = false) {
     const confirmar = await mostrarConfirmacion(
-        '¿Confirmar entrada?',
-        'Esta acción marcará el boleto como usado.'
+        forzar ? '¿Dejar pasar con un boleto de otra función?' : '¿Confirmar entrada?',
+        forzar
+            ? 'El boleto no corresponde a una función en curso. Quedará registrado que se autorizó la entrada.'
+            : 'Esta acción marcará el boleto como usado.'
     );
 
     if (!confirmar) return;
@@ -675,11 +693,17 @@ async function confirmarEntrada(codigoUnico) {
                 : { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 codigo_unico: codigoUnico,
+                forzar: forzar,
                 csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
             })
         });
 
         const data = await response.json();
+
+        if (!data.success && data.requiere_confirmacion && !forzar) {
+            notify.warning(data.message);
+            return confirmarEntrada(codigoUnico, true);
+        }
 
         if (data.success) {
             modalBoletoInfo.hide();

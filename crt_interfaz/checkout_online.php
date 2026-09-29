@@ -498,6 +498,11 @@ body {
         </div>
         <?php endif; ?>
 
+        <p class="small text-muted mb-2">
+          Al pagar aceptas los <a href="terminos.php" target="_blank" rel="noopener" class="link-light">Términos y condiciones</a>
+          (incluida la <a href="terminos.php#reembolsos" target="_blank" rel="noopener" class="link-light">política de reembolsos</a>)
+          y el <a href="privacidad.php" target="_blank" rel="noopener" class="link-light">Aviso de privacidad</a>.
+        </p>
         <button type="submit" class="btn-pagar" id="btnPagar">
           Pagar
         </button>

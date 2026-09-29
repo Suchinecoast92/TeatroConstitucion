@@ -1536,6 +1536,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
                     <li><a href="#inicio">Inicio</a></li>
                     <li><a href="acerca.php">Acerca del teatro</a></li>
                     <li><a href="contacto.php">Contacto / Reservaciones</a></li>
+                    <li><a href="mi_pedido.php">Mi pedido</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -1558,7 +1559,7 @@ $eventos_movil = array_merge($eventos_esta_semana, $eventos_proximos);
             <div class="footer-bottom-inner">
                 <div> Teatro Constitución · Apatzingan. Todos los derechos reservados.</div>
                 <div class="muted">
-                    <a href="terminos.php" style="color: inherit; text-decoration: none;">Términos · Privacidad</a>
+                    <a href="terminos.php" style="color: inherit; text-decoration: none;">Términos</a> · <a href="privacidad.php" style="color: inherit; text-decoration: none;">Aviso de privacidad</a>
                 </div>
             </div>
         </div>

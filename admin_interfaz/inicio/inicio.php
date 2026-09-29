@@ -4,6 +4,8 @@
  * Soporta datos actuales (trt_25), históricos (trt_historico_evento), o ambos
  */
 
+require_once __DIR__ . '/../../includes/auth_guard.php';
+teatro_require_panel_admin();
 include "../../evt_interfaz/conexion.php";
 
 // Detectar qué base de datos usar

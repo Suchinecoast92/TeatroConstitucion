@@ -95,7 +95,9 @@ function boletos_para_descarga(mysqli $conn, string $codigoBoleto, string $codig
 
 function ticket_font_path(): ?string
 {
+    // La fuente del repositorio va primero: el buildpack PHP de DigitalOcean no trae fuentes TTF
     $candidates = [
+        dirname(__DIR__) . '/assets/fonts/DejaVuSans.ttf',
         'C:/Windows/Fonts/arial.ttf',
         'C:/Windows/Fonts/segoeui.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
@@ -169,7 +171,7 @@ function generar_png_boleto(array $b): ?string
     imagefilledrectangle($im, 36, 36, $W - 36, $H - 36, $card);
     imagerectangle($im, 36, 36, $W - 36, $H - 36, $line);
 
-    ticket_draw_text($im, 18, (int) ($W / 2), 78, 'Teatro Constitucion', $muted, 'center');
+    ticket_draw_text($im, 18, (int) ($W / 2), 78, 'Teatro Constitución', $muted, 'center');
     ticket_draw_text($im, 26, (int) ($W / 2), 120, 'BOLETO DE ENTRADA', $white, 'center');
 
     $titulo = mb_substr($b['titulo'], 0, 42, 'UTF-8');
@@ -188,7 +190,7 @@ function generar_png_boleto(array $b): ?string
     imageline($im, 80, 235, $W - 80, 235, $line);
 
     ticket_draw_text($im, 20, (int) ($W / 2), 280, 'Asiento ' . $b['codigo_asiento'], $white, 'center');
-    $tipoPrecio = $b['tipo_boleto'] . ' · $' . number_format((float) $b['precio_final'], 2);
+    $tipoPrecio = (ETIQUETAS_TIPO_BOLETO[$b['tipo_boleto']] ?? $b['tipo_boleto']) . ' · $' . number_format((float) $b['precio_final'], 2);
     ticket_draw_text($im, 16, (int) ($W / 2), 315, $tipoPrecio, $muted, 'center');
 
     $qrSize = 360;

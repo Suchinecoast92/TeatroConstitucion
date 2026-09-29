@@ -52,7 +52,7 @@ if (isset($_POST['accion']) && $_POST['accion'] === 'borrar_permanente') {
         $conn_hist_select = $conn;
         $conn_hist_select->query("USE trt_historico_evento");
         @respaldarEvento($conn_hist_select, $id, 'local');
-        $rs = $conn_hist_select->query("SELECT id_boleto FROM boletos WHERE id_evento = $id AND estatus IN (1,2)");
+        $rs = $conn_hist_select->query("SELECT id_boleto FROM boletos WHERE id_evento = $id AND estatus IN (0,1,2)");
         if ($rs) {
             while ($r = $rs->fetch_assoc()) {
                 @respaldarBoleto($conn_hist_select, (int)$r['id_boleto'], 'local');

@@ -261,11 +261,15 @@ function emitir_boletos_orden_pagada(mysqli $conn, int $idOrden): array
                 }
                 throw new RuntimeException("Asiento $codigoAsiento ya vendido");
             }
+            if ($exist && (int) $exist['estatus'] !== 2) {
+                // Boleto ya usado en la entrada: la persona está sentada
+                throw new RuntimeException("Asiento $codigoAsiento ya vendido");
+            }
 
             $codigoUnico = strtoupper(bin2hex(random_bytes(8)));
 
             if ($exist) {
-                // Reutilizar cancelado/usado
+                // Reutilizar cancelado
                 $idBoleto = (int) $exist['id_boleto'];
                 if ($idPromo) {
                     $up = $conn->prepare('
@@ -425,6 +429,13 @@ function emitir_boletos_orden_pagada(mysqli $conn, int $idOrden): array
     // Si quedó pagada a medias (algún item sin boleto), proteger esos asientos
     if (!emision_orden_completa($conn, $idOrden)) {
         proteger_asientos_orden_sin_boleto($conn, $idOrden, 86400);
+    } elseif ($emitidos > 0) {
+        try {
+            require_once __DIR__ . '/correo/CorreoService.php';
+            correo_programar_confirmacion($idOrden);
+        } catch (Throwable $e) {
+            error_log('[emision] no se pudo programar correo de orden ' . $idOrden . ': ' . $e->getMessage());
+        }
     }
 
     return [

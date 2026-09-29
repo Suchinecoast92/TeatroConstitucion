@@ -1,7 +1,10 @@
-    <?php
+<?php
     // imprimir_directo.php
     // Devuelve datos JSON para impresión con QZ Tray
     // Usa el esquema correcto: boletos, asientos, evento, funciones, categorias
+
+    require_once __DIR__ . '/../includes/auth_guard.php';
+    teatro_require_login(true);
 
     require_once __DIR__ . '/vendor/autoload.php';
     require_once __DIR__ . '/../conexion.php'; // Usar la conexión existente en lugar de Database class si es posible, o adaptar.

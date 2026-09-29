@@ -13,6 +13,9 @@ while (ob_get_level()) {
 error_reporting(0);
 ini_set('display_errors', 0);
 
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login();
+
 // Cargar dependencias
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/../conexion.php';

@@ -43,6 +43,7 @@ $pasos = [
     ['migracion_pagos.sql', $main, fn() => $hayTabla($main, 'pagos')],
     ['migracion_origen_boletos.sql', $main, fn() => $hayColumna($main, 'boletos', 'origen')],
     ['migracion_evento_imagenes.sql', $main, fn() => $hayTabla($main, 'evento_imagenes')],
+    ['migracion_orden_notificaciones.sql', $main, fn() => $hayTabla($main, 'orden_notificaciones')],
     ['migracion_origen_boletos_historico.sql', $hist, fn() => $hayColumna($hist, 'boletos', 'origen')],
 ];
 

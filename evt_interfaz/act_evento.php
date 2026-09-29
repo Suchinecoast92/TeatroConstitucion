@@ -83,7 +83,7 @@ function archivar_evento_completo($id, $conn)
     if (file_exists(__DIR__ . '/../sync/backup_helper.php')) {
         require_once __DIR__ . '/../sync/backup_helper.php';
         @respaldarEvento($conn, $id, 'local');
-        $rs = $conn->query("SELECT id_boleto FROM boletos WHERE id_evento = $id AND estatus IN (1,2)");
+        $rs = $conn->query("SELECT id_boleto FROM boletos WHERE id_evento = $id AND estatus IN (0,1,2)");
         if ($rs) {
             while ($r = $rs->fetch_assoc()) {
                 @respaldarBoleto($conn, (int)$r['id_boleto'], 'local');
@@ -156,6 +156,12 @@ if (isset($_POST['accion'])) {
                 throw new Exception("Contraseña incorrecta.");
             }
             $stmt->close();
+
+            require_once __DIR__ . '/../includes/ordenes_helper.php';
+            $bloqueos = ordenes_bloqueos_archivar($conn, $id);
+            if ($bloqueos) {
+                throw new Exception('No se puede archivar todavía. ' . implode(' ', $bloqueos));
+            }
 
             archivar_evento_completo($id, $conn);
 

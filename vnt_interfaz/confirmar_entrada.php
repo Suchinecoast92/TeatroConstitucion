@@ -46,38 +46,13 @@ try {
         throw new Exception("Código vacío");
     }
     
-    // Actualizar el estatus del boleto a 0 (usado)
-    $stmt = $conn->prepare("
-        UPDATE boletos 
-        SET estatus = 0 
-        WHERE codigo_unico = ? AND estatus = 1
-    ");
-    
-    if (!$stmt) {
-        throw new Exception("Error al preparar consulta: " . $conn->error);
-    }
-    
-    $stmt->bind_param("s", $codigo_unico);
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
-    }
-    
-    if ($stmt->affected_rows > 0) {
-        ob_clean();
-        echo json_encode([
-            'success' => true,
-            'message' => 'Entrada confirmada exitosamente'
-        ], JSON_UNESCAPED_UNICODE);
-    } else {
-        ob_clean();
-        echo json_encode([
-            'success' => false,
-            'message' => 'El boleto ya fue usado o no existe'
-        ], JSON_UNESCAPED_UNICODE);
-    }
-    
-    $stmt->close();
+    require_once __DIR__ . '/../includes/entrada_helper.php';
+    $forzar = !empty($data['forzar']);
+    $idUsuario = isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : null;
+    $resultado = entrada_confirmar($conn, $codigo_unico, $forzar, $idUsuario);
+
+    ob_clean();
+    echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
     $conn->close();
     
 } catch (Exception $e) {

@@ -1,5 +1,7 @@
 <?php
 // Endpoint para obtener funciones disponibles en tiempo real
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login(true);
 header('Content-Type: application/json');
 
 include "../conexion.php";

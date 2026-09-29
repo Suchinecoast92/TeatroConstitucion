@@ -30,6 +30,16 @@
 
     const API_BASE = getAppRoot() + '/api/reservas.php';
 
+    function csrfToken() {
+        if (typeof window.teatroCsrfToken === 'function') return window.teatroCsrfToken();
+        const m = document.querySelector('meta[name="csrf-token"]');
+        return m ? m.getAttribute('content') : '';
+    }
+
+    function jsonHeaders() {
+        return { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken() };
+    }
+
 
 
     function genSessionId() {
@@ -78,9 +88,11 @@
 
             method: 'POST',
 
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonHeaders(),
 
             body: JSON.stringify({
+
+                csrf_token: csrfToken(),
 
                 session_id: SESSION_ID,
 
@@ -110,6 +122,8 @@
 
         const body = JSON.stringify({
 
+            csrf_token: csrfToken(),
+
             session_id: SESSION_ID,
 
             id_evento: idEvento,
@@ -126,7 +140,7 @@
 
                 method: 'POST',
 
-                headers: { 'Content-Type': 'application/json' },
+                headers: jsonHeaders(),
 
                 body,
 
@@ -150,7 +164,7 @@
 
             const url = API_BASE + '?action=liberar_sesion';
 
-            const payload = JSON.stringify({ session_id: SESSION_ID });
+            const payload = JSON.stringify({ session_id: SESSION_ID, csrf_token: csrfToken() });
 
             if (navigator.sendBeacon) {
 
@@ -166,7 +180,7 @@
 
                     keepalive: true,
 
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: jsonHeaders(),
 
                 });
 
@@ -434,9 +448,9 @@
 
             method: 'POST',
 
-            headers: { 'Content-Type': 'application/json' },
+            headers: jsonHeaders(),
 
-            body: JSON.stringify({ session_id: SESSION_ID }),
+            body: JSON.stringify({ session_id: SESSION_ID, csrf_token: csrfToken() }),
 
         }).catch(() => {});
 

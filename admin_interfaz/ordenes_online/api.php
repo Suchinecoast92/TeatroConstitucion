@@ -1,7 +1,7 @@
 <?php
 /**
  * API admin: órdenes online / reembolsos.
- * Acciones: listar | detalle | reembolsar | reemitir
+ * Acciones: listar | detalle | reembolsar | reemitir | reenviar_correo
  */
 session_start();
 header('Content-Type: application/json; charset=utf-8');
@@ -29,7 +29,7 @@ if (!is_array($input)) {
     $input = [];
 }
 
-if (in_array($action, ['reembolsar', 'reemitir'], true)) {
+if (in_array($action, ['reembolsar', 'reemitir', 'reenviar_correo'], true)) {
     $tok = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($input['csrf_token'] ?? '');
     if (!teatro_csrf_validate(is_string($tok) ? $tok : '')) {
         http_response_code(403);
@@ -95,6 +95,29 @@ try {
         }
         $emi = emitir_boletos_orden_pagada($conn, (int) $orden['id_orden']);
         echo json_encode($emi, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($action === 'reenviar_correo') {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'error' => 'POST requerido']);
+            exit;
+        }
+        require_once dirname(__DIR__, 2) . '/includes/correo/CorreoService.php';
+        $codigo = trim((string) ($input['codigo'] ?? ''));
+        $orden = obtenerOrdenPorCodigo($conn, $codigo);
+        if (!$orden) {
+            echo json_encode(['success' => false, 'error' => 'No encontrada']);
+            exit;
+        }
+        $r = correo_enviar_confirmacion_orden($conn, (int) $orden['id_orden'], true);
+        echo json_encode([
+            'success' => $r['ok'],
+            'estado' => $r['estado'],
+            'modo' => correo_modo(),
+            'error' => $r['error'] ?? null,
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 

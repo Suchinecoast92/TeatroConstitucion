@@ -1,6 +1,8 @@
 <?php
 // 1. CONEXIÓN
 session_start();
+require_once __DIR__ . '/../../includes/auth_guard.php';
+teatro_require_panel_admin();
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../conexion.php';
 require_once __DIR__ . '/../../includes/catalogo_boletos_helper.php';

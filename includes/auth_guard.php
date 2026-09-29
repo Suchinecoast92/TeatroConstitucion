@@ -58,6 +58,26 @@ function teatro_require_admin(bool $asJson = false): void
 }
 
 /**
+ * Misma regla que admin_interfaz/index.php: rol admin, o empleado al que un admin
+ * autorizó en esta sesión (admin_verificado).
+ */
+function teatro_require_panel_admin(bool $asJson = false): void
+{
+    teatro_require_login($asJson);
+    if (($_SESSION['usuario_rol'] ?? '') === 'admin' || !empty($_SESSION['admin_verificado'])) {
+        return;
+    }
+    if ($asJson) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'ok' => false, 'error' => 'Requiere verificación de administrador'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    http_response_code(403);
+    die('Requiere verificación de administrador');
+}
+
+/**
  * Bloquea ejecución vía HTTP (scripts de mantenimiento / debug).
  */
 function teatro_require_cli(): void

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../includes/auth_guard.php';
+teatro_require_panel_admin(true);
 require_once '../../evt_interfaz/conexion.php';
 header('Content-Type: application/json');
 

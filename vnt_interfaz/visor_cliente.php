@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login();
 include "../conexion.php";
 require_once __DIR__ . '/../config/ventas.php';
 require_once __DIR__ . '/../includes/catalogo_boletos_helper.php';

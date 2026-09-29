@@ -91,6 +91,10 @@ Ver `DOMINIOS_PRODUCCION.md`. Recomendado: agregar `www`, `gestion` y `api` en A
 
 Ver `PAGOS.md`. En staging: credenciales de prueba y webhook de prueba apuntando a staging.
 
+### 5. Correo de confirmación
+
+Ver `CORREO.md`. `app.yaml` lo deja en `MAIL_MODE=off` hasta tener proveedor SMTP con el dominio verificado (SPF/DKIM). DigitalOcean suele bloquear la salida por 25/465/587: usar el puerto 2525 del proveedor.
+
 ## Llave de QZ Tray (rotada)
 
 La llave anterior estuvo versionada desde el primer commit y su certificado estaba truncado (inválido). Se rotó:

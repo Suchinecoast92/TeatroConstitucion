@@ -50,14 +50,16 @@ try {
         $stmt = $conn->prepare("SELECT b.id_boleto, b.estatus, b.id_evento, b.id_funcion, a.codigo_asiento 
                                FROM boletos b 
                                LEFT JOIN asientos a ON b.id_asiento = a.id_asiento 
-                               WHERE b.codigo_unico = ?");
+                               WHERE b.codigo_unico = ?
+                               FOR UPDATE");
         $stmt->bind_param("s", $codigo_unico);
     } else {
         // Buscar por ID
         $stmt = $conn->prepare("SELECT b.id_boleto, b.estatus, b.id_evento, b.id_funcion, a.codigo_asiento 
                                FROM boletos b 
                                LEFT JOIN asientos a ON b.id_asiento = a.id_asiento 
-                               WHERE b.id_boleto = ?");
+                               WHERE b.id_boleto = ?
+                               FOR UPDATE");
         $stmt->bind_param("i", $id_boleto);
     }
     
@@ -80,9 +82,23 @@ try {
     }
     
     $stmt->close();
+
+    // Boletos de venta online: cancelar aquí dejaría la orden "pagada" sin devolver el dinero.
+    // Se cancelan desde Admin → Órdenes online, que reembolsa en la pasarela y cancela los boletos.
+    $rt = $conn->query("SHOW TABLES LIKE 'orden_items'");
+    if ($rt && $rt->num_rows > 0) {
+        $so = $conn->prepare("SELECT o.codigo_publico FROM orden_items oi INNER JOIN ordenes o ON o.id_orden = oi.id_orden WHERE oi.id_boleto = ? LIMIT 1");
+        $so->bind_param("i", $id_boleto);
+        $so->execute();
+        $ordenOnline = $so->get_result()->fetch_assoc();
+        $so->close();
+        if ($ordenOnline) {
+            throw new Exception('Este boleto se compró en línea (orden ' . $ordenOnline['codigo_publico'] . '). Cancélalo desde Administración → Órdenes online para que se reembolse el pago.');
+        }
+    }
     
     // Actualizar el estado del boleto a 2 (cancelado)
-    $stmt = $conn->prepare("UPDATE boletos SET estatus = 2 WHERE id_boleto = ?");
+    $stmt = $conn->prepare("UPDATE boletos SET estatus = 2 WHERE id_boleto = ? AND estatus = 1");
     $stmt->bind_param("i", $id_boleto);
     
     if (!$stmt->execute()) {

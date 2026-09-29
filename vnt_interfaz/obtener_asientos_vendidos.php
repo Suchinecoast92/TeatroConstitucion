@@ -4,6 +4,8 @@
  * Mantiene compatibilidad: `asientos` = solo vendidos (estatus=1).
  * Campos nuevos: vendidos, reservados, ocupados.
  */
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login(true);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../conexion.php';

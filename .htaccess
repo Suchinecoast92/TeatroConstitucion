@@ -14,8 +14,9 @@ RedirectMatch 403 (?i)/\.(git|env)(/|$)
 
 # Scripts de mantenimiento / debug (solo CLI)
 RedirectMatch 403 (?i)/(seed_test_data|debug_columns|debug_occupancy|check_status|check_databases|test_stats|fix_schema|fix_funciones|fix_boletos_index|inspect_db|sync_historico_schema)\.php$
-RedirectMatch 403 (?i)/evt_interfaz/(fix_historico|setup_historico|debug_schema)\.php$
-RedirectMatch 403 (?i)/vnt_interfaz/verificar_tipo_boleto\.php$
+RedirectMatch 403 (?i)/evt_interfaz/(fix_historico|setup_historico|debug_schema|show_boletos)\.php$
+RedirectMatch 403 (?i)/admin_interfaz/transacciones/diagnostic_check\.php$
+RedirectMatch 403 (?i)/vnt_interfaz/(verificar_tipo_boleto|conexion_api|ticket_precio_helper|logoticket)\.php$
 RedirectMatch 403 (?i)/sql/truncar_datos\.php$
 RedirectMatch 403 (?i)/auth/(secret_login|migrar_contrasenas)\.php$
 

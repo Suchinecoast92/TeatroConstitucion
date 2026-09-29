@@ -66,6 +66,23 @@ services:
         value: <public-key>
       - key: QZ_PRIVATE_KEY
         type: SECRET
+      # Correo: off hasta configurar el proveedor SMTP (ver docs/CORREO.md).
+      - key: MAIL_MODE
+        value: "off"
+      - key: MAIL_FROM
+        value: boletos@<dominio>
+      - key: MAIL_FROM_NAME
+        value: Teatro Constitución
+      - key: MAIL_HOST
+        value: <smtp-proveedor>
+      - key: MAIL_PORT
+        value: "2525"
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_USER
+        value: <usuario-smtp>
+      - key: MAIL_PASS
+        type: SECRET
 
 databases:
   - name: db

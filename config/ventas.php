@@ -11,6 +11,10 @@ define('VENTAS_CONFIG_INCLUDED', true);
 /** Horas después de la función en que aún se permite vender */
 define('HORAS_CIERRE_VENTAS_POST_FUNCION', 24);
 
+/** Ventana de acceso en la puerta: desde N minutos antes hasta N minutos después del inicio de la función */
+define('ENTRADA_MINUTOS_ANTES_FUNCION', 180);
+define('ENTRADA_MINUTOS_DESPUES_FUNCION', 240);
+
 define('SEGUNDOS_CIERRE_VENTAS_POST_FUNCION', HORAS_CIERRE_VENTAS_POST_FUNCION * 3600);
 define('MS_CIERRE_VENTAS_POST_FUNCION', SEGUNDOS_CIERRE_VENTAS_POST_FUNCION * 1000);
 

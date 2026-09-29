@@ -1,9 +1,10 @@
 <?php
-// Habilitar todos los errores para depuración
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/php_errors.log');
+
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login();
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/../conexion.php';

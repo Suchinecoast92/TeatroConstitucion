@@ -1044,6 +1044,7 @@ if ($resultado && $resultado->num_rows > 0) {
                     <li><a href="index.php">Inicio</a></li>
                     <li><a href="acerca.php">Acerca del teatro</a></li>
                     <li><a href="contacto.php">Contacto / Reservaciones</a></li>
+                    <li><a href="mi_pedido.php">Mi pedido</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -1065,7 +1066,7 @@ if ($resultado && $resultado->num_rows > 0) {
         <div class="footer-bottom">
             <div class="footer-bottom-inner">
                 <div>© <?php echo date('Y'); ?> Teatro Constitución · Apatzingan. Todos los derechos reservados.</div>
-                <div class="muted"><a href="terminos.php" style="color: inherit; text-decoration: none;">Términos · Privacidad</a></div>
+                <div class="muted"><a href="terminos.php" style="color: inherit; text-decoration: none;">Términos</a> · <a href="privacidad.php" style="color: inherit; text-decoration: none;">Aviso de privacidad</a></div>
             </div>
         </div>
     </footer>

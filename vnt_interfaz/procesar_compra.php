@@ -33,6 +33,7 @@ require_once __DIR__ . '/../transacciones_helper.php';
 require_once __DIR__ . '/../api/registrar_cambio.php';
 require_once __DIR__ . '/../sync/reservas_helper.php';
 require_once __DIR__ . '/../config/ventas.php';
+require_once __DIR__ . '/../includes/precio_helper.php';
 $horasVentaAbierta = (int) HORAS_CIERRE_VENTAS_POST_FUNCION;
 
 // Obtener ID del usuario logueado
@@ -113,12 +114,20 @@ if (empty($asientos)) {
     exit;
 }
 
+// Los precios se calculan en el servidor; los del navegador solo se comparan.
+$cotizacion = calcular_cotizacion_taquilla($conn, $id_evento, $asientos);
+if (!$cotizacion['success']) {
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => $cotizacion['error']]);
+    exit;
+}
+
 // VERIFICACIÓN ATÓMICA ANTI DOBLE-VENTA
 // Bloquea las filas en `boletos` (FOR UPDATE) y verifica que ningún asiento
 // esté ya vendido en esta BD ni en la BD online, ni esté reservado por otra sesión.
 $conn->begin_transaction();
 try {
-    $codigos_chk = array_map(fn($a) => $a['asiento'], $asientos);
+    $codigos_chk = array_column($cotizacion['items'], 'codigo_asiento');
     verificarVentaAtomica(
         $conn,
         $id_evento,
@@ -137,62 +146,14 @@ try {
 try {
     $boletos_generados = [];
 
-    foreach ($asientos as $asiento_data) {
-        $codigo_asiento = $asiento_data['asiento'];
-        $categoria_id = (int) $asiento_data['categoriaId'];
-        $precio = (float) $asiento_data['precio'];
-        $descuento_aplicado = isset($asiento_data['descuento_aplicado']) ? (float) $asiento_data['descuento_aplicado'] : 0;
-        $precio_final = isset($asiento_data['precio_final']) ? (float) $asiento_data['precio_final'] : $precio;
-        $id_promocion = isset($asiento_data['id_promocion']) ? (int) $asiento_data['id_promocion'] : null;
-        $tipo_boleto = isset($asiento_data['tipo_boleto']) ? $asiento_data['tipo_boleto'] : 'adulto';
-
-        // Validar que la categoría existe y pertenece al evento
-        $stmt = $conn->prepare("SELECT id_categoria FROM categorias WHERE id_categoria = ? AND id_evento = ?");
-        $stmt->bind_param("ii", $categoria_id, $id_evento);
-        $stmt->execute();
-        $result_cat = $stmt->get_result();
-
-        if ($result_cat->num_rows === 0) {
-            // La categoría no existe o no pertenece al evento, buscar una categoría por defecto
-            $stmt->close();
-
-            // Primero intentar encontrar "General"
-            $stmt = $conn->prepare("SELECT id_categoria FROM categorias WHERE id_evento = ? AND LOWER(nombre_categoria) = 'general' LIMIT 1");
-            $stmt->bind_param("i", $id_evento);
-            $stmt->execute();
-            $result_cat = $stmt->get_result();
-
-            if ($result_cat->num_rows > 0) {
-                $row_cat = $result_cat->fetch_assoc();
-                $categoria_id = (int) $row_cat['id_categoria'];
-                $stmt->close();
-            } else {
-                // Si no hay "General", tomar la primera categoría disponible del evento
-                $stmt->close();
-                $stmt = $conn->prepare("SELECT id_categoria FROM categorias WHERE id_evento = ? ORDER BY precio ASC LIMIT 1");
-                $stmt->bind_param("i", $id_evento);
-                $stmt->execute();
-                $result_cat = $stmt->get_result();
-
-                if ($result_cat->num_rows > 0) {
-                    $row_cat = $result_cat->fetch_assoc();
-                    $categoria_id = (int) $row_cat['id_categoria'];
-                    $stmt->close();
-                } else {
-                    // No hay categorías para este evento
-                    $stmt->close();
-                    throw new Exception("El evento no tiene categorías configuradas. Por favor, configura las categorías antes de vender boletos.");
-                }
-            }
-        } else {
-            $stmt->close();
-        }
-
-        // Si es cortesía, el precio final es 0
-        if ($tipo_boleto === 'cortesia') {
-            $precio_final = 0.00;
-            $descuento_aplicado = $precio; // El descuento es el precio completo
-        }
+    foreach ($cotizacion['items'] as $item_cot) {
+        $codigo_asiento = $item_cot['codigo_asiento'];
+        $categoria_id = $item_cot['id_categoria'];
+        $precio = $item_cot['precio_base'];
+        $descuento_aplicado = $item_cot['descuento_aplicado'];
+        $precio_final = $item_cot['precio_final'];
+        $id_promocion = $item_cot['id_promocion'];
+        $tipo_boleto = $item_cot['tipo_boleto'];
 
         // Obtener o crear id_asiento de la tabla asientos
         $stmt = $conn->prepare("SELECT id_asiento FROM asientos WHERE codigo_asiento = ?");
@@ -248,15 +209,15 @@ try {
         }
         $stmt->close();
 
-        // Si existe un boleto activo (estatus = 1), no se puede vender
-        if ($boleto_existente && $boleto_existente['estatus'] == 1) {
+        // Activo (1) o ya usado en la entrada (0): el asiento está ocupado
+        if ($boleto_existente && (int) $boleto_existente['estatus'] !== 2) {
             throw new Exception("El asiento $codigo_asiento ya está vendido");
         }
 
         // Generar código único alfanumérico
         $codigo_unico = strtoupper(bin2hex(random_bytes(8)));
 
-        // Si existe un boleto cancelado (estatus = 2) o usado (estatus = 0), reutilizarlo
+        // Si existe un boleto cancelado (estatus = 2), reutilizarlo
         if ($boleto_existente) {
             // Actualizar el boleto existente
             if ($id_promocion) {

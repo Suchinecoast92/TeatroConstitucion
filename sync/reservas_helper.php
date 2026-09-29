@@ -171,7 +171,7 @@ if (!function_exists('reservarAsientos')) {
                 continue;
             }
 
-            // Verificar que no esté ya VENDIDO (solo estatus activo = 1; cancelados se pueden revender)
+            // Verificar que no esté ya VENDIDO (1 = activo, 0 = ya usado en la entrada; solo cancelados se revenden)
             $vendidoEn = null;
             foreach ($bdsBoletos as $bd) {
                 $sql = "
@@ -179,7 +179,7 @@ if (!function_exists('reservarAsientos')) {
                     INNER JOIN `$bd`.asientos a ON a.id_asiento = b.id_asiento
                     WHERE a.codigo_asiento = ?
                       AND b.id_evento = ?
-                      AND b.estatus = 1
+                      AND b.estatus IN (0, 1)
                 ";
                 if ($idFuncion) {
                     $sql .= ' AND b.id_funcion = ' . (int) $idFuncion;
@@ -444,7 +444,7 @@ if (!function_exists('verificarVentaAtomica')) {
         string $sessionId,
         string $origen
     ): void {
-        // Bloquear filas de boletos activos o cancelados (FOR UPDATE) para reventa segura
+        // Bloquear filas de boletos activos, usados o cancelados (FOR UPDATE) para reventa segura
         $placeholders = implode(',', array_fill(0, count($codigosAsientos), '?'));
         $sql = "
             SELECT a.codigo_asiento, b.estatus
@@ -453,7 +453,7 @@ if (!function_exists('verificarVentaAtomica')) {
               ON b.id_asiento = a.id_asiento
              AND b.id_evento  = ?
              AND " . ($idFuncion ? "b.id_funcion = " . (int)$idFuncion : "(b.id_funcion IS NULL OR b.id_funcion = 0)") . "
-             AND b.estatus IN (1, 2)
+             AND b.estatus IN (0, 1, 2)
             WHERE a.codigo_asiento IN ($placeholders)
             FOR UPDATE
         ";
@@ -465,8 +465,8 @@ if (!function_exists('verificarVentaAtomica')) {
         $res = $stmt->get_result();
         $vendidosLocal = [];
         while ($row = $res->fetch_assoc()) {
-            // Solo estatus 1 = vendido; estatus 2 = cancelado → disponible para revender
-            if ((int) ($row['estatus'] ?? 0) === 1) {
+            // 1 = vendido, 0 = usado (la persona ya entró): ocupados. Solo 2 = cancelado se revende.
+            if ($row['estatus'] !== null && (int) $row['estatus'] !== 2) {
                 $vendidosLocal[] = $row['codigo_asiento'];
             }
         }
@@ -544,7 +544,7 @@ if (!function_exists('obtenerDisponibilidadFuncion')) {
                 SELECT a.codigo_asiento
                 FROM boletos b
                 INNER JOIN asientos a ON b.id_asiento = a.id_asiento
-                WHERE b.id_evento = ? AND b.id_funcion = ? AND b.estatus = 1
+                WHERE b.id_evento = ? AND b.id_funcion = ? AND b.estatus IN (0, 1)
             ");
             $stmt->bind_param('ii', $idEvento, $idFuncion);
         } else {
@@ -552,7 +552,7 @@ if (!function_exists('obtenerDisponibilidadFuncion')) {
                 SELECT a.codigo_asiento
                 FROM boletos b
                 INNER JOIN asientos a ON b.id_asiento = a.id_asiento
-                WHERE b.id_evento = ? AND b.estatus = 1
+                WHERE b.id_evento = ? AND b.estatus IN (0, 1)
             ");
             $stmt->bind_param('i', $idEvento);
         }

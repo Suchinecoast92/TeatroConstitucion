@@ -3,6 +3,9 @@
  * Control de Entrada - Escáner de Boletos
  * Página compacta para validar y marcar boletos como usados
  */
+require_once __DIR__ . '/../includes/auth_guard.php';
+require_once __DIR__ . '/../includes/csrf.php';
+teatro_require_login();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -277,6 +280,7 @@
         .result-header.valid { background: var(--success-gradient); }
         .result-header.used { background: rgba(71, 85, 105, 0.9); }
         .result-header.invalid { background: var(--danger-gradient); }
+        .result-header.otra-funcion { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
         
         .result-header i { font-size: 3.5rem; }
         .result-header h4 { margin: 12px 0 0; font-weight: 700; font-size: 1.5rem; }
@@ -426,6 +430,7 @@
             .ticket-item.full { grid-column: span 1; }
         }
     </style>
+<?php echo teatro_csrf_meta(); ?>
 </head>
 <body>
     <div class="toast-container" id="toastContainer"></div>
@@ -733,13 +738,26 @@
             const resultActions = document.getElementById('resultActions');
             
             const isValid = ticket.estatus == 1;
+            const otraFuncion = isValid && ticket.entrada && ticket.entrada.permitida === false;
             
-            resultHeader.className = 'result-header ' + (isValid ? 'valid' : 'used');
-            teatroSetHtml(resultHeader, isValid
-                ? '<i class="bi bi-check-circle-fill"></i><h4>Boleto Válido</h4>'
-                : '<i class="bi bi-exclamation-triangle-fill"></i><h4>Ya Usado</h4>');
+            if (otraFuncion) {
+                resultHeader.className = 'result-header otra-funcion';
+                teatroSetHtml(resultHeader, '<i class="bi bi-exclamation-triangle-fill"></i><h4>Otra Función</h4>');
+            } else {
+                resultHeader.className = 'result-header ' + (isValid ? 'valid' : 'used');
+                teatroSetHtml(resultHeader, isValid
+                    ? '<i class="bi bi-check-circle-fill"></i><h4>Boleto Válido</h4>'
+                    : (ticket.estatus == 2
+                        ? '<i class="bi bi-x-circle-fill"></i><h4>Cancelado</h4>'
+                        : '<i class="bi bi-exclamation-triangle-fill"></i><h4>Ya Usado</h4>'));
+            }
             
-            teatroSetHtml(ticketInfo, `
+            teatroSetHtml(ticketInfo, (otraFuncion ? `
+                <div class="ticket-item full" style="text-align: center;">
+                    <label>Aviso</label>
+                    <span style="color: #d97706;">${escapeHtml(ticket.entrada.mensaje)}</span>
+                </div>
+            ` : '') + `
                 <div class="ticket-item full">
                     <label>Código</label>
                     <span style="color: #667eea; letter-spacing: 1px;">${escapeHtml(ticket.codigo_unico)}</span>
@@ -765,12 +783,18 @@
                         <i class="bi bi-x-lg"></i> Cancelar
                     </button>
                     <button class="btn-confirm" type="button" data-accion="confirmar" data-codigo="${escapeAttr(codigoSafe)}">
-                        <i class="bi bi-check2-circle"></i> Confirmar Entrada
+                        ${otraFuncion
+                            ? '<i class="bi bi-exclamation-triangle"></i> Dejar pasar de todos modos'
+                            : '<i class="bi bi-check2-circle"></i> Confirmar Entrada'}
                     </button>
                 `);
                 resultActions.querySelector('[data-accion="cancelar"]')?.addEventListener('click', hideResult);
                 resultActions.querySelector('[data-accion="confirmar"]')?.addEventListener('click', (e) => {
-                    confirmEntry(e.currentTarget.getAttribute('data-codigo'));
+                    const codigo = e.currentTarget.getAttribute('data-codigo');
+                    if (otraFuncion && !confirm(ticket.entrada.mensaje + '\n\n¿Autorizar la entrada de todos modos? Quedará registrado.')) {
+                        return;
+                    }
+                    confirmEntry(codigo, otraFuncion);
                 });
             } else {
                 teatroSetHtml(resultActions, `
@@ -826,19 +850,30 @@
             }, 300);
         }
         
-        async function confirmEntry(codigoUnico) {
+        async function confirmEntry(codigoUnico, forzar = false) {
             const btn = document.querySelector('.btn-confirm');
             btn.disabled = true;
             teatroSetHtml(btn, '<span class="spinner-border spinner-border-sm me-2"></span> Procesando...');
             
             try {
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
                 const response = await fetch('../vnt_interfaz/confirmar_entrada.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ codigo_unico: codigoUnico })
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+                    body: JSON.stringify({ codigo_unico: codigoUnico, forzar: forzar, csrf_token: csrf })
                 });
                 
                 const data = await response.json();
+                
+                if (!data.success && data.requiere_confirmacion && !forzar) {
+                    btn.disabled = false;
+                    teatroSetHtml(btn, '<i class="bi bi-check2-circle"></i> Confirmar Entrada');
+                    if (confirm(data.message + '\n\n¿Autorizar la entrada de todos modos? Quedará registrado.')) {
+                        return confirmEntry(codigoUnico, true);
+                    }
+                    return;
+                }
                 
                 if (data.success) {
                     showToast('¡Entrada confirmada!', 'success');

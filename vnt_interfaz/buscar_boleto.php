@@ -1,10 +1,8 @@
 <?php
 // Buscar boleto por código
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login(true);
 header('Content-Type: application/json');
-
-// Log de depuración (comentar en producción)
-error_log("=== BUSCAR BOLETO ===");
-error_log("POST data: " . print_r($_POST, true));
 
 include "../conexion.php";
 

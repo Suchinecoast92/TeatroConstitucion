@@ -347,7 +347,7 @@ if (!function_exists('verificarPuedeBorrarEvento')) {
      */
     function verificarPuedeBorrarEvento($conn_local, $id_evento) {
         // Verificar boletos vendidos en BD local
-        $stmt = $conn_local->prepare("SELECT COUNT(*) as n FROM boletos WHERE id_evento = ? AND estatus IN (1,2)");
+        $stmt = $conn_local->prepare("SELECT COUNT(*) as n FROM boletos WHERE id_evento = ? AND estatus IN (0,1,2)");
         $stmt->bind_param('i', $id_evento);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();

@@ -171,6 +171,19 @@ async function ver(codigo) {
   if (r.alerta_sin_boletos) {
     actions += `<button class="btn btn-success btn-sm me-2" id="btnReemit">Reintentar emisión</button>`;
   }
+  const puedeCorreo = o.estado === 'pagada' && !r.alerta_sin_boletos && (r.boletos || []).length && r.correo_modo !== 'off';
+  if (puedeCorreo) {
+    actions += `<button class="btn btn-outline-info btn-sm me-2" id="btnCorreo">${r.correo && r.correo.estado === 'enviado' ? 'Reenviar correo' : 'Enviar correo'}</button>`;
+  }
+  const c = r.correo;
+  let correoTxt = '<span class="text-secondary">sin envío</span>';
+  if (c) {
+    correoTxt = esc(c.estado) + (c.enviado_en ? ' · ' + esc(c.enviado_en) : '')
+      + ' · intentos ' + esc(c.intentos) + (c.proveedor ? ' · ' + esc(c.proveedor) : '')
+      + (c.estado === 'fallido' && c.ultimo_error ? `<div class="text-danger small">${esc(c.ultimo_error)}</div>` : '');
+  }
+  if (r.correo_modo === 'mock') correoTxt += ' <span class="badge-e">simulado</span>';
+  if (r.correo_modo === 'off') correoTxt += ' <span class="badge-e">correo desactivado</span>';
   actions += `<a class="btn btn-outline-light btn-sm" target="_blank" href="../../crt_interfaz/orden.php?codigo=${encodeURIComponent(o.codigo_publico)}">Ver como cliente</a>`;
 
   box.style.display = '';
@@ -185,6 +198,7 @@ async function ver(codigo) {
     <table class="table-darkish mb-3"><thead><tr><th>Asiento</th><th>Tipo</th><th>Precio</th><th>id_boleto</th></tr></thead><tbody>${items}</tbody></table>
     <div class="mb-2"><strong>Códigos</strong>${bols}</div>
     <div class="mb-3"><strong>Pagos</strong>${pagos || '<div class="text-secondary small">—</div>'}</div>
+    <div class="mb-3"><strong>Correo de confirmación</strong><div class="small">${correoTxt}</div></div>
     <div>${actions}</div>
     <div class="mt-2 small text-info" id="msgAccion"></div>
   `);
@@ -236,6 +250,28 @@ async function ver(codigo) {
       msg.className = 'mt-2 small ' + (rr.success ? 'text-success' : 'text-danger');
       cargar();
       ver(o.codigo_publico);
+    };
+  }
+  const btnC = document.getElementById('btnCorreo');
+  if (btnC) {
+    btnC.onclick = async () => {
+      if (c && c.estado === 'enviado' && !confirm('El correo ya se envió. ¿Enviarlo otra vez a ' + o.email + '?')) return;
+      btnC.disabled = true;
+      const rr = await fetch(API + '?action=reenviar_correo', {
+        method: 'POST',
+        headers: (typeof window.teatroCsrfHeaders === 'function')
+          ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+          : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codigo: o.codigo_publico,
+          csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+        }),
+      }).then(x => x.json());
+      msg.textContent = rr.success
+        ? (rr.modo === 'mock' ? 'Correo simulado generado (no se envió de verdad).' : 'Correo enviado.')
+        : ('Error: ' + (rr.error || ''));
+      msg.className = 'mt-2 small ' + (rr.success ? 'text-success' : 'text-danger');
+      setTimeout(() => ver(o.codigo_publico), 1200);
     };
   }
 }

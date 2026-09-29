@@ -49,6 +49,8 @@ $ordenes = $hayOnline ? $fetch('SELECT * FROM ordenes o WHERE ' . sprintf($esPru
 $idsOrden = $ids($ordenes, 'id_orden');
 $items = $ordenes ? $fetch("SELECT * FROM orden_items WHERE id_orden IN ($idsOrden)") : [];
 $pagos = $ordenes ? $fetch("SELECT * FROM pagos WHERE id_orden IN ($idsOrden)") : [];
+$hayNotif = $existe(DB_LOCAL_NAME, 'orden_notificaciones');
+$notificaciones = ($ordenes && $hayNotif) ? $fetch("SELECT * FROM orden_notificaciones WHERE id_orden IN ($idsOrden)") : [];
 
 $boletosOnline = !$ordenes ? '' : "
        OR (b.origen = 'online'
@@ -82,7 +84,7 @@ if ($idsEvt !== '0') {
 }
 
 echo 'Eventos [PRUEBA]: ' . count($eventos) . ' activos, ' . count($eventosHist) . " archivados\n";
-echo 'Órdenes de prueba: ' . count($ordenes) . ' | Items: ' . count($items) . ' | Pagos: ' . count($pagos) . ' | Boletos: ' . count($boletos) . "\n";
+echo 'Órdenes de prueba: ' . count($ordenes) . ' | Items: ' . count($items) . ' | Pagos: ' . count($pagos) . ' | Correos: ' . count($notificaciones) . ' | Boletos: ' . count($boletos) . "\n";
 foreach ($porEvento as $t => $d) {
     if ($d['rows']) {
         echo "  $t: " . count($d['rows']) . "\n";
@@ -99,7 +101,7 @@ if (!$aplicar) {
 }
 
 $respaldo = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'teatro_limpieza_prueba_' . date('Ymd_His') . '.json';
-$json = json_encode(['ordenes' => $ordenes, 'items' => $items, 'pagos' => $pagos, 'boletos' => $boletos, 'por_evento' => $porEvento], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+$json = json_encode(['ordenes' => $ordenes, 'items' => $items, 'pagos' => $pagos, 'notificaciones' => $notificaciones, 'boletos' => $boletos, 'por_evento' => $porEvento], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
 if ($json === false || file_put_contents($respaldo, $json) === false) {
     fwrite(STDERR, "No se pudo escribir el respaldo; no se borró nada.\n");
     exit(1);
@@ -110,6 +112,9 @@ $idsBoleto = $ids($boletos, 'id_boleto');
 $conn->begin_transaction();
 try {
     if ($ordenes) {
+        if ($hayNotif) {
+            $conn->query("DELETE FROM orden_notificaciones WHERE id_orden IN ($idsOrden)");
+        }
         $conn->query("DELETE FROM pagos WHERE id_orden IN ($idsOrden)");
         $conn->query("DELETE FROM orden_items WHERE id_orden IN ($idsOrden)");
         $conn->query("DELETE FROM ordenes WHERE id_orden IN ($idsOrden)");

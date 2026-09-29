@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../includes/auth_guard.php';
+teatro_require_panel_admin(true);
+
 // INICIO: Capturar TODO el output desde el principio con callback
 $captured_errors = '';
 $action = $_GET['action'] ?? 'generar';

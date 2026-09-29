@@ -4,6 +4,8 @@
    Soporta BD actual, histórica, o ambas.
    ========================= */
 
+require_once __DIR__ . '/../../includes/auth_guard.php';
+teatro_require_panel_admin();
 require_once '../../evt_interfaz/conexion.php';
 
 // Detectar DB

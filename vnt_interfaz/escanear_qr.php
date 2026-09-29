@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/csrf.php';
 teatro_require_login(false);
 
 include "../conexion.php";
+require_once __DIR__ . '/../includes/entrada_helper.php';
 
 $mensaje = '';
 $tipo_mensaje = '';
@@ -17,18 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_entrada']))
         $tipo_mensaje = "danger";
     } else {
         $codigo_unico = trim((string) ($_POST['codigo_unico'] ?? ''));
-
-        $stmt = $conn->prepare("UPDATE boletos SET estatus = 0 WHERE codigo_unico = ? AND estatus = 1");
-        $stmt->bind_param("s", $codigo_unico);
-
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
+        $r = entrada_confirmar($conn, $codigo_unico, false, (int) ($_SESSION['usuario_id'] ?? 0) ?: null);
+        if ($r['success']) {
             $mensaje = "Entrada confirmada exitosamente. El boleto ha sido marcado como usado.";
             $tipo_mensaje = "success";
+        } elseif (!empty($r['requiere_confirmacion'])) {
+            $mensaje = $r['message'] . ' Para autorizarlo de todos modos usa el escáner del punto de venta.';
+            $tipo_mensaje = "warning";
         } else {
-            $mensaje = "Error: El boleto ya fue usado o no existe.";
+            $mensaje = "Error: " . $r['message'];
             $tipo_mensaje = "danger";
         }
-        $stmt->close();
     }
 }
 
@@ -60,8 +60,15 @@ if (isset($_GET['codigo']) && !empty($_GET['codigo'])) {
     if ($result->num_rows > 0) {
         $boleto_info = $result->fetch_assoc();
         
+        $entrada = entrada_obtener_boleto($conn, $boleto_info['codigo_unico'])['entrada'] ?? null;
         if ($boleto_info['estatus'] == 0) {
             $mensaje = "ADVERTENCIA: Este boleto ya fue usado.";
+            $tipo_mensaje = "warning";
+        } elseif ($boleto_info['estatus'] == 2) {
+            $mensaje = "Este boleto está cancelado.";
+            $tipo_mensaje = "danger";
+        } elseif ($entrada && !$entrada['permitida']) {
+            $mensaje = "ADVERTENCIA: " . $entrada['mensaje'];
             $tipo_mensaje = "warning";
         } else {
             $mensaje = "Boleto válido. Puede confirmar la entrada.";

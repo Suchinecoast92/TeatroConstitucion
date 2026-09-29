@@ -77,6 +77,78 @@ function asegurarTablasOrdenes(mysqli $conn): void
     $ok = true;
 }
 
+/**
+ * Motivos por los que no se debe archivar un evento todavía por sus órdenes online.
+ * Archivar borra funciones y mueve los boletos al histórico: un pago en curso quedaría
+ * cobrado sin boletos y un cliente con función pendiente perdería su acceso.
+ *
+ * @return string[] mensajes; vacío si se puede archivar
+ */
+function ordenes_bloqueos_archivar(mysqli $conn, int $idEvento): array
+{
+    $chk = $conn->query("SHOW TABLES LIKE 'ordenes'");
+    if (!$chk || $chk->num_rows === 0) {
+        return [];
+    }
+    $motivos = [];
+    $ttl = (int) PAGO_EN_CURSO_TTL_SEG;
+    $minFin = (int) ENTRADA_MINUTOS_DESPUES_FUNCION;
+    $tienePagos = ($r = $conn->query("SHOW TABLES LIKE 'pagos'")) && $r->num_rows > 0;
+
+    $sqlPend = "
+        SELECT COUNT(DISTINCT o.id_orden) AS n
+        FROM ordenes o
+        WHERE o.id_evento = ? AND o.estado = 'pendiente'
+          AND (o.expira_en > NOW()" . ($tienePagos ? "
+               OR EXISTS (SELECT 1 FROM pagos p WHERE p.id_orden = o.id_orden
+                          AND p.estado_interno = 'PENDING'
+                          AND p.creado_en > DATE_SUB(NOW(), INTERVAL ? SECOND))" : '') . ")
+    ";
+    $st = $conn->prepare($sqlPend);
+    if ($tienePagos) {
+        $st->bind_param('ii', $idEvento, $ttl);
+    } else {
+        $st->bind_param('i', $idEvento);
+    }
+    $st->execute();
+    $n = (int) $st->get_result()->fetch_assoc()['n'];
+    $st->close();
+    if ($n > 0) {
+        $motivos[] = "Hay $n orden(es) online con pago en curso. Espera a que se paguen o expiren.";
+    }
+
+    $st = $conn->prepare("
+        SELECT COUNT(DISTINCT o.id_orden) AS n
+        FROM ordenes o
+        INNER JOIN orden_items oi ON oi.id_orden = o.id_orden
+        WHERE o.id_evento = ? AND o.estado = 'pagada' AND oi.id_boleto IS NULL
+    ");
+    $st->bind_param('i', $idEvento);
+    $st->execute();
+    $n = (int) $st->get_result()->fetch_assoc()['n'];
+    $st->close();
+    if ($n > 0) {
+        $motivos[] = "Hay $n orden(es) online pagadas con boletos sin emitir. Revísalas en Administración → Órdenes online.";
+    }
+
+    $st = $conn->prepare("
+        SELECT COUNT(*) AS n
+        FROM ordenes o
+        INNER JOIN funciones f ON f.id_funcion = o.id_funcion
+        WHERE o.id_evento = ? AND o.estado = 'pagada'
+          AND f.fecha_hora > (NOW() - INTERVAL ? MINUTE)
+    ");
+    $st->bind_param('ii', $idEvento, $minFin);
+    $st->execute();
+    $n = (int) $st->get_result()->fetch_assoc()['n'];
+    $st->close();
+    if ($n > 0) {
+        $motivos[] = "Hay $n orden(es) online pagadas para funciones que aún no terminan. Cancélalas con reembolso en Administración → Órdenes online o espera a que pase la función.";
+    }
+
+    return $motivos;
+}
+
 function generar_codigo_orden(): string
 {
     return 'ORD' . strtoupper(bin2hex(random_bytes(8)));

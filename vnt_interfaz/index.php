@@ -2180,16 +2180,28 @@ if ($evento_info):
     }
 
     // --- ACCIONES DE VALIDACIÓN ---
-    function accionVerificar(codigo) {
-        if(!confirm('¿Confirmar entrada para el boleto ' + codigo + '?')) return;
+    function accionVerificar(codigo, forzar = false) {
+        if(!forzar && !confirm('¿Confirmar entrada para el boleto ' + codigo + '?')) return;
         
         fetch('confirmar_entrada.php', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ codigo_unico: codigo })
+            headers: (typeof window.teatroCsrfHeaders === 'function')
+                ? window.teatroCsrfHeaders({ 'Content-Type': 'application/json' })
+                : { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                codigo_unico: codigo,
+                forzar: forzar,
+                csrf_token: (typeof window.teatroCsrfToken === 'function') ? window.teatroCsrfToken() : ''
+            })
         })
         .then(res => res.json())
         .then(data => {
+            if(!data.success && data.requiere_confirmacion && !forzar) {
+                if(confirm(data.message + '\n\n¿Autorizar la entrada de todos modos? Quedará registrado.')) {
+                    accionVerificar(codigo, true);
+                }
+                return;
+            }
             if(data.success) {
                 notify.success('Entrada confirmada');
                 realizarBusqueda(); // Recargar tabla
@@ -2992,11 +3004,11 @@ window.URL_PANEL = '<?= $url_panel ?>';
 
 <script src="js/carrito-patch.js"></script>
 <script src="js/descuentos-modal.js"></script>
-<script src="js/escaner_qr.js?v=5"></script>
+<script src="js/escaner_qr.js?v=6"></script>
 <script src="js/menu-mejoras.js?v=1"></script>
 <script src="js/seleccion-multiple.js?v=1"></script>
 <script src="js/sync-sender.js?v=2"></script>
-<script src="js/reservas-tiempo-real.js?v=2"></script>
+<script src="js/reservas-tiempo-real.js?v=3"></script>
 
 <!-- Forzar carga de asientos vendidos al inicio -->
 <script>

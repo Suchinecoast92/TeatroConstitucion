@@ -45,8 +45,9 @@ Probar (QA completa):
 - [ ] compra online con Payment Brick sandbox: aprobada, rechazada, pendiente
 - [ ] webhook firmado desde MP sandbox (y rechazo sin firma)
 - [ ] emisión de boleto, QR en página de orden, PDF e imagen **después de un redeploy** (regeneración)
-- [ ] control de entrada escaneando QR
+- [ ] control de entrada escaneando QR (un boleto de otra función muestra el aviso y pide autorizar)
 - [ ] cancelación y reembolso (cancela boletos)
+- [ ] `Mi pedido`, `Términos` y `Aviso de privacidad` se ven en `www` y el correo de confirmación enlaza a ellos
 - [ ] concurrencia: dos compradores y taquilla contra online
 - [ ] subir imagen de evento, redesplegar y confirmar que el cartel sigue visible (restaurado desde la BD)
 - [ ] `php sql/test_fase*.php` contra la BD de staging (por consola de App Platform o job)
@@ -78,14 +79,26 @@ Orden pensado para que el teatro venda con el sistema nuevo ese mismo día. La t
    | 2 | `sql/migracion_pagos.sql` | `trt_25` |
    | 3 | `sql/migracion_origen_boletos.sql` (usa `orden_items`: va después de 1) | `trt_25` |
    | 4 | `sql/migracion_evento_imagenes.sql` | `trt_25` |
-   | 5 | `sql/migracion_origen_boletos_historico.sql` | `trt_historico_evento` |
+   | 5 | `sql/migracion_orden_notificaciones.sql` (correos enviados; va después de 1) | `trt_25` |
+   | 6 | `sql/migracion_origen_boletos_historico.sql` | `trt_historico_evento` |
 
    `trt_25_backup` y `trt_25_online` no cambian. El código también crea o ajusta estas tablas si faltan (`asegurar*`), pero en producción se aplican explícitamente para no depender de la primera petición. Las tablas online no llevan FK a `evento`/`funciones` porque el archivado borra esas filas. Con cliente `mysql` se pueden aplicar los archivos a mano en ese orden con `--default-character-set=utf8mb4`.
 6. **Desplegar** el código (o reiniciar la app si ya estaba) con los secretos configurados. Al arrancar, `bin/iniciar.sh` sube a `evento_imagenes` los carteles que vienen en Git. Confirmar en el log `[imagenes] importadas a BD: N`.
 7. **Validar:** la salida de `aplicar_migraciones.php` en producción debe coincidir con la del paso 3 (boletos por evento, última venta, suma de ventas, funciones futuras, usuarios). Confirmar que el evento `limpiar_reservas_temporales` existe (`SHOW EVENTS`).
 8. **Pruebas de humo** (lista corta de staging): login, cartelera con carteles, mapa de una función futura, una venta de taquilla de prueba con impresión QZ, escanear su QR y cancelarla.
 9. **Apertura a taquilla** en `https://gestion.<dominio>`. Desde aquí la PC local ya no vende: dejar WAMP apagado para evitar ventas en la BD vieja.
-10. **Venta online:** apertura gradual, primero en sandbox en producción oculta; **cobros reales solo con aprobación explícita** (ver `PAGOS.md`).
+10. **Venta online:** apertura gradual, primero en sandbox en producción oculta; **cobros reales solo con aprobación explícita** (ver `PAGOS.md`). Antes, completar los textos legales (sección siguiente).
+
+### Textos legales (antes de abrir la venta online)
+
+Los datos están en `config/legal.php` (públicos, se versionan en Git). Mientras falten, las páginas muestran el nombre del teatro y la ciudad:
+
+- [ ] `LEGAL_RESPONSABLE` y `LEGAL_DOMICILIO`: quién opera el teatro y recibe los pagos. Si es un organismo público (p. ej. el Ayuntamiento), aplica la ley de datos personales para sujetos obligados en lugar de la LFPDPPP: revisar el aviso de privacidad con quien lleve lo jurídico.
+- [ ] `LEGAL_EMITE_FACTURA`: `true` (CFDI a solicitud, con plazo `LEGAL_DIAS_SOLICITAR_FACTURA`), `false` (no se factura) o `null` (texto general de contacto).
+- [ ] `LEGAL_CORREO`: buzón que realmente se atiende (ARCO, reembolsos, factura).
+- [ ] Actualizar `LEGAL_FECHA_ACTUALIZACION` cuando cambien los textos.
+
+Política de reembolsos publicada en `crt_interfaz/terminos.php#reembolsos`: solo si el teatro cancela el evento o lo reprograma y el cliente no acepta la nueva fecha; no por inasistencia o cambio de planes; otros casos a criterio del teatro. Los reembolsos online se hacen desde Administración → Órdenes online (reembolsa por Mercado Pago y cancela los boletos).
 
 No ejecutar en producción `sql/test_*.php` (crean órdenes y boletos) ni `sql/limpiar_datos_prueba.php` (se niega a correr con `APP_ENV=production`).
 
@@ -94,6 +107,13 @@ Rollback: la BD local del teatro queda intacta hasta confirmar producción. Si a
 ## Entorno de taquilla
 
 La PC de taquilla pasa de `localhost/TeatroConstitucion` a `https://gestion.<dominio>`. `INICIAR_TEATRO.bat` arranca WAMP y abre `localhost`: sirve para desarrollo o instalación local, pero no forma parte del flujo normal con el servidor web.
+
+Reglas de operación que cambian con esta versión:
+
+- **Entrada:** un boleto solo pasa directo si su función empieza en menos de 3 h o empezó hace menos de 4 h (`ENTRADA_MINUTOS_*` en `config/ventas.php`). Fuera de esa ventana el escáner avisa "Boleto de otra función" y solo entra si el operador autoriza; la autorización queda en el log.
+- **Cancelar en taquilla:** los boletos comprados en línea no se cancelan desde la taquilla; se cancelan con reembolso en Administración → Órdenes online.
+- **Archivar un evento** se bloquea mientras tenga órdenes online con pago en curso, pagadas sin boletos emitidos o pagadas para funciones que aún no terminan.
+- **Precios de taquilla:** el servidor los recalcula; si la pantalla quedó con un precio o promoción viejos, la venta se rechaza con "Recarga la página de venta".
 
 ## Offline
 
