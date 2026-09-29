@@ -41,7 +41,7 @@ Web server: `heroku-php-apache2` (Apache + PHP-FPM) con document root en la raí
 4. **Llave primaria obligatoria** (`sql_require_primary_key`). Las 28 tablas de las 3 BD ya tienen PK y son InnoDB.
 5. **Credenciales en código.** `ventas/panel_admin.php` usaba `root` sin contraseña; ahora usa la conexión común. `sync/backup_helper.php` también.
 6. **Scripts de mantenimiento públicos.** `fix_schema`, `fix_funciones`, `fix_boletos_index`, `inspect_db`, `sync_historico_schema`, `evt_interfaz/fix_historico`, `setup_historico`: ahora solo CLI y bloqueados en `.htaccess`.
-7. **Llave privada de QZ Tray** descargable por HTTP y con oráculo de firma público. Ahora `.key` bloqueado, `sign_message.php` exige sesión y la llave puede venir de `QZ_PRIVATE_KEY` (SECRET). **Pendiente del dueño:** sacarla de Git y rotarla (ver abajo).
+7. **Llave privada de QZ Tray** descargable por HTTP y con oráculo de firma público. Ahora `.key` bloqueado, `sign_message.php` exige sesión y la llave puede venir de `QZ_PRIVATE_KEY` (SECRET). Rotada y fuera de Git (ver abajo).
 
 ## Persistencia de archivos (disco efímero)
 
@@ -87,16 +87,21 @@ Ver `DOMINIOS_PRODUCCION.md`. Recomendado: agregar `www`, `gestion` y `api` en A
 
 Ver `PAGOS.md`. En staging: credenciales de prueba y webhook de prueba apuntando a staging.
 
-## Sacar la llave de QZ de Git (acción del dueño)
+## Llave de QZ Tray (rotada)
 
-La llave `vnt_interfaz/utils/qz_private.key` está versionada, así que cualquiera con acceso al repo la tiene.
+La llave anterior estuvo versionada desde el primer commit y su certificado estaba truncado (inválido). Se rotó:
 
-1. Generar un par nuevo de llave y certificado de QZ Tray, e instalar el certificado nuevo en las PCs de taquilla.
-2. En producción, poner la llave nueva en `QZ_PRIVATE_KEY` (SECRET). En local, guardarla en `QZ_PRIVATE_KEY_PATH` fuera del repo.
-3. `git rm --cached vnt_interfaz/utils/qz_private.key` (el archivo local se conserva; `.gitignore` ya excluye `*.key`).
-4. El historial de Git conserva la llave vieja; por eso hay que rotarla, no basta con borrarla.
+- Llave nueva RSA 2048, **fuera del repo**: en la PC de desarrollo está en `C:/wamp64/secrets/teatro/qz_private.key`, referenciada por `QZ_PRIVATE_KEY_PATH` en `.env` local.
+- Certificado público nuevo (autofirmado, vigente hasta 2036) en `vnt_interfaz/utils/qz_cert.pem`. Es público: el navegador lo descarga para QZ Tray.
+- La llave vieja se eliminó del repo. El historial de Git la conserva, pero ya no firma nada válido.
 
-Igual con `boletos_qr/*.png` (1064 imágenes QR rastreadas desde el primer commit): `git rm -r --cached boletos_qr` y conservar `.gitkeep`. Son regenerables y no deben estar en el repo.
+Pendiente:
+
+1. **Producción:** pegar el contenido de la llave nueva en la variable SECRET `QZ_PRIVATE_KEY`. No subir el archivo.
+2. **PCs de taquilla:** para que QZ Tray confíe sin preguntar, copiar `qz_cert.pem` como `override.crt` en la carpeta de instalación de QZ Tray (p. ej. `C:\Program Files\QZ Tray\override.crt`) y reiniciar QZ Tray. Sin esto QZ Tray sigue imprimiendo, pero pide permiso.
+3. Guardar una copia de la llave en un gestor de contraseñas; si se pierde, hay que generar otro par y reinstalar el certificado.
+
+Las imágenes `boletos_qr/*.png` también se sacaron de Git (solo queda `.gitkeep`); se regeneran bajo demanda.
 
 ## Lo que NO se hizo (a propósito)
 
