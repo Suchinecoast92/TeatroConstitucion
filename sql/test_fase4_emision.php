@@ -131,7 +131,7 @@ if (!$rowVb || (int) $rowVb['estatus'] !== 1) {
 ok_line('lookup codigo_unico compatible con entrada');
 
 echo "PASS fase4 emision\n";
-echo "(Nota: el boleto de prueba queda activo en BD para el asiento $asiento; cancélalo en admin si quieres liberarlo.)\n";
+echo "(Nota: el boleto de prueba queda activo en BD para el asiento $asiento; para liberarlo: php sql/limpiar_datos_prueba.php --aplicar)\n";
 
 function ok_line(string $m): void
 {

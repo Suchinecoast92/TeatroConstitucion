@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS ordenes (
     UNIQUE KEY uk_codigo_publico (codigo_publico),
     KEY idx_orden_evento_funcion (id_evento, id_funcion),
     KEY idx_orden_session (session_id),
-    KEY idx_orden_estado_expira (estado, expira_en),
-    CONSTRAINT fk_orden_evento FOREIGN KEY (id_evento) REFERENCES evento (id_evento),
-    CONSTRAINT fk_orden_funcion FOREIGN KEY (id_funcion) REFERENCES funciones (id_funcion)
+    KEY idx_orden_estado_expira (estado, expira_en)
+    -- Sin FK a evento/funciones: evt_interfaz/auto_archivar.php borra esas filas al archivar
+    -- y la orden debe conservarse. Igual que includes/ordenes_helper.php.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS orden_items (

@@ -9,7 +9,7 @@
 </IfModule>
 
 # Directorios que no deben servirse por HTTP
-RedirectMatch 403 (?i)/(includes|config|sql|docs|db_trt_25|vendor|\.do)/
+RedirectMatch 403 (?i)/(includes|config|sql|docs|db_trt_25|vendor|bin|\.do)/
 RedirectMatch 403 (?i)/\.(git|env)(/|$)
 
 # Scripts de mantenimiento / debug (solo CLI)
@@ -24,6 +24,10 @@ RedirectMatch 403 (?i)/auth/(secret_login|migrar_contrasenas)\.php$
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Cartel de evento que no está en disco (disco efímero) → copia en la BD.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^evt_interfaz/imagenes/([A-Za-z0-9_-]+\.(?:jpe?g|png|gif))$ evt_interfaz/imagen_evento.php?r=$1 [NC,L]
+
   # api.* → solo /api/
   RewriteCond %{HTTP_HOST} ^api\. [NC]
   RewriteCond %{REQUEST_URI} !^/api/ [NC]
@@ -35,7 +39,7 @@ RedirectMatch 403 (?i)/auth/(secret_login|migrar_contrasenas)\.php$
 
   # www.* → solo sitio público; lo demás (login, paneles, taquilla) va a gestion.*
   RewriteCond %{REQUEST_URI} !^/(crt_interfaz|api/online|assets|evt_interfaz/imagenes|boletos_qr)/ [NC]
-  RewriteCond %{REQUEST_URI} !^/(favicon\.ico|robots\.txt|health\.php)$ [NC]
+  RewriteCond %{REQUEST_URI} !^/(favicon\.ico|robots\.txt|health\.php|evt_interfaz/imagen_evento\.php)$ [NC]
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://gestion.%1%{REQUEST_URI} [R=302,L]
 </IfModule>

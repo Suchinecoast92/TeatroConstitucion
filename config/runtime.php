@@ -193,7 +193,7 @@ function teatro_host_guard(): void
                 return;
             }
         }
-        if (in_array($path, ['/favicon.ico', '/robots.txt'], true)) {
+        if (in_array($path, ['/favicon.ico', '/robots.txt', '/evt_interfaz/imagen_evento.php'], true)) {
             return;
         }
         if ($gestion !== '') {

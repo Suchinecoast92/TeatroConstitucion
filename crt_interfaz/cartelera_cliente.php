@@ -942,7 +942,7 @@ if ($resultado && $resultado->num_rows > 0) {
                         <div class="evento-content">
                             <!-- Imagen del evento -->
                             <div class="evento-imagen">
-                                <img src="../evt_interfaz/<?php echo htmlspecialchars($evento['imagen']); ?>" 
+                                <img src="../evt_interfaz/<?php echo htmlspecialchars((string) $evento['imagen']); ?>" 
                                      alt="<?php echo teatro_h($evento['titulo']); ?>"
                                      onerror="this.src='imagenes_teatro/nat.png'">
                             </div>

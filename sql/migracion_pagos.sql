@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS pagos (
     UNIQUE KEY uk_ref_externa (ref_externa),
     KEY idx_pago_orden (id_orden),
     KEY idx_pago_estado (estado_interno),
-    KEY idx_pago_proveedor_ref (ref_pago_proveedor),
-    CONSTRAINT fk_pago_orden FOREIGN KEY (id_orden) REFERENCES ordenes (id_orden) ON DELETE CASCADE
+    KEY idx_pago_proveedor_ref (ref_pago_proveedor)
+    -- Misma estructura que crea includes/pagos/PaymentService.php (sin FK).
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Rollback:

@@ -51,15 +51,19 @@ App Platform pierde los archivos escritos en disco en cada despliegue o reinicio
 |---|---|---|
 | `boletos_qr/*.png` | Sí (solo codifica `codigo_unico` de la BD) | Resuelto: `teatro_qr_asegurado()` lo recrea al pedir PDF, imagen o página de orden |
 | PDF de boletos | Sí (se generan al vuelo) | Sin cambios |
-| **`evt_interfaz/imagenes/`** (carteles subidos desde admin) | **No** | **Necesita persistencia. Decisión pendiente** |
+| `evt_interfaz/imagenes/` (carteles subidos desde admin) | Sí, desde la BD | Resuelto: copia en la tabla `evento_imagenes` (ver abajo) |
 | Sesiones PHP, rate limit (`/tmp`) | No es necesario | 1 instancia; un despliegue cierra sesiones del personal |
 
-Queda demostrado que hace falta almacenamiento persistente para las imágenes de eventos. Opciones:
+### Carteles de eventos en la BD
 
-- **A. DigitalOcean Spaces** (S3, unos 5 USD/mes). Subida desde admin a Spaces y URL pública o CDN en la BD. Es lo estándar; agrega credenciales (SECRET) y una dependencia (SDK S3 o firma v4 con curl).
-- **B. Imagen en la BD** (tabla `evento_imagenes` con BLOB, servida por un PHP con caché). Sin infraestructura nueva y entra en los backups de la BD; tiene sentido porque los carteles son pocos y pequeños.
+Se eligió guardarlos en la BD (sin infraestructura nueva, entran en los backups; son unas 126 imágenes, ~80 MB).
 
-Mientras no se decida: las imágenes que ya están en Git se despliegan con el código; las **nuevas** subidas en producción desaparecerían en el siguiente despliegue.
+- `evento.imagen` sigue guardando `imagenes/<archivo>`, así que las pantallas no cambian. La tabla `evento_imagenes` (clave `ruta`) guarda los bytes; el archivo en disco es solo caché.
+- Crear/editar evento escribe en disco **y** en la BD; si la BD falla, la subida se rechaza. La imagen anterior solo se borra si ningún evento, activo o archivado, la usa.
+- Al arrancar, `bin/iniciar.sh` (run_command del app spec) ejecuta `php sql/sincronizar_imagenes_eventos.php`: sube a la BD los archivos que no tengan copia (primer despliegue: los que vienen en Git) y restaura en disco los que falten.
+- Si aun así falta un archivo, `.htaccess` reescribe la petición a `evt_interfaz/imagen_evento.php`, que lo sirve desde la BD y lo deja restaurado.
+- Prueba: `php sql/test_imagenes_eventos.php`. Migración: `sql/migracion_evento_imagenes.sql` (la app también crea la tabla si falta).
+- Cuando la BD de producción ya tenga las imágenes, se pueden sacar de Git (`git rm -r --cached evt_interfaz/imagenes` conservando `.htaccess`).
 
 ## Pasos (cuando existan cuenta, dominio y credenciales)
 
@@ -107,5 +111,5 @@ Las imágenes `boletos_qr/*.png` también se sacaron de Git (solo queda `.gitkee
 
 - No se creó infraestructura, no hay credenciales reales y no se activaron cobros.
 - No se migró la BD.
-- No se agregó Spaces (pendiente de decisión).
+- No se agregó Spaces: los carteles van en la BD.
 - Los `.bat` quedan como herramientas locales (bloqueados por HTTP).

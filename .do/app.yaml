@@ -15,7 +15,8 @@ services:
       deploy_on_push: false
     # composer.json está en la raíz (vendor-dir → vnt_interfaz/vendor). Raíz = document root.
     source_dir: /
-    run_command: heroku-php-apache2
+    # Restaura carteles de eventos desde la BD y luego arranca heroku-php-apache2.
+    run_command: bash bin/iniciar.sh
     http_port: 8080
     # 1 instancia: sesiones PHP y rate limit viven en el disco local del contenedor.
     instance_count: 1

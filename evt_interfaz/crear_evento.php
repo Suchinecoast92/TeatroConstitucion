@@ -218,13 +218,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $imagen_ruta = "";
     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
         require_once __DIR__ . '/../includes/upload_image.php';
+        require_once __DIR__ . '/../includes/evento_imagen_helper.php';
         $valid = teatro_validar_imagen_subida($_FILES['imagen']['tmp_name'], $_FILES['imagen']['name'] ?? '');
         if (!empty($valid['ok'])) {
             if (!is_dir("imagenes"))
                 mkdir("imagenes", 0755, true);
-            $ruta = "imagenes/evt_" . time() . "." . $valid['ext'];
+            $ruta = teatro_evt_img_ruta_nueva($valid['ext']);
             if (move_uploaded_file($_FILES['imagen']['tmp_name'], $ruta)) {
-                $imagen_ruta = $ruta;
+                if (teatro_evt_img_guardar($conn, $ruta)) {
+                    $imagen_ruta = $ruta;
+                } else {
+                    @unlink($ruta);
+                    $errores_php[] = "No se pudo guardar la imagen en la base de datos.";
+                }
             } else
                 $errores_php[] = "Error al guardar imagen.";
         } else
@@ -386,6 +392,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } catch (Exception $e) {
             $conn->rollback();
+            if ($imagen_ruta !== '') {
+                teatro_evt_img_eliminar_si_huerfana($conn, $imagen_ruta);
+            }
             $errores_php[] = "Error DB: " . $e->getMessage();
         }
     }

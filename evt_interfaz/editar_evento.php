@@ -65,6 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errores_php)) {
+            require_once __DIR__ . '/../includes/evento_imagen_helper.php';
+            teatro_evt_img_asegurar_tabla($conn);
+            $imagen_nueva = '';
+            $imagen_reemplazada = '';
             $conn->begin_transaction();
             try {
                 if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
@@ -73,11 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!empty($valid['ok'])) {
                         if (!is_dir("imagenes"))
                             mkdir("imagenes", 0755, true);
-                        $ruta = "imagenes/evt_" . time() . "." . $valid['ext'];
+                        $ruta = teatro_evt_img_ruta_nueva($valid['ext']);
                         if (move_uploaded_file($_FILES['imagen']['tmp_name'], $ruta)) {
+                            $imagen_nueva = $ruta;
+                            if (!teatro_evt_img_guardar($conn, $ruta)) {
+                                throw new Exception('No se pudo guardar la imagen en la base de datos.');
+                            }
+                            $imagen_reemplazada = (string) ($_POST['imagen_actual'] ?? '');
                             $img = $ruta;
-                            if ($_POST['imagen_actual'] && file_exists($_POST['imagen_actual']))
-                                unlink($_POST['imagen_actual']);
                         }
                     } else {
                         throw new Exception($valid['error'] ?? 'Imagen inválida.');
@@ -192,6 +199,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $conn->commit();
+                if ($imagen_reemplazada !== '' && $imagen_reemplazada !== $img) {
+                    teatro_evt_img_eliminar_si_huerfana($conn, $imagen_reemplazada);
+                }
                 if (function_exists('registrar_transaccion'))
                     registrar_transaccion('evento_guardar', "Guardó evento: $titulo");
                 registrar_cambio('evento', $evt_id, null, ['accion' => $modo_reactivacion ? 'reactivar' : 'editar']);
@@ -310,6 +320,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php exit;
             } catch (Exception $e) {
                 $conn->rollback();
+                if ($imagen_nueva !== '') {
+                    teatro_evt_img_eliminar_si_huerfana($conn, $imagen_nueva);
+                }
                 $errores_php[] = "Error DB: " . $e->getMessage();
             }
         }
