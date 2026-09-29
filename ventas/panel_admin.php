@@ -22,8 +22,8 @@ if (!isset($_SESSION['usuario_id']) || ($_SESSION['usuario_rol'] ?? '') !== 'adm
 // ─────────────────────────────────────────────────────────────────────
 $reservas_activas = [];
 $reservas_count = ['total' => 0, 'local' => 0, 'online' => 0];
-$cR = @new mysqli('localhost', 'root', '', 'trt_25');
-if (!$cR->connect_error) {
+$cR = getLocalConnection();
+if ($cR) {
     @$cR->query("DELETE FROM reservas_temporales WHERE expira_en < NOW()");
     $r = @$cR->query("
         SELECT r.codigo_asiento, r.id_evento, r.id_funcion, r.origen,
@@ -48,9 +48,13 @@ if (!$cR->connect_error) {
 // ─────────────────────────────────────────────────────────────────────
 // SECCIÓN VENTAS (desde trt_25_backup.venta_detallada)
 // ─────────────────────────────────────────────────────────────────────
-$conn_b = @new mysqli('localhost', 'root', '', 'trt_25_backup');
-$bd_disponible = !$conn_b->connect_error;
-if ($bd_disponible) $conn_b->set_charset('utf8mb4');
+try {
+    $conn_b = teatro_db_connect((string) teatro_env('DB_BACKUP_NAME', 'trt_25_backup'));
+} catch (Throwable $e) {
+    error_log('[panel_admin] BD de respaldo no disponible: ' . $e->getMessage());
+    $conn_b = null;
+}
+$bd_disponible = $conn_b !== null;
 
 $filtro_metodo = $_GET['metodo']  ?? '';
 $filtro_lugar  = $_GET['lugar']   ?? '';

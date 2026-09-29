@@ -1,5 +1,8 @@
 <?php
-// fix_setup_historico.php
+// fix_setup_historico.php — solo CLI
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_cli();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 

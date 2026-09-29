@@ -1,4 +1,7 @@
 <?php
+// Solo CLI: php fix_schema.php
+require_once __DIR__ . '/includes/auth_guard.php';
+teatro_require_cli();
 include 'conexion.php';
 
 $missing_cols = [

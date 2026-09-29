@@ -3,7 +3,10 @@
  * Script para corregir el índice único en la tabla boletos
  * El índice debe permitir el mismo asiento en diferentes funciones
  * Maneja las llaves foráneas correctamente
+ * Solo CLI: php fix_boletos_index.php
  */
+require_once __DIR__ . '/includes/auth_guard.php';
+teatro_require_cli();
 
 include "conexion.php";
 

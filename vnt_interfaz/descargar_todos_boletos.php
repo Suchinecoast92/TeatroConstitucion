@@ -18,6 +18,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/ticket_precio_helper.php';
 require_once __DIR__ . '/../includes/texto_encoding_helper.php';
+require_once __DIR__ . '/../includes/qr_helper.php';
 
 // Verificar parámetros
 if (!isset($_GET['codigos']) || empty($_GET['codigos'])) {
@@ -162,8 +163,8 @@ foreach ($boletos as $index => $boleto) {
     $pdf->Ln(8);
 
     // Código QR
-    $qr_path = __DIR__ . '/../boletos_qr/' . $boleto['codigo_unico'] . '.png';
-    if (file_exists($qr_path)) {
+    $qr_path = teatro_qr_asegurado((string) $boleto['codigo_unico']);
+    if ($qr_path) {
         $pdf->SetFont('Arial', 'B', 10);
         $pdf->Cell(0, 6, convertirTexto('Código de verificación:'), 0, 1, 'C');
         $pdf->Ln(3);

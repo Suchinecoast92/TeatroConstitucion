@@ -1,0 +1,29 @@
+{
+    "name": "teatro-constitucion/app",
+    "description": "Teatro Constitución: taquilla, administración, control de entrada y venta online. Manifiesto de despliegue (App Platform / buildpack PHP).",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "~8.3.0",
+        "ext-ctype": "*",
+        "ext-curl": "*",
+        "ext-fileinfo": "*",
+        "ext-gd": "*",
+        "ext-iconv": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-mysqli": "*",
+        "ext-openssl": "*",
+        "ext-zip": "*",
+        "ext-zlib": "*",
+        "endroid/qr-code": "^4.4",
+        "setasign/fpdf": "^1.8",
+        "mike42/escpos-php": "^4.0"
+    },
+    "config": {
+        "vendor-dir": "vnt_interfaz/vendor",
+        "optimize-autoloader": true,
+        "sort-packages": false
+    }
+}

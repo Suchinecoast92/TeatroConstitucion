@@ -13,6 +13,8 @@ if (defined('TEATRO_CSRF_INCLUDED')) {
 }
 define('TEATRO_CSRF_INCLUDED', true);
 
+require_once dirname(__DIR__) . '/config/env.php';
+
 /**
  * Endurece cookie de sesión (llamar ANTES de session_start si es posible).
  */

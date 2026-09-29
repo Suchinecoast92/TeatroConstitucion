@@ -168,7 +168,7 @@ $conn->close();
                 
                 <!-- QR Code -->
                 <img 
-                    src="../boletos_qr/<?= htmlspecialchars($boleto_info['codigo_unico']) ?>.png" 
+                    src="../crt_interfaz/qr_boleto.php?c=<?= htmlspecialchars(rawurlencode($boleto_info['codigo_unico'])) ?>" 
                     alt="QR Code" 
                     class="qr-preview"
                 >

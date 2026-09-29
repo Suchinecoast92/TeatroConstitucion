@@ -24,23 +24,34 @@ if (!$conn) {
 $secret = (string) teatro_env('MP_WEBHOOK_SECRET', '');
 $env = strtolower((string) teatro_env('APP_ENV', 'local'));
 $isProd = in_array($env, ['production', 'prod'], true);
+// Sin firma solo se tolera en la máquina de desarrollo; staging público exige firma igual que producción.
+$exigeFirma = $env !== 'local';
 $isMockHttp = !empty($_GET['mock']);
 
-// Mock por HTTP solo en entornos donde el mock está permitido (sin firma MP).
+if ($isProd && !teatro_request_is_https()) {
+    error_log('[webhook_pagos] petición sin HTTPS en producción (¿falta TRUST_PROXY=1?) — rechazando');
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'https required']);
+    exit;
+}
+
+// Mock por HTTP: solo con mock permitido Y desde la propia máquina (nunca desde Internet/staging público).
 if ($isMockHttp) {
-    if (!payment_mock_permitido()) {
+    $remote = teatro_remote_addr_original();
+    $esLoopback = in_array($remote, ['127.0.0.1', '::1'], true);
+    if (!payment_mock_permitido() || !$esLoopback) {
         http_response_code(403);
         echo json_encode(['success' => false, 'error' => 'mock disabled']);
         exit;
     }
 } elseif ($secret === '') {
-    if ($isProd) {
-        error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío en producción — rechazando');
+    if ($exigeFirma) {
+        error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío fuera de local — rechazando');
         http_response_code(503);
         echo json_encode(['success' => false, 'error' => 'webhook misconfigured']);
         exit;
     }
-    error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío — aceptando solo en entorno no productivo');
+    error_log('[webhook_pagos] MP_WEBHOOK_SECRET vacío — aceptando solo en APP_ENV=local');
 } elseif (!payment_verificar_firma_mp($secret, $_SERVER, $_GET)) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'unauthorized']);

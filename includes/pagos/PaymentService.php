@@ -53,22 +53,13 @@ function payment_app_base_url(): string
         return $configured;
     }
 
-    // Fallback HTTP
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-    $scheme = $https ? 'https' : 'http';
+    if (teatro_es_produccion()) {
+        error_log('[pagos] APP_URL no configurada en producción; usando Host de la petición');
+    }
+    $scheme = teatro_request_is_https() ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-    // Detectar carpeta del proyecto desde SCRIPT_NAME
-    // ej. /TeatroConstitucion/api/online/pagos.php → /TeatroConstitucion
-    $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
-    $basePath = '';
-    if (preg_match('#^(/.+?)/(?:api|crt_interfaz|vnt_interfaz)/#', $script, $m)) {
-        $basePath = $m[1];
-    } elseif (preg_match('#^(/[^/]+)/#', $script, $m)) {
-        $basePath = $m[1];
-    }
-
-    return $scheme . '://' . $host . $basePath;
+    return $scheme . '://' . $host . teatro_app_base_path();
 }
 
 function payment_resolve_gateway(): PaymentGatewayInterface
@@ -79,6 +70,32 @@ function payment_resolve_gateway(): PaymentGatewayInterface
         return new MockPaymentGateway();
     }
     return new MercadoPagoGateway($token);
+}
+
+/**
+ * Modo de checkout para el frontend:
+ *  - 'bricks'   → Payment Brick embebido (requiere gateway MP + MP_PUBLIC_KEY)
+ *  - 'redirect' → Checkout Pro / mock con redirección (flujo histórico, se conserva)
+ * MP_CHECKOUT=redirect fuerza el flujo anterior aunque haya Public Key.
+ */
+function payment_modo_checkout(): string
+{
+    $forzado = strtolower((string) teatro_env('MP_CHECKOUT', ''));
+    if ($forzado === 'redirect') {
+        return 'redirect';
+    }
+    $gateway = payment_resolve_gateway();
+    if ($gateway instanceof MercadoPagoGateway && payment_public_key() !== '') {
+        return 'bricks';
+    }
+    return 'redirect';
+}
+
+/** Public Key de MP (única credencial que puede llegar al navegador). */
+function payment_public_key(): string
+{
+    $pk = trim((string) teatro_env('MP_PUBLIC_KEY', ''));
+    return preg_match('/^(APP_USR|TEST)-[A-Za-z0-9-]{8,}$/', $pk) ? $pk : '';
 }
 
 /**
@@ -94,6 +111,9 @@ function payment_mock_permitido(): bool
     }
     if ($env === 'production' || $env === 'prod') {
         return false;
+    }
+    if ($env !== 'local') {
+        return $mode === 'mock';
     }
     return $mode === 'mock' || $token === '';
 }
@@ -245,6 +265,337 @@ function payment_crear_para_orden(mysqli $conn, string $codigoPublico): array
         'mode' => $proveedor === 'mock' ? 'mock' : 'mercadopago',
         'ttl_pasarela_seg' => $ttlPago,
     ];
+}
+
+/**
+ * Compara lo que reporta el proveedor contra la orden en BD.
+ * @return string|null null si es consistente; texto del problema si no.
+ */
+function payment_validar_contra_orden(array $orden, array $info): ?string
+{
+    $ext = (string) ($info['external_reference'] ?? '');
+    if ($ext === '' || !hash_equals((string) $orden['codigo_publico'], $ext)) {
+        return 'external_reference no coincide con la orden';
+    }
+    if (!isset($info['monto']) || $info['monto'] === null) {
+        return 'el proveedor no reportó monto';
+    }
+    if (abs((float) $info['monto'] - (float) $orden['total']) > 0.009) {
+        return 'monto no coincide con el total de la orden';
+    }
+    $moneda = isset($info['moneda']) && $info['moneda'] !== null ? strtoupper((string) $info['moneda']) : 'MXN';
+    if ($moneda !== 'MXN') {
+        return 'moneda no coincide';
+    }
+    return null;
+}
+
+/**
+ * Deja una orden lista para cobrar: reabre si falló, extiende holds/expiración
+ * y confirma que los asientos siguen apartados para la sesión dueña.
+ * @return array{success:bool,orden?:array,error?:string,http?:int}
+ */
+function payment_preparar_orden_para_cobro(mysqli $conn, string $codigoPublico, string $sessionId): array
+{
+    asegurarTablaPagos($conn);
+    $orden = obtenerOrdenPorCodigo($conn, $codigoPublico);
+    if (!$orden) {
+        return ['success' => false, 'error' => 'Orden no encontrada', 'http' => 404];
+    }
+    if ($sessionId === '' || !hash_equals((string) $orden['session_id'], $sessionId)) {
+        return ['success' => false, 'error' => 'No autorizado', 'http' => 403];
+    }
+    if ($orden['estado'] === 'pagada') {
+        return ['success' => true, 'orden' => $orden, 'ya_pagada' => true];
+    }
+    if (!in_array($orden['estado'], ['pendiente', 'fallida'], true)) {
+        return ['success' => false, 'error' => 'La orden no está pendiente de pago', 'http' => 409];
+    }
+    if (!teatro_funcion_venta_abierta($conn, (int) $orden['id_evento'], (int) $orden['id_funcion'])) {
+        return ['success' => false, 'error' => teatro_mensaje_venta_cerrada(), 'http' => 403];
+    }
+
+    $idOrden = (int) $orden['id_orden'];
+    $ttlPago = payment_ttl_pasarela();
+
+    if ($orden['estado'] === 'fallida') {
+        $rst = $conn->prepare("UPDATE ordenes SET estado = 'pendiente' WHERE id_orden = ? AND estado = 'fallida'");
+        $rst->bind_param('i', $idOrden);
+        $rst->execute();
+        $rst->close();
+    }
+
+    renovarReservasSesion($orden['session_id'], (int) $orden['id_evento'], (int) $orden['id_funcion'], $ttlPago);
+    payment_extender_expira_orden($conn, $idOrden, $ttlPago);
+    expirarOrdenesPendientes($conn);
+
+    $orden = obtenerOrdenPorCodigo($conn, $codigoPublico);
+    if (!$orden || $orden['estado'] !== 'pendiente') {
+        return ['success' => false, 'error' => 'La orden expiró. Vuelve a seleccionar tus asientos.', 'http' => 409];
+    }
+
+    $codigos = array_column($orden['items'] ?? [], 'codigo_asiento');
+    $faltantes = verificarHoldsSesionOnline(
+        $conn,
+        (int) $orden['id_evento'],
+        (int) $orden['id_funcion'],
+        (string) $orden['session_id'],
+        $codigos
+    );
+    if ($faltantes) {
+        return [
+            'success' => false,
+            'error' => 'Tus asientos ya no están apartados (' . implode(', ', $faltantes) . '). No se realizó ningún cobro.',
+            'http' => 409,
+        ];
+    }
+
+    $st = $conn->prepare('SELECT titulo FROM evento WHERE id_evento = ?');
+    $eid = (int) $orden['id_evento'];
+    $st->bind_param('i', $eid);
+    $st->execute();
+    $evt = $st->get_result()->fetch_assoc();
+    $st->close();
+    $orden['titulo_evento'] = $evt['titulo'] ?? 'Teatro Constitución';
+
+    return ['success' => true, 'orden' => $orden];
+}
+
+/**
+ * Configuración pública del Payment Brick. El monto sale de la BD, nunca del navegador.
+ */
+function payment_brick_config(mysqli $conn, string $codigoPublico, string $sessionId): array
+{
+    if (payment_modo_checkout() !== 'bricks') {
+        return ['success' => false, 'error' => 'Checkout Bricks no está habilitado', 'http' => 409];
+    }
+    $prep = payment_preparar_orden_para_cobro($conn, $codigoPublico, $sessionId);
+    if (!$prep['success']) {
+        return $prep;
+    }
+    $orden = $prep['orden'];
+    if (!empty($prep['ya_pagada'])) {
+        return ['success' => true, 'ya_pagada' => true, 'codigo_publico' => $codigoPublico];
+    }
+
+    $metodos = ['creditCard' => 'all', 'debitCard' => 'all'];
+    // Efectivo (OXXO, etc.) puede tardar días en acreditarse y los holds duran minutos: desactivado por defecto.
+    if ((string) teatro_env('MP_BRICK_TICKET', '0') === '1') {
+        $metodos['ticket'] = 'all';
+    }
+    $metodos['maxInstallments'] = max(1, min(24, (int) teatro_env('MP_MAX_CUOTAS', 1)));
+
+    return [
+        'success' => true,
+        'public_key' => payment_public_key(),
+        'locale' => 'es-MX',
+        'amount' => round((float) $orden['total'], 2),
+        'payer_email' => (string) $orden['email'],
+        'payment_methods' => $metodos,
+        'codigo_publico' => $codigoPublico,
+        'ttl_pasarela_seg' => payment_ttl_pasarela(),
+    ];
+}
+
+/**
+ * Clave de idempotencia estable para un intento de pago (formato UUID v4).
+ * Mismo intento (reintento HTTP / doble envío del mismo token) → misma clave.
+ */
+function payment_idempotency_key(string $codigoPublico, array $datosPago, int $intentosFallidos): string
+{
+    $token = (string) ($datosPago['token'] ?? '');
+    $semilla = $token !== ''
+        ? implode('|', [$codigoPublico, 'tok', $token, (string) ($datosPago['payment_method_id'] ?? ''), (string) ($datosPago['installments'] ?? '1')])
+        : implode('|', [$codigoPublico, 'sin_token', (string) ($datosPago['payment_method_id'] ?? ''), (string) $intentosFallidos]);
+    $h = hash('sha256', $semilla);
+    $h[12] = '4';
+    $h[16] = dechex((hexdec($h[16]) & 0x3) | 0x8);
+    return substr($h, 0, 8) . '-' . substr($h, 8, 4) . '-' . substr($h, 12, 4) . '-' . substr($h, 16, 4) . '-' . substr($h, 20, 12);
+}
+
+/**
+ * Procesa el envío del Payment Brick: crea el cobro en el proveedor desde backend.
+ * La orden solo pasa a PAID tras validar el pago contra la BD (aquí y/o en el webhook).
+ *
+ * @return array{success:bool,estado?:string,status_detail?:string,codigo_publico?:string,error?:string,http?:int,idempotent?:bool}
+ */
+function payment_procesar_brick(mysqli $conn, string $codigoPublico, string $sessionId, array $datosPago): array
+{
+    asegurarTablaPagos($conn);
+
+    $ordenLock = obtenerOrdenPorCodigo($conn, $codigoPublico);
+    if (!$ordenLock) {
+        return ['success' => false, 'error' => 'Orden no encontrada', 'http' => 404];
+    }
+    $idOrden = (int) $ordenLock['id_orden'];
+
+    // Serializa doble clic / pestañas: un solo cobro por orden a la vez
+    $lockName = 'teatro_pago_orden_' . $idOrden;
+    $lk = $conn->query("SELECT GET_LOCK('" . $conn->real_escape_string($lockName) . "', 10) AS l");
+    $got = $lk ? (int) ($lk->fetch_assoc()['l'] ?? 0) : 0;
+    if ($got !== 1) {
+        return ['success' => false, 'error' => 'Hay un pago en proceso para esta orden. Espera unos segundos.', 'http' => 409];
+    }
+
+    try {
+        $prep = payment_preparar_orden_para_cobro($conn, $codigoPublico, $sessionId);
+        if (!$prep['success']) {
+            return $prep;
+        }
+        if (!empty($prep['ya_pagada'])) {
+            return ['success' => true, 'estado' => 'PAID', 'codigo_publico' => $codigoPublico, 'idempotent' => true];
+        }
+        $orden = $prep['orden'];
+
+        // Monto: el navegador no decide; si manda uno distinto se rechaza (posible manipulación)
+        $montoCliente = $datosPago['transaction_amount'] ?? null;
+        if ($montoCliente !== null && abs((float) $montoCliente - (float) $orden['total']) > 0.009) {
+            return ['success' => false, 'error' => 'El total cambió. Recarga la página.', 'http' => 409];
+        }
+
+        $gateway = payment_resolve_gateway();
+        $proveedor = $gateway->nombreProveedor();
+
+        $st = $conn->prepare("
+            SELECT id_pago, ref_externa, ref_pago_proveedor, estado_interno, creado_en
+            FROM pagos
+            WHERE id_orden = ? AND ref_externa LIKE 'BRK-%'
+            ORDER BY id_pago DESC
+        ");
+        $st->bind_param('i', $idOrden);
+        $st->execute();
+        $intentos = $st->get_result()->fetch_all(MYSQLI_ASSOC);
+        $st->close();
+
+        $fallidos = 0;
+        foreach ($intentos as $it) {
+            if ($it['estado_interno'] === 'FAILED') {
+                $fallidos++;
+            }
+        }
+
+        $idemKey = payment_idempotency_key($codigoPublico, $datosPago, $fallidos);
+        $refExterna = 'BRK-' . $idemKey;
+
+        $existente = null;
+        foreach ($intentos as $it) {
+            if ($it['ref_externa'] === $refExterna) {
+                $existente = $it;
+                break;
+            }
+        }
+
+        if ($existente && !empty($existente['ref_pago_proveedor'])) {
+            // Reintento del mismo intento: no volver a cobrar
+            if ($existente['estado_interno'] === 'PAID') {
+                emitir_boletos_orden_pagada($conn, $idOrden);
+            }
+            return [
+                'success' => true,
+                'estado' => $existente['estado_interno'],
+                'codigo_publico' => $codigoPublico,
+                'idempotent' => true,
+            ];
+        }
+
+        if (!$existente) {
+            foreach ($intentos as $it) {
+                if ($it['estado_interno'] === 'PAID') {
+                    return ['success' => true, 'estado' => 'PAID', 'codigo_publico' => $codigoPublico, 'idempotent' => true];
+                }
+                if ($it['estado_interno'] === 'PENDING') {
+                    // Otro intento distinto sigue abierto (en revisión o resultado incierto): no arriesgar doble cobro
+                    return [
+                        'success' => false,
+                        'estado' => 'PENDING',
+                        'error' => 'Tu pago anterior sigue en verificación. Revisa el estado de tu orden en unos minutos.',
+                        'codigo_publico' => $codigoPublico,
+                        'http' => 409,
+                    ];
+                }
+            }
+
+            $monto = (float) $orden['total'];
+            $resumen = json_encode(['brick' => true, 'payment_method_id' => (string) ($datosPago['payment_method_id'] ?? '')], JSON_UNESCAPED_UNICODE);
+            $ins = $conn->prepare("
+                INSERT INTO pagos (id_orden, proveedor, ref_externa, estado_interno, monto, moneda, init_point, payload_resumen)
+                VALUES (?, ?, ?, 'PENDING', ?, 'MXN', NULL, ?)
+            ");
+            $ins->bind_param('issds', $idOrden, $proveedor, $refExterna, $monto, $resumen);
+            try {
+                $ins->execute();
+            } catch (mysqli_sql_exception $e) {
+                $ins->close();
+                // UNIQUE(ref_externa): otra petición registró el mismo intento
+                return ['success' => true, 'estado' => 'PENDING', 'codigo_publico' => $codigoPublico, 'idempotent' => true];
+            }
+            $ins->close();
+        }
+
+        $urls = ['notification' => payment_app_base_url() . '/api/online/webhook_pagos.php'];
+        $res = $gateway->crearPagoDirecto($orden, $datosPago, $idemKey, $urls);
+
+        if (!$res['success']) {
+            if (!empty($res['rechazo_definitivo'])) {
+                // El proveedor no creó el cobro: el intento se cierra y se permite reintentar
+                payment_aplicar_estado($conn, $refExterna, 'FAILED', null, ['brick' => true, 'error' => mb_substr((string) ($res['error'] ?? ''), 0, 200)]);
+                return ['success' => false, 'estado' => 'FAILED', 'error' => 'No se pudo procesar el pago. Verifica los datos e intenta de nuevo.', 'codigo_publico' => $codigoPublico, 'http' => 402];
+            }
+            // Resultado incierto (red/5xx): el intento queda PENDING; el webhook o un reintento con la misma clave lo resuelven
+            error_log('[payment] brick resultado incierto orden ' . $idOrden . ': ' . ($res['error'] ?? ''));
+            return ['success' => true, 'estado' => 'PENDING', 'codigo_publico' => $codigoPublico];
+        }
+
+        $refPago = (string) ($res['ref_pago'] ?? '');
+        $up = $conn->prepare('UPDATE pagos SET ref_pago_proveedor = ? WHERE ref_externa = ?');
+        $up->bind_param('ss', $refPago, $refExterna);
+        $up->execute();
+        $up->close();
+
+        // Verificación backend: con MP se re-consulta el pago por API antes de confiar en un "approved"
+        $info = $res;
+        if ($gateway instanceof MercadoPagoGateway && ($res['estado_interno'] ?? '') === 'PAID') {
+            $info = $gateway->consultarPago($refPago);
+            if (!$info['success']) {
+                return ['success' => true, 'estado' => 'PENDING', 'codigo_publico' => $codigoPublico];
+            }
+        }
+
+        $estado = (string) ($info['estado_interno'] ?? 'PENDING');
+        if ($estado === 'PAID') {
+            $problema = payment_validar_contra_orden($orden, $info);
+            if ($problema !== null) {
+                payment_registrar_alerta($conn, $refExterna, $problema, $info['raw'] ?? []);
+                return ['success' => false, 'estado' => 'PENDING', 'error' => 'Tu pago requiere revisión. Conserva tu número de orden.', 'codigo_publico' => $codigoPublico, 'http' => 409];
+            }
+        }
+
+        $ap = payment_aplicar_estado($conn, $refExterna, $estado, $refPago, $info['raw'] ?? null);
+        return [
+            'success' => $estado !== 'FAILED',
+            'estado' => $estado,
+            'status_detail' => (string) ($info['status_detail'] ?? ''),
+            'codigo_publico' => $codigoPublico,
+            'emision_ok' => $ap['emision_ok'] ?? null,
+            'error' => $estado === 'FAILED' ? 'El pago fue rechazado. Puedes intentar con otro medio de pago.' : null,
+            'http' => $estado === 'FAILED' ? 402 : 200,
+        ];
+    } finally {
+        $conn->query("SELECT RELEASE_LOCK('" . $conn->real_escape_string($lockName) . "')");
+    }
+}
+
+/**
+ * Guarda una alerta de validación en el pago (monto/referencia inconsistentes) sin cambiar su estado.
+ */
+function payment_registrar_alerta(mysqli $conn, string $refExterna, string $problema, array $raw): void
+{
+    error_log('[payment] ALERTA validación ' . $refExterna . ': ' . $problema);
+    $resumen = json_encode(['alerta_validacion' => $problema, 'proveedor' => $raw], JSON_UNESCAPED_UNICODE);
+    $st = $conn->prepare('UPDATE pagos SET payload_resumen = ? WHERE ref_externa = ?');
+    $st->bind_param('ss', $resumen, $refExterna);
+    $st->execute();
+    $st->close();
 }
 
 /**
@@ -485,33 +836,64 @@ function payment_procesar_webhook(mysqli $conn, array $query, array $body): arra
         return $info;
     }
 
-    $extRef = $info['external_reference'] ?? null;
-    $refExterna = null;
-    if ($extRef) {
-        // Buscar pago por orden codigo
-        $orden = obtenerOrdenPorCodigo($conn, (string) $extRef);
-        if ($orden) {
-            $idOrden = (int) $orden['id_orden'];
-            $st = $conn->prepare("SELECT ref_externa FROM pagos WHERE id_orden = ? ORDER BY id_pago DESC LIMIT 1");
-            $st->bind_param('i', $idOrden);
-            $st->execute();
-            $row = $st->get_result()->fetch_assoc();
-            $st->close();
-            $refExterna = $row['ref_externa'] ?? null;
-        }
-    }
-    if (!$refExterna) {
-        // Intentar por payment id ya guardado
-        $st = $conn->prepare('SELECT ref_externa FROM pagos WHERE ref_pago_proveedor = ? LIMIT 1');
-        $pid = (string) $id;
-        $st->bind_param('s', $pid);
+    $pid = (string) ($info['ref_pago'] ?? $id);
+    $extRef = (string) ($info['external_reference'] ?? '');
+    $pagoRow = null;
+
+    // 1) Pago ya ligado a este id del proveedor (Bricks lo guarda al crear el cobro)
+    $st = $conn->prepare('SELECT * FROM pagos WHERE ref_pago_proveedor = ? LIMIT 1');
+    $st->bind_param('s', $pid);
+    $st->execute();
+    $pagoRow = $st->get_result()->fetch_assoc() ?: null;
+    $st->close();
+
+    $orden = $extRef !== '' ? obtenerOrdenPorCodigo($conn, $extRef) : null;
+
+    // 2) Sin liga previa: intento abierto de la orden indicada por external_reference
+    if (!$pagoRow && $orden) {
+        $idOrden = (int) $orden['id_orden'];
+        $st = $conn->prepare("
+            SELECT * FROM pagos
+            WHERE id_orden = ? AND (ref_pago_proveedor IS NULL OR ref_pago_proveedor = '')
+            ORDER BY (estado_interno = 'PENDING') DESC, id_pago DESC
+            LIMIT 1
+        ");
+        $st->bind_param('i', $idOrden);
         $st->execute();
-        $row = $st->get_result()->fetch_assoc();
+        $pagoRow = $st->get_result()->fetch_assoc() ?: null;
         $st->close();
-        $refExterna = $row['ref_externa'] ?? null;
     }
-    if (!$refExterna) {
+
+    if (!$pagoRow) {
         return ['success' => false, 'error' => 'No se pudo relacionar el pago con una orden'];
+    }
+    if ((string) $pagoRow['proveedor'] !== $gateway->nombreProveedor()) {
+        return ['success' => true, 'ignored' => true, 'reason' => 'pago de otro proveedor'];
+    }
+    $refExterna = (string) $pagoRow['ref_externa'];
+
+    // La orden del registro de pago es la autoridad; el external_reference debe coincidir con ella
+    $ordenPago = null;
+    $st = $conn->prepare('SELECT codigo_publico FROM ordenes WHERE id_orden = ? LIMIT 1');
+    $idOrdenPago = (int) $pagoRow['id_orden'];
+    $st->bind_param('i', $idOrdenPago);
+    $st->execute();
+    $rowOrd = $st->get_result()->fetch_assoc();
+    $st->close();
+    if ($rowOrd) {
+        $ordenPago = obtenerOrdenPorCodigo($conn, (string) $rowOrd['codigo_publico']);
+    }
+    if (!$ordenPago) {
+        return ['success' => false, 'error' => 'Orden del pago no encontrada'];
+    }
+
+    if (($info['estado_interno'] ?? '') === 'PAID') {
+        $problema = payment_validar_contra_orden($ordenPago, $info);
+        if ($problema !== null) {
+            payment_registrar_alerta($conn, $refExterna, $problema, $info['raw'] ?? []);
+            // 200 para que MP no reintente indefinidamente; queda para revisión/reembolso manual
+            return ['success' => true, 'ignored' => true, 'alerta' => $problema];
+        }
     }
 
     return payment_aplicar_estado(

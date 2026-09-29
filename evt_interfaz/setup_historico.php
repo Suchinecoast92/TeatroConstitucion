@@ -1,5 +1,7 @@
 <?php
-// setup_historico.php
+// setup_historico.php — solo CLI
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_cli();
 // Script para inicializar/sincronizar la estructura de la base de datos histórica
 // Ejecutar este script cuando se realicen cambios en la estructura de la base de datos principal
 

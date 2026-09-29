@@ -3,7 +3,10 @@
  * SINCRONIZAR ESQUEMA DE BASE DE DATOS HISTÓRICA
  * Este script asegura que las tablas en trt_historico_evento tengan 
  * la misma estructura que las tablas en trt_25
+ * Solo CLI: php sync_historico_schema.php
  */
+require_once __DIR__ . '/includes/auth_guard.php';
+teatro_require_cli();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

@@ -156,8 +156,9 @@ $pdf->Cell(0, 7, convertirTexto(!empty(trim($boleto['vendedor_nombre'])) ? trim(
 $pdf->Ln(5);
 
 // Código QR
-$qr_path = __DIR__ . '/../boletos_qr/' . $codigo_unico . '.png';
-if (file_exists($qr_path)) {
+require_once __DIR__ . '/../includes/qr_helper.php';
+$qr_path = teatro_qr_asegurado((string) $codigo_unico);
+if ($qr_path) {
     $pdf->SetFont('Arial', 'B', 10);
     $pdf->Cell(0, 6, convertirTexto('Código de verificación:'), 0, 1, 'C');
     $pdf->Ln(3);

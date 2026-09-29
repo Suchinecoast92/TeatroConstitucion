@@ -1,0 +1,83 @@
+# PLANTILLA de App Spec para DigitalOcean App Platform. NO contiene secretos.
+# Ver docs/DEPLOY_DIGITALOCEAN.md antes de usarla. Sustituir <...> por valores reales.
+# Los valores SECRET se capturan en el panel (o con doctl) y DigitalOcean los guarda cifrados:
+# nunca escribir aquí tokens, contraseñas ni llaves.
+
+name: teatro-constitucion
+region: sfo
+
+services:
+  - name: web
+    environment_slug: php
+    github:
+      repo: <owner>/<repo>
+      branch: main
+      deploy_on_push: false
+    # composer.json está en la raíz (vendor-dir → vnt_interfaz/vendor). Raíz = document root.
+    source_dir: /
+    run_command: heroku-php-apache2
+    http_port: 8080
+    # 1 instancia: sesiones PHP y rate limit viven en el disco local del contenedor.
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    health_check:
+      http_path: /health.php
+    envs:
+      - key: APP_ENV
+        value: production
+      - key: APP_URL
+        value: https://www.<dominio>
+      - key: APP_TIMEZONE
+        value: America/Mexico_City
+      - key: TRUST_PROXY
+        value: "1"
+      - key: HOST_WWW
+        value: www.<dominio>
+      - key: HOST_GESTION
+        value: gestion.<dominio>
+      - key: HOST_API
+        value: api.<dominio>
+      - key: DB_HOST
+        value: ${db.HOSTNAME}
+      - key: DB_PORT
+        value: ${db.PORT}
+      - key: DB_USER
+        value: ${db.USERNAME}
+      - key: DB_PASS
+        value: ${db.PASSWORD}
+        type: SECRET
+      - key: DB_NAME
+        value: trt_25
+      - key: DB_BACKUP_NAME
+        value: trt_25_backup
+      - key: DB_SSL
+        value: "1"
+      - key: DB_SSL_CA_CERT
+        value: ${db.CA_CERT}
+      - key: MP_MODE
+        value: sandbox
+      # Capturar en el panel como SECRET (no escribir el valor aquí):
+      - key: MP_ACCESS_TOKEN
+        type: SECRET
+      - key: MP_WEBHOOK_SECRET
+        type: SECRET
+      - key: MP_PUBLIC_KEY
+        value: <public-key>
+      - key: QZ_PRIVATE_KEY
+        type: SECRET
+
+databases:
+  - name: db
+    engine: MYSQL
+    production: true
+    cluster_name: <cluster-mysql>
+    db_name: trt_25
+    db_user: <usuario-app>
+
+domains:
+  - domain: www.<dominio>
+    type: PRIMARY
+  - domain: gestion.<dominio>
+    type: ALIAS
+  - domain: api.<dominio>
+    type: ALIAS

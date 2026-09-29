@@ -6,6 +6,13 @@
 # Dependencias
 **/vendor/
 composer.lock
+# El lock raíz fija versiones para el build de App Platform
+!/composer.lock
+
+# Llaves privadas (QZ Tray, TLS): van en variables de entorno / fuera del repo
+*.key
+*.p12
+*.pfx
 
 # Logs
 *.log

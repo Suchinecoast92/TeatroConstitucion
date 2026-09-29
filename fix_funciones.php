@@ -1,4 +1,7 @@
 <?php
+// Solo CLI: php fix_funciones.php
+require_once __DIR__ . '/includes/auth_guard.php';
+teatro_require_cli();
 require_once 'evt_interfaz/conexion.php';
 
 // Actualizar funciones futuras a estado = 0 (activo)

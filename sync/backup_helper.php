@@ -22,13 +22,7 @@ if (!function_exists('getBackupConnection')) {
 
         @mysqli_report(MYSQLI_REPORT_OFF);
         try {
-            $c = @new mysqli(DB_LOCAL_HOST, DB_LOCAL_USER, DB_LOCAL_PASS, $backupName);
-            if ($c->connect_error) {
-                error_log('[Backup] No se pudo conectar a ' . $backupName . ': ' . $c->connect_error);
-                return null;
-            }
-            $c->set_charset('utf8mb4');
-            $conn = $c;
+            $conn = teatro_db_connect((string) $backupName);
             return $conn;
         } catch (Throwable $e) {
             error_log('[Backup] Error conexión: ' . $e->getMessage());

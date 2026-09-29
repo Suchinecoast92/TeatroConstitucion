@@ -386,7 +386,7 @@ button.codigo-mono {
 
       <div class="tickets">
         <?php foreach ($boletos as $b):
-          $qrUrl = $appRoot . '/boletos_qr/' . rawurlencode($b['codigo_unico']) . '.png';
+          $qrUrl = $appRoot . '/crt_interfaz/qr_boleto.php?c=' . rawurlencode($b['codigo_unico']);
         ?>
           <div class="ticket-panel">
             <div class="ticket-qr">

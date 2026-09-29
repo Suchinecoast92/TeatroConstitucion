@@ -2,7 +2,9 @@
 /**
  * API: iniciar pago de una orden.
  *
- * POST ?action=iniciar  {codigo_publico}  → init_point
+ * POST ?action=iniciar  {codigo_publico}  → init_point (Checkout Pro / mock, flujo redirect)
+ * POST ?action=brick_config {codigo_publico, session_id} → public key + monto desde BD (Checkout Bricks)
+ * POST ?action=procesar {codigo_publico, session_id, form_data} → crea el cobro desde backend (Checkout Bricks)
  * POST ?action=simular  {codigo_publico, result=approved|rejected}  (solo mock / APP_ENV=local)
  * GET  ?action=estado&codigo=
  */
@@ -56,6 +58,30 @@ try {
         }
         $r = payment_crear_para_orden($conn, $codigo);
         api_online_respond($r, $r['success'] ? 200 : 400);
+    }
+
+    if ($action === 'brick_config' || $action === 'procesar') {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            api_online_respond(['success' => false, 'error' => 'Método no permitido'], 405);
+        }
+        $codigo = trim((string) ($data['codigo_publico'] ?? $data['codigo'] ?? ''));
+        $sessionId = trim((string) ($data['session_id'] ?? ''));
+        if ($codigo === '' || $sessionId === '') {
+            api_online_respond(['success' => false, 'error' => 'codigo_publico y session_id requeridos'], 400);
+        }
+
+        if ($action === 'brick_config') {
+            $r = payment_brick_config($conn, $codigo, $sessionId);
+        } else {
+            $form = $data['form_data'] ?? null;
+            if (!is_array($form)) {
+                api_online_respond(['success' => false, 'error' => 'form_data requerido'], 400);
+            }
+            $r = payment_procesar_brick($conn, $codigo, $sessionId, $form);
+        }
+        $http = (int) ($r['http'] ?? ($r['success'] ? 200 : 400));
+        unset($r['http'], $r['orden']);
+        api_online_respond($r, $http);
     }
 
     if ($action === 'simular') {

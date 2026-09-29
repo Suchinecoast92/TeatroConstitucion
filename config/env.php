@@ -87,3 +87,5 @@ teatro_load_env();
 if (function_exists('date_default_timezone_set')) {
     @date_default_timezone_set((string) teatro_env('APP_TIMEZONE', 'America/Mexico_City'));
 }
+
+require_once __DIR__ . '/runtime.php';

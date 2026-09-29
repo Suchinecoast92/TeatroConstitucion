@@ -8,10 +8,12 @@ if (defined('TEATRO_LOGIN_RL_INCLUDED')) {
 }
 define('TEATRO_LOGIN_RL_INCLUDED', true);
 
-function teatro_client_ip(): string
-{
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    return is_string($ip) && $ip !== '' ? $ip : '0.0.0.0';
+if (!function_exists('teatro_client_ip')) {
+    function teatro_client_ip(): string
+    {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        return is_string($ip) && $ip !== '' ? $ip : '0.0.0.0';
+    }
 }
 
 function teatro_login_rl_path(): string

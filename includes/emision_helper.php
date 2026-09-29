@@ -35,6 +35,27 @@ function asegurar_origen_boletos(mysqli $conn): void
             WHERE b.origen = 'local'
         ");
     }
+    // El archivado copia con INSERT … SELECT * y el panel une con UNION SELECT *:
+    // la tabla histórica debe tener las mismas columnas en el mismo orden.
+    $h = @$conn->query("
+        SELECT
+            SUM(COLUMN_NAME = 'origen') AS tiene_origen,
+            SUM(COLUMN_NAME = 'tipo_boleto') AS tiene_tipo
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = 'trt_historico_evento' AND TABLE_NAME = 'boletos'
+    ");
+    $hr = $h ? $h->fetch_assoc() : null;
+    if ($hr && (int) $hr['tiene_tipo'] > 0 && (int) $hr['tiene_origen'] === 0) {
+        try {
+            $conn->query("
+                ALTER TABLE trt_historico_evento.boletos
+                ADD COLUMN origen ENUM('local','online') NOT NULL DEFAULT 'local'
+                AFTER tipo_boleto
+            ");
+        } catch (Throwable $e) {
+            error_log('[emision] no se pudo alinear trt_historico_evento.boletos.origen: ' . $e->getMessage());
+        }
+    }
     $ok = true;
 }
 
@@ -96,27 +117,8 @@ function emision_generar_qr_png(string $codigoUnico): bool
         error_log('[emision] vendor Endroid no disponible; omitiendo QR de ' . $codigoUnico);
         return false;
     }
-    try {
-        $qrDir = dirname(__DIR__) . '/boletos_qr/';
-        if (!is_dir($qrDir)) {
-            mkdir($qrDir, 0777, true);
-        }
-        $qrPath = $qrDir . $codigoUnico . '.png';
-
-        $qrCode = \Endroid\QrCode\QrCode::create($codigoUnico)
-            ->setEncoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
-            ->setErrorCorrectionLevel(new \Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow())
-            ->setSize(300)
-            ->setMargin(10)
-            ->setRoundBlockSizeMode(new \Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin());
-
-        $writer = new \Endroid\QrCode\Writer\PngWriter();
-        $writer->write($qrCode)->saveToFile($qrPath);
-        return true;
-    } catch (Throwable $e) {
-        error_log('[emision] QR ' . $codigoUnico . ': ' . $e->getMessage());
-        return false;
-    }
+    require_once __DIR__ . '/qr_helper.php';
+    return teatro_qr_generar($codigoUnico);
 }
 
 /**

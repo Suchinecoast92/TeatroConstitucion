@@ -29,6 +29,44 @@ class MockPaymentGateway implements PaymentGatewayInterface
         ];
     }
 
+    /**
+     * Simula POST /v1/payments. Misma clave de idempotencia → mismo pago (como MP).
+     * Solo para pruebas: datosPago puede traer mock_result (approved|rejected|pending|in_process),
+     * mock_monto y mock_external_reference para simular respuestas inconsistentes del proveedor.
+     */
+    public function crearPagoDirecto(array $orden, array $datosPago, string $idempotencyKey, array $urls): array
+    {
+        $metodo = trim((string) ($datosPago['payment_method_id'] ?? ''));
+        if ($metodo === '') {
+            return ['success' => false, 'error' => 'Método de pago inválido', 'rechazo_definitivo' => true];
+        }
+        $result = strtolower((string) ($datosPago['mock_result'] ?? 'approved'));
+        $mapa = [
+            'approved' => ['PAID', 'accredited'],
+            'rejected' => ['FAILED', 'cc_rejected_other_reason'],
+            'pending' => ['PENDING', 'pending_waiting_payment'],
+            'in_process' => ['PENDING', 'pending_contingency'],
+        ];
+        [$estado, $detalle] = $mapa[$result] ?? $mapa['approved'];
+
+        $refPago = 'MOCK-PAY-' . strtoupper(substr(hash('sha256', $idempotencyKey), 0, 12));
+        $monto = isset($datosPago['mock_monto']) ? (float) $datosPago['mock_monto'] : round((float) $orden['total'], 2);
+        $extRef = isset($datosPago['mock_external_reference'])
+            ? (string) $datosPago['mock_external_reference']
+            : (string) $orden['codigo_publico'];
+
+        return [
+            'success' => true,
+            'estado_interno' => $estado,
+            'status_detail' => $detalle,
+            'ref_pago' => $refPago,
+            'monto' => $monto,
+            'moneda' => 'MXN',
+            'external_reference' => $extRef,
+            'raw' => ['mock' => true, 'id' => $refPago, 'status' => $result, 'payment_method_id' => $metodo],
+        ];
+    }
+
     public function consultarPago(string $paymentId): array
     {
         // En mock, paymentId puede ser MOCK-PAY-xxx; el estado lo decide PaymentService

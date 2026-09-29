@@ -477,14 +477,20 @@ body {
 
         <?php
         $mostrarMockHint = false;
+        $modoCheckout = 'redirect';
         if (is_file(dirname(__DIR__) . '/includes/pagos/PaymentService.php')) {
             require_once dirname(__DIR__) . '/includes/pagos/PaymentService.php';
             $mostrarMockHint = function_exists('payment_mock_permitido') && payment_mock_permitido();
+            $modoCheckout = function_exists('payment_modo_checkout') ? payment_modo_checkout() : 'redirect';
         }
         if ($mostrarMockHint):
         ?>
         <div class="alert-glass small mt-3 mb-3">
           Entorno de prueba: sin token de Mercado Pago el sistema usa <strong>modo mock</strong>.
+        </div>
+        <?php elseif ($modoCheckout === 'bricks'): ?>
+        <div class="alert-glass small mt-3 mb-3">
+          Al confirmar se crea la orden y aparece el formulario seguro de Mercado Pago. Tus datos de tarjeta no pasan por nuestros servidores.
         </div>
         <?php else: ?>
         <div class="alert-glass small mt-3 mb-3">
@@ -498,6 +504,13 @@ body {
         <div class="msg mt-2" id="msg"></div>
         <div id="resultado" class="mt-3"></div>
       </form>
+      <?php if ($modoCheckout === 'bricks'): ?>
+      <div id="brickWrap" class="mt-3" hidden>
+        <h2 class="mt-2">Pago con tarjeta</h2>
+        <div id="paymentBrick_container"></div>
+        <div class="msg mt-2" id="msgBrick" role="status" aria-live="polite"></div>
+      </div>
+      <?php endif; ?>
     </div>
   </div>
 </div>
@@ -526,9 +539,13 @@ body {
 <script src="../assets/js/teatro-escape.js?v=4"></script>
 <script src="js/compra-timer.js"></script>
 <script src="js/orden-aviso.js"></script>
+<?php if ($modoCheckout === 'bricks'): ?>
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+<?php endif; ?>
 <script>
 (() => {
   const APP_ROOT = <?= json_encode($appRoot) ?>;
+  const MODO_CHECKOUT = <?= json_encode($modoCheckout) ?>;
   const ID_EVENTO = <?= (int) $id_evento ?>;
   const ID_FUNCION = <?= (int) $id_funcion ?>;
   const ETIQUETAS = <?= json_encode($etiquetas, JSON_UNESCAPED_UNICODE) ?>;
@@ -817,6 +834,11 @@ body {
 
     try { TeatroOrdenAviso.guardarCodigo(r.codigo_publico); } catch (e) {}
 
+    if (MODO_CHECKOUT === 'bricks') {
+      await abrirBrick(r.codigo_publico);
+      return;
+    }
+
     msg.textContent = 'Iniciando pago…';
     let p;
     try {
@@ -857,8 +879,133 @@ body {
     window.location.href = p.init_point;
   }
 
+  let brickController = null;
+  let brickEnviando = false;
+
+  function irAOrden(codigo) {
+    try {
+      TeatroCompraTimer.clear();
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+    window.location.href = 'orden.php?codigo=' + encodeURIComponent(codigo) + '&espera=1';
+  }
+
+  function avisoBrick(texto, tipo) {
+    const el = document.getElementById('msgBrick');
+    if (!el) return;
+    el.textContent = texto || '';
+    el.className = 'msg mt-2' + (tipo ? ' text-' + tipo : '');
+  }
+
+  async function abrirBrick(codigo) {
+    msg.textContent = 'Preparando pago seguro…';
+    msg.className = 'msg mt-2 text-primary';
+
+    let cfg;
+    try {
+      cfg = await fetch(API_PAGOS + '?action=brick_config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigo_publico: codigo, session_id: data.session_id }),
+      }).then(x => x.json());
+    } catch (err) {
+      cfg = { success: false };
+    }
+
+    if (cfg && cfg.success && cfg.ya_pagada) {
+      irAOrden(codigo);
+      return;
+    }
+    if (!cfg || !cfg.success || !cfg.public_key || typeof MercadoPago === 'undefined') {
+      leavingToPay = false;
+      msg.textContent = '';
+      msg.className = 'msg mt-2';
+      btn.disabled = false;
+      TeatroCompraTimer.start({ onExpire: expirarSesion, arm: true });
+      TeatroOrdenAviso.mostrar(codigo, {
+        titulo: 'Tu orden quedó registrada',
+        mensaje: (cfg && cfg.error ? cfg.error + ' ' : '') + 'No se realizó ningún cobro. Puedes intentar de nuevo o acudir a taquilla con este número.',
+      });
+      return;
+    }
+
+    try { sessionStorage.setItem(PAGO_CURSO_KEY, codigo); } catch (e) {}
+
+    const form = document.getElementById('formPago');
+    form.querySelectorAll('input').forEach((el) => { el.readOnly = true; });
+    btn.hidden = true;
+    msg.textContent = '';
+    const wrap = document.getElementById('brickWrap');
+    wrap.hidden = false;
+
+    const mp = new MercadoPago(cfg.public_key, { locale: cfg.locale || 'es-MX' });
+    try {
+      brickController = await mp.bricks().create('payment', 'paymentBrick_container', {
+        initialization: {
+          amount: cfg.amount,
+          payer: { email: cfg.payer_email || '' },
+        },
+        customization: {
+          visual: { style: { theme: 'dark' } },
+          paymentMethods: cfg.payment_methods,
+        },
+        callbacks: {
+          onReady: () => {
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          },
+          onSubmit: ({ formData }) => new Promise((resolve, reject) => {
+            if (brickEnviando) { reject(); return; }
+            brickEnviando = true;
+            avisoBrick('Procesando pago…', 'primary');
+            fetch(API_PAGOS + '?action=procesar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ codigo_publico: codigo, session_id: data.session_id, form_data: formData }),
+            })
+              .then(x => x.json())
+              .then((res) => {
+                if (res && (res.estado === 'PAID' || res.estado === 'PENDING')) {
+                  resolve();
+                  avisoBrick(res.estado === 'PAID' ? 'Pago aprobado. Generando tus boletos…' : 'Pago en revisión…', 'success');
+                  irAOrden(codigo);
+                  return;
+                }
+                brickEnviando = false;
+                avisoBrick((res && res.error) || 'El pago no fue aprobado. Intenta con otra tarjeta.', 'danger');
+                reject();
+              })
+              .catch(() => {
+                // Resultado incierto: el backend/webhook decide; no reintentar a ciegas.
+                brickEnviando = false;
+                avisoBrick('No pudimos confirmar la respuesta. Revisando el estado de tu orden…', 'warning');
+                reject();
+                setTimeout(() => irAOrden(codigo), 1500);
+              });
+          }),
+          onError: () => {
+            avisoBrick('Hubo un problema con el formulario de pago. Recarga la página si persiste.', 'danger');
+          },
+        },
+      });
+    } catch (err) {
+      avisoBrick('No se pudo cargar el formulario de pago.', 'danger');
+    }
+
+    leavingToPay = false;
+    TeatroCompraTimer.startFromNow(cfg.ttl_pasarela_seg || PAGO_TTL);
+    TeatroCompraTimer.start({
+      arm: true,
+      onExpire: () => {
+        if (brickEnviando) return;
+        try { brickController && brickController.unmount(); } catch (e) {}
+        irAOrden(codigo);
+      },
+    });
+  }
+
   document.getElementById('formPago').addEventListener('submit', (e) => {
     e.preventDefault();
+    if (btn.hidden || btn.disabled) return;
     const fd = new FormData(e.target);
     const nombre = String(fd.get('nombre') || '').trim();
     const apellido = String(fd.get('apellido') || '').trim();

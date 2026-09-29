@@ -1,37 +1,47 @@
 <?php
 // vnt_interfaz/sign_message.php
-// Firma mensajes de QZ Tray para permitir "Remember this decision"
+// Firma mensajes de QZ Tray para permitir "Remember this decision".
+// Solo para personal con sesión: sin esto cualquiera podría usar la llave como oráculo de firma.
 
-header('Access-Control-Allow-Origin: *'); // Ajustar según seguridad deseada
-header('Content-Type: text/plain');
+require_once __DIR__ . '/../includes/csrf.php';
+require_once __DIR__ . '/../includes/auth_guard.php';
+teatro_require_login(false);
 
-$KEY = 'utils/qz_private.key'; // Asegurarse que la ruta sea correcta desde este archivo
-$req = $_GET['request']; // QZ manda el string a firmar en ?request=
+header('Content-Type: text/plain; charset=utf-8');
+header('Cache-Control: no-store');
 
-if (empty($req)) {
+// Fuera del repositorio en producción: QZ_PRIVATE_KEY_PATH (archivo) o QZ_PRIVATE_KEY (PEM en variable de entorno).
+$pem = (string) teatro_env('QZ_PRIVATE_KEY', '');
+if ($pem === '') {
+    $keyPath = (string) teatro_env('QZ_PRIVATE_KEY_PATH', __DIR__ . '/utils/qz_private.key');
+    $pem = is_readable($keyPath) ? (string) file_get_contents($keyPath) : '';
+}
+$pem = str_replace('\n', "\n", $pem);
+
+$req = isset($_GET['request']) ? (string) $_GET['request'] : '';
+if ($req === '' || strlen($req) > 8192) {
+    http_response_code(400);
     echo "Error: No request provided";
     exit;
 }
 
-if (!file_exists($KEY)) {
+if ($pem === '') {
+    http_response_code(503);
     echo "Error: Private key not found";
     exit;
 }
 
-$privateKey = openssl_get_privatekey(file_get_contents($KEY));
-
+$privateKey = openssl_pkey_get_private($pem);
 if (!$privateKey) {
+    http_response_code(503);
     echo "Error: Invalid private key";
     exit;
 }
 
 $signature = null;
-if (openssl_sign($req, $signature, $privateKey, "sha512")) { // QZ usa SHA512 (o SHA1 en versiones viejas, 2.0+ usa SHA512)
-    $signed = base64_encode($signature);
-    echo $signed;
+if (openssl_sign($req, $signature, $privateKey, "sha512")) { // QZ 2.x usa SHA512
+    echo base64_encode($signature);
 } else {
+    http_response_code(500);
     echo "Error: Signing failed";
 }
-
-// Liberar clave (opcional en PHP moderno)
-// openssl_free_key($privateKey);

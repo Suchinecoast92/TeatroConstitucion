@@ -3,6 +3,8 @@
  * Guards de autenticación / entorno para endpoints sensibles.
  */
 
+require_once dirname(__DIR__) . '/config/env.php';
+
 /**
  * Exige sesión de usuario autenticado.
  */

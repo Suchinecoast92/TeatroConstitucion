@@ -121,8 +121,9 @@ if (isset($_GET['cliente']) && !empty($_GET['cliente'])) {
 }
 
 // Código QR
-$qr_path = __DIR__ . '/../boletos_qr/' . $codigo_unico . '.png';
-if (file_exists($qr_path)) {
+require_once __DIR__ . '/../includes/qr_helper.php';
+$qr_path = teatro_qr_asegurado((string) $codigo_unico);
+if ($qr_path) {
     // QR centrado
     $qr_size = 45;
     $qr_x = ($ancho - $qr_size) / 2;
