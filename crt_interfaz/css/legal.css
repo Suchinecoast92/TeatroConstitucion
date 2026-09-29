@@ -1,5 +1,6 @@
 body {
-    background-image: url('imagenes_teatro/TeatroNoche1.jpg');
+    background-color: #0f1115;
+    background-image: url('../imagenes_teatro/TeatroNoche1.jpg');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;

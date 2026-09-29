@@ -21,7 +21,7 @@ function legal_page_open(string $titulo): void
     <link rel="icon" href="imagenes_teatro/nat.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/legal.css?v=1">
+    <link rel="stylesheet" href="css/legal.css?v=2">
 </head>
 <body>
     <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
