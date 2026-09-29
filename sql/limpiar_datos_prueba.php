@@ -83,6 +83,19 @@ if ($idsEvt !== '0') {
     }
 }
 
+// Auditoría de ventas/cancelaciones de taquilla sobre el evento de prueba. Se busca por texto porque
+// estas filas no guardan id_evento y sobreviven a una limpieza anterior del evento.
+if ($existe(DB_LOCAL_NAME, 'transacciones')) {
+    $w = "accion IN ('venta', 'boleto_cancelar') AND descripcion LIKE '%Evento: [PRUEBA]%'";
+    if ($ordenes) {
+        $w = "($w) OR (accion = 'reembolso_online' AND CASE WHEN JSON_VALID(datos_json) THEN CAST(JSON_UNQUOTE(JSON_EXTRACT(datos_json, '$.id_orden')) AS UNSIGNED) END IN ($idsOrden))";
+    }
+    $filasTx = $fetch("SELECT * FROM transacciones WHERE $w");
+    if ($filasTx) {
+        $porEvento[DB_LOCAL_NAME . '.transacciones'] = ['where' => $w, 'rows' => $filasTx];
+    }
+}
+
 echo 'Eventos [PRUEBA]: ' . count($eventos) . ' activos, ' . count($eventosHist) . " archivados\n";
 echo 'Órdenes de prueba: ' . count($ordenes) . ' | Items: ' . count($items) . ' | Pagos: ' . count($pagos) . ' | Correos: ' . count($notificaciones) . ' | Boletos: ' . count($boletos) . "\n";
 foreach ($porEvento as $t => $d) {
@@ -90,7 +103,7 @@ foreach ($porEvento as $t => $d) {
         echo "  $t: " . count($d['rows']) . "\n";
     }
 }
-$total = count($eventos) + count($eventosHist) + count($ordenes) + count($boletos);
+$total = count($eventos) + count($eventosHist) + count($ordenes) + count($boletos) + count($filasTx ?? []);
 if ($total === 0) {
     echo "No hay datos de prueba.\n";
     exit(0);
